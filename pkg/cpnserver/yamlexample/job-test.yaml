@@ -1,0 +1,41 @@
+# CpnJobID: job123456
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pytorch-densenet-job
+  namespace: cpn-job
+spec:
+  template:
+    spec:
+      nodeSelector:
+        kubernetes.io/hostname: node235
+      hostIPC: true
+      containers:
+      - name: pytorch-container
+        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        command: ["python", "/cyq/test_demo/densenet.py"]
+        args:
+          - "--model-name"
+          - "densenet121"
+          - "--model-path"
+          - "/cyq/models/densenet/densenet121.pth"
+          - "--images-path"
+          - "/cyq/datasets/animals/main/"
+        volumeMounts:
+          - name: cyq-volume
+            mountPath: /cyq
+          - name: nvidia-mps
+            mountPath: /tmp/nvidia-mps
+        resources:
+          limits:
+            k8s.amazonaws.com/vgpu: 1
+      restartPolicy: Never
+      volumes:
+        - name: cyq-volume
+          hostPath:
+            path: /data/cyq  # 主机路径 /data/cyq
+            type: Directory
+        - name: nvidia-mps
+          hostPath:
+            path: /tmp/nvidia-mps
+  backoffLimit: 4  # 最大重试次数

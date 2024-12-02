@@ -53,6 +53,7 @@ func APP1() {
 	for msg := range MsgQueue {
 		var mergedMap map[string]interface{}
 		_ = json.Unmarshal(msg, &mergedMap)
-
+		log.Printf("get msg from cluster: %v", mergedMap["client-name"])
+		HeartBeat <- mergedMap
 	}
 }

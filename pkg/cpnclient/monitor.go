@@ -80,9 +80,23 @@ func GetPrometheusSvcIPAndPort(client *kubernetes.Clientset) (str string, err er
 
 }
 
-func GetMertric(ipPort string, metric string) (metricmap map[string]interface{}, err error) {
+// 定义prometheus的返回格式，不一定准确
+type Result struct {
+	Metric map[string]interface{} `json:"metric"`
+	Value  []interface{}          `json:"value"`
+}
+type PromResponse struct {
+	Status string `json:"status"`
+	Data   struct {
+		ResultType string   `json:"resultType"`
+		Result     []Result `json:"result"`
+	} `json:"data"`
+}
 
-	var metricMap map[string]interface{}
+func GetMertric(ipPort string, metric string) (value []string, err error) {
+
+	// var metricMap map[string]interface{}
+	var promResponse PromResponse
 
 	metric = url.QueryEscape(metric)
 	prometheusURL := "http://" + ipPort + "/api/v1/query?query=" + metric
@@ -97,11 +111,16 @@ func GetMertric(ipPort string, metric string) (metricmap map[string]interface{},
 
 	body, _ := io.ReadAll(resp.Body)
 
-	_ = json.Unmarshal(body, &metricMap)
-	if metricMap["status"] == "success" {
-		if dataMap, ok := metricMap["data"].(map[string]interface{}); ok { // 返回值为data里的部分
-			return dataMap, nil
+	_ = json.Unmarshal(body, &promResponse)
+	if promResponse.Status == "success" {
+		var result Result
+		for _, result = range promResponse.Data.Result {
+			tmp, ok := result.Value[1].(string)
+			if ok {
+				value = append(value, tmp)
+			}
 		}
+		return value, nil
 	}
 	log.Printf("Error: failed get metric %v", metric)
 	return nil, errors.New("-1")
@@ -127,9 +146,9 @@ func APP2(client *kubernetes.Clientset) (err error) {
 	log.Println("CpnServerURL:", CpnServerURL)
 	// 定时发送
 	for {
-		var podMap, jobMap, nodeMap, metricMap, mergedMap map[string]interface{}
-		metricMap = make(map[string]interface{})
-		mergedMap = make(map[string]interface{})
+		var podMap, jobMap, nodeMap map[string]interface{}
+		metricMap := make(map[string]map[string]interface{})
+		mergedMap := make(map[string]interface{})
 
 		podlist, err := podList(client)
 		if err == nil {
@@ -151,8 +170,13 @@ func APP2(client *kubernetes.Clientset) (err error) {
 
 		ipPort, err := GetPrometheusSvcIPAndPort(client)
 		if err == nil {
-			for key, metric := range PromMetrics {
-				metricMap[key], _ = GetMertric(ipPort, metric)
+			for _, nodeName := range WorkerNodeName {
+				for key, metric := range PromMetrics[nodeName] {
+					if _, exists := metricMap[nodeName]; !exists {
+						metricMap[nodeName] = make(map[string]interface{}) // 对里面的map进行初始化
+					}
+					metricMap[nodeName][key], _ = GetMertric(ipPort, metric)
+				}
 			}
 		}
 

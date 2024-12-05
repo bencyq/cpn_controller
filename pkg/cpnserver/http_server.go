@@ -49,7 +49,7 @@ func APP1() {
 	// 创建http服务端
 	go newHttpServer()
 
-	// 接受信息 TODO:并发送给调度器
+	// 接受信息,并发送给调度器
 	for msg := range MsgQueue {
 		var mergedMap map[string]interface{}
 		_ = json.Unmarshal(msg, &mergedMap)

@@ -23,8 +23,9 @@ func TestGetPrometheusSvcIPAndPort(t *testing.T) {
 }
 
 func TestGetMertric(t *testing.T) {
-	for _, metric := range PromMetrics {
-		fmt.Println(GetMertric("10.98.211.221:80", metric))
+	for _, nodeName := range WorkerNodeName {
+		for _, metric := range PromMetrics[nodeName] {
+			fmt.Println(GetMertric("10.98.211.221:80", metric))
+		}
 	}
-	// fmt.Println(GetMertric("10.98.211.221:80", `sum%28increase%28node_cpu_seconds_total%7Bmode%21%3D%22idle%22%2Cnode%3D%22node16%22%7D%5B2m%5D%29%29`))
 }

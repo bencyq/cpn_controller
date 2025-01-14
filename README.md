@@ -21,7 +21,7 @@
 # 实现步骤
 
 - [x]  完成自定义的 plugin `cpnscheduling`的安装，能直接按照Job、Deployment等的配置文件中指定的node节点调度pod
-- [ ]  在集群中安装一个广域调度器的本地节点，能实现发送prometheus信息以及接收pod配置文件，并向k8s apiserver提交请求，使用client-go编写
+- [x]  在集群中安装一个广域调度器的本地节点，能实现发送prometheus信息以及接收pod配置文件，并向k8s apiserver提交请求，使用client-go编写
 - [ ]  使用go实现一个广域调度器，能依据固定的作业池，综合考虑作业之间的亲和性以及工作节点之间的宽带与时延，安排最合理的作业并行策略
 
 # ~~自定义的 plugin `cpnscheduling` 设计流程~~

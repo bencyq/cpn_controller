@@ -29,30 +29,47 @@ func (s *Scheduler) FindCluster(clusterName string) (c *Cluster, err error) {
 }
 
 type Job struct {
-	// filepath     string
-	Timestamp    time.Time          `json:"timestamp"`      // 作业提交的时间
-	PresumedTime string             `json:"presumedTime"`   // 预计完成需要时间
-	Pre_job      string             `json:"pre_job"`        // 记录Job队列中前面的Job的名字，帮助判断该Job是否可以被发送给客户端
-	Lock         []chan interface{} `json:"lock,omitempty"` // 用来确保Job在合适时候发送给客户端
+	// Job 的分配信息
+	ClusterID int `json:"clusterid"`
+	NodeID    int `json:"nodeid"`
+	CardID    int `json:"cardid"`
+	// Job的属性信息
+	Timestamp    time.Time `json:"timestamp"`    // 作业提交的时间
+	PresumedTime float64   `json:"presumedTime"` // 预计完成需要时间
+	ID           string    `json:"id"`           // 作业ID
+	JobModelName string    `json:"jobmodelname"` // 作业模型名字，如yolo、resnet、llama3等
+	JobType      string    `json:"jobtype"`      // 作业类型 (CPU密集型 或 GPU密集型)
+	MemoryReq    float64   `json:"memoryreq"`    // 内存需求
+	GPUMemoryReq float64   `json:"gpumemoryreq"` // 显存需求 (仅GPU作业)
+	DataSize     float64   `json:"datasize"`     // 数据大小
+	CPUPowerReq  float64   `json:"cpupowereq"`   // CPU需求量，以Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz的100%算力为基准
+	GPUPowerReq  float64   `json:"gpupowereq"`   // GPU算力需求量，以A100的100%为基准
+
+	Pre_job string             `json:"pre_job"`        // 记录Job队列中前面的Job的名字，帮助判断该Job是否可以被发送给客户端
+	Lock    []chan interface{} `json:"lock,omitempty"` // 用来确保Job在合适时候发送给客户端
 }
 
 // JobPool 管理作业池，存储作业并提供增删操作
 type JobPool map[string]Job
 
 type Card struct {
-	id              int
-	GPU_UTIL        float64
-	GPU_MEMORY_FREE int64
-	GPU_MEMORY_USED int64
+	id                int
+	CARDMODEL         CardModel
+	GPU_UTIL          float64
+	GPU_MEMORY_FREE   int64
+	GPU_MEMORY_USED   int64
+	PerformanceFactor float64 // Deprecated:性能系数，被GPU算力替代
+	GPUPower          float64 // GPU算力，以A100的100%为100点
 }
 
 type Node struct {
+	ID           int
 	name         string
 	card         []Card
 	CPU_USAGE    float64
 	TOTAL_MEMORY int64
 	FREE_MEMORY  int64
-	CARDMODEL    CardModel
+	CPUPower     float64 // CPU算力，以Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz的100%为100点
 }
 
 type ClusterJobQueue struct {
@@ -60,6 +77,7 @@ type ClusterJobQueue struct {
 }
 
 type Cluster struct {
+	ID     int
 	name   string
 	ipPort string
 	node   []Node

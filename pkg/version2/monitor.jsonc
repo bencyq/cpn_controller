@@ -1,0 +1,72 @@
+[
+// FREE_MEMORY
+// http://27.154.1.16:30561/api/v1/query?query=node_memory_MemAvailable_bytes{node=%22aigpuserver-4090%22}
+{
+    "status": "success",
+    "data": {
+        "resultType": "vector",
+        "result": [
+            {
+                "metric": {
+                    "__name__": "node_memory_MemAvailable_bytes",
+                    "app": "node-exporter",
+                    "instance": "27.154.1.18:9100",
+                    "job": "kubernetes-service-endpoints",
+                    "namespace": "kube-system",
+                    "node": "aigpuserver-4090",
+                    "plugin": "node-exporter",
+                    "service": "node-exporter"
+                },
+                "value": [
+                    1736931772.428,
+                    "100312395776"
+                ]
+            }
+        ]
+    }
+},
+// GPU_MEMORY_FREE
+// http://27.154.1.16:30561/api/v1/query?query=DCGM_FI_DEV_FB_FREE{Hostname=%22aigpuserver-4090%22}
+{
+    "status": "success",
+    "data": {
+        "resultType": "vector",
+        "result": [
+            {
+                "metric": {
+                    "DCGM_FI_DRIVER_VERSION": "550.54.14",
+                    "Hostname": "aigpuserver-4090",
+                    "UUID": "GPU-8402f837-0a66-a070-6f6a-5fcba29a0e5e",
+                    "__name__": "DCGM_FI_DEV_FB_FREE",
+                    "device": "nvidia1",
+                    "gpu": "1",
+                    "instance": "27.154.1.18:9400",
+                    "job": "dcgm-exporter",
+                    "modelName": "NVIDIA GeForce RTX 4090"
+                },
+                "value": [
+                    1736929072.741,
+                    "2622"
+                ]
+            },
+            {
+                "metric": {
+                    "DCGM_FI_DRIVER_VERSION": "550.54.14",
+                    "Hostname": "aigpuserver-4090",
+                    "UUID": "GPU-c2b9ceb0-5b8e-1d92-8497-1032a15da0f2",
+                    "__name__": "DCGM_FI_DEV_FB_FREE",
+                    "device": "nvidia0",
+                    "gpu": "0",
+                    "instance": "27.154.1.18:9400",
+                    "job": "dcgm-exporter",
+                    "modelName": "NVIDIA GeForce RTX 4090"
+                },
+                "value": [
+                    1736929072.741,
+                    "759"
+                ]
+            }
+        ]
+    }
+}
+]

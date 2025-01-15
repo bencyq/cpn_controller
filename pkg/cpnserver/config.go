@@ -30,7 +30,6 @@ var cluster_one = Cluster{
 				}
 				return cards
 			}(),
-			CARDMODEL: NVIDIA_GeForce_RTX_4090,
 		})
 		nodes = append(nodes, Node{
 			name: "node235",

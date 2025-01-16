@@ -20,8 +20,7 @@ func getJson(url string) (body []byte) {
 }
 
 // 解析json
-func unmarshalJson(body []byte) {
-	var root Root
+func (root *Root) unmarshalJson(body []byte) {
 	err := json.Unmarshal(body, &root)
 	if err != nil {
 		log.Println("Error:", err)
@@ -46,44 +45,48 @@ func generatePromMetrics(nodeName string) map[string]string {
 }
 
 // TODO: 需要测试
-func getMetric(cluster *ClusterInfo) {
-	for _, node := range cluster.NodeInfo {
-		metrics := generatePromMetrics(node.NodeID)
-		nodeMetric := make(map[string]Data)
+func (root *Root) getMetric() {
+	for _, datacenter := range root.DataCenterInfo {
+		for _, cluster := range datacenter.ClusterInfo {
+			for _, node := range cluster.NodeInfo {
+				metrics := generatePromMetrics(node.NodeID)
+				nodeMetric := make(map[string]Data)
 
-		// 以node为单位获取metric
-		for metric, metricExpr := range metrics {
-			var promResponse PromResponse
-			metricExpr = url.QueryEscape(metricExpr)
-			prometheusURL := "http://" + cluster.ClusterPromIpPort + "/api/v1/query?query=" + metricExpr
-			resp, err := http.Get(prometheusURL)
-			if err != nil {
-				log.Println("Error: sending prometheus request failed", err)
+				// 以node为单位获取metric
+				for metric, metricExpr := range metrics {
+					var promResponse PromResponse
+					metricExpr = url.QueryEscape(metricExpr)
+					prometheusURL := "http://" + cluster.ClusterPromIpPort + "/api/v1/query?query=" + metricExpr
+					resp, err := http.Get(prometheusURL)
+					if err != nil {
+						log.Println("Error: sending prometheus request failed", err)
+					}
+					defer resp.Body.Close()
+					body, _ := io.ReadAll(resp.Body)
+					_ = json.Unmarshal(body, &promResponse)
+
+					if promResponse.Status == "success" {
+						nodeMetric[metric] = promResponse.Data
+					} else {
+						log.Println("promResponse wrong")
+					}
+				}
+
+				// 解析nodeMetric并把值存入对应的变量中
+				node.CPU_USAGE, _ = strconv.ParseFloat(nodeMetric["CPU_USAGE"].Result[0].Value[1].(string), 64)
+				node.TOTAL_MEMORY, _ = strconv.ParseInt(nodeMetric["TOTAL_MEMORY"].Result[0].Value[1].(string), 10, 64)
+				node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
+				for _, result := range nodeMetric["GPU_UTIL"].Result {
+					node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+				}
+				for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
+					node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+				}
+				for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
+					node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+				}
+
 			}
-			defer resp.Body.Close()
-			body, _ := io.ReadAll(resp.Body)
-			_ = json.Unmarshal(body, &promResponse)
-
-			if promResponse.Status == "success" {
-				nodeMetric[metric] = promResponse.Data
-			} else {
-				log.Println("promResponse wrong")
-			}
 		}
-
-		// 解析nodeMetric并把值存入对应的变量中
-		node.CPU_USAGE, _ = strconv.ParseFloat(nodeMetric["CPU_USAGE"].Result[0].Value[1].(string), 64)
-		node.TOTAL_MEMORY, _ = strconv.ParseInt(nodeMetric["TOTAL_MEMORY"].Result[0].Value[1].(string), 10, 64)
-		node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
-		for _, result := range nodeMetric["GPU_UTIL"].Result {
-			node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
-		}
-		for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
-			node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
-		}
-		for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
-			node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
-		}
-
 	}
 }

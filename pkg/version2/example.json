@@ -1,33 +1,137 @@
 {
-    "DataCenterNums": 3,
+    "DataCenterNums": 1,
     "DataCenterInfo": [
         {
-            "DataCenterID": "xxx",
-            "DataCenterName": "xxx",
-            "ClusterNums": 4,
+            "DataCenterID": "test1",
+            "DataCenterLocation": "北京",
+            "ClusterNums": 3,
             "ClusterInfo": [
                 {
-                    "ClusterID": "xxxx",
-                    "ClusterIP": "27.154.1.18",
-                    "ClusterLocation": "北京",
-                    "Nodes": [
+                    "ClusterID": "sgcc",
+                    "ClusterIP": "27.154.1.16",
+                    "NodeNums": 2,
+                    "NodeInfo": [
                         {
-                            "NodeID": "4090xxx",
+                            "NodeID": "sgcc",
+                            "NodeIP": "27.154.1.16",
+                            "CPUInfo": {
+                                "CPUNums": 4,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz",
+                                "CPUCore": 144
+                            },
+                            "NodeType": "CPU"
+                        },
+                        {
+                            "NodeID": "aigpuserver-4090",
                             "NodeIP": "27.154.1.18",
                             "CPUInfo": {
+                                "CPUNums": 2,
                                 "Architecture": "x86_64",
-                                "CPU Model": "Intel(R) Xeon(R) Platinum 8358P * 2",
-                                "CPU Core": 64
+                                "CPUModel": "Intel(R) Xeon(R) Gold 6133 CPU @ 2.50GHz",
+                                "CPUCore": 80
                             },
                             "NodeType": "GPU",
-                            "CardInfo": {
-                                "CardType": "A100",
-                                "CardMount": 8
-                            }
+                            "CardNums": 2,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA GeForce RTX 4090"
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "NVIDIA GeForce RTX 4090"
+                                }
+                            ]
                         }
                     ],
-                    "ClusterPromIpPort": "27.154.1.18:31000",
-                    "ClusterKubeconfigFilePath": "/directory/file"
+                    "ClusterPromIpPort": "27.154.1.16:30561",
+                    "ClusterKubeconfigFilePath": "/root/cyq/kubeconfig/16-admin.conf"
+                },
+                {
+                    "ClusterID": "sgcc1",
+                    "ClusterIP": "27.154.1.10",
+                    "NodeNums": 2,
+                    "NodeInfo": [
+                        {
+                            "NodeID": "sgcc1",
+                            "NodeIP": "27.154.1.10",
+                            "CPUInfo": {
+                                "CPUNums": 4,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz",
+                                "CPUCore": 144
+                            },
+                            "NodeType": "CPU"
+                        },
+                        {
+                            "NodeID": "node2",
+                            "NodeIP": "27.154.1.12",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz",
+                                "CPUCore": 40
+                            },
+                            "NodeType": "GPU",
+                            "CardNums": 1,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB"
+                                }
+                            ]
+                        }
+                    ],
+                    "ClusterPromIpPort": "27.154.1.10:31466",
+                    "ClusterKubeconfigFilePath": "/root/cyq/kubeconfig/10-admin.conf"
+                },
+                {
+                    "ClusterID": "aigpuserver",
+                    "ClusterIP": "27.154.2.240",
+                    "NodeNums": 1,
+                    "NodeInfo": [
+                        {
+                            "NodeID": "aigpuserver",
+                            "NodeIP": "27.154.2.240",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) CPU E5-2620 v4 @ 2.10GHz",
+                                "CPUCore": 32
+                            },
+                            "NodeType": "GPU",
+                            "CardNums": 6,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "Tesla P100-PCIE-16GB"
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "Tesla P100-PCIE-16GB"
+                                },
+                                {
+                                    "CardID": "2",
+                                    "CardModel": "Tesla P100-PCIE-16GB"
+                                },
+                                {
+                                    "CardID": "3",
+                                    "CardModel": "Tesla P100-PCIE-16GB"
+                                },
+                                {
+                                    "CardID": "4",
+                                    "CardModel": "Tesla P100-PCIE-16GB"
+                                },
+                                {
+                                    "CardID": "5",
+                                    "CardModel": "Tesla P100-PCIE-16GB"
+                                }
+                            ]
+                        }
+                    ],
+                    "ClusterPromIpPort": "27.154.2.240:30521",
+                    "ClusterKubeconfigFilePath": "/root/cyq/kubeconfig/240-admin.conf"
                 }
             ]
         }

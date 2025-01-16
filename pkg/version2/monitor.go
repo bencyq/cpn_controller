@@ -2,9 +2,10 @@ package version2
 
 // 1. 初始化调度策略模块，从调度器接口获取到集群的详细信息
 // 2. 测试每个集群的prometheus是否能成功获取到需要的metric，并定期收集
-// 3. 测试每个集群的Job、Namespace等信息能能否成功获取到，并缓存
+// 3. 测试每个集群的Job、Namespace等信息能能否成功获取到，（并缓存？）
 
 import (
+	// "fmt"
 	"encoding/json"
 	"io"
 	"log"
@@ -26,6 +27,7 @@ func unmarshalJson(body []byte) {
 		log.Println("Error:", err)
 		return
 	}
+	// fmt.Printf("%+v",root)
 }
 
 // 根据nodename生成prommetric查询语句
@@ -43,8 +45,9 @@ func generatePromMetrics(nodeName string) map[string]string {
 	return metrics
 }
 
+// TODO: 需要测试
 func getMetric(cluster *ClusterInfo) {
-	for _, node := range cluster.Nodes {
+	for _, node := range cluster.NodeInfo {
 		metrics := generatePromMetrics(node.NodeID)
 		nodeMetric := make(map[string]Data)
 
@@ -63,11 +66,6 @@ func getMetric(cluster *ClusterInfo) {
 
 			if promResponse.Status == "success" {
 				nodeMetric[metric] = promResponse.Data
-				// var result Result
-				// for _, result = range promResponse.Data.Result {
-				// 	content, ok := result.Value[1].(string)
-				// 	nodeMetric[metric] = content
-				// }
 			} else {
 				log.Println("promResponse wrong")
 			}
@@ -77,6 +75,15 @@ func getMetric(cluster *ClusterInfo) {
 		node.CPU_USAGE, _ = strconv.ParseFloat(nodeMetric["CPU_USAGE"].Result[0].Value[1].(string), 64)
 		node.TOTAL_MEMORY, _ = strconv.ParseInt(nodeMetric["TOTAL_MEMORY"].Result[0].Value[1].(string), 10, 64)
 		node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
+		for _, result := range nodeMetric["GPU_UTIL"].Result {
+			node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+		}
+		for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
+			node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+		}
+		for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
+			node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+		}
 
 	}
 }

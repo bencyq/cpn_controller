@@ -7,6 +7,7 @@ package version2
 import (
 	// "fmt"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -30,7 +31,7 @@ func (root *Root) unmarshalJson(body []byte) {
 }
 
 // 根据nodename生成prommetric查询语句
-func generatePromMetrics(nodeName string) map[string]string {
+func generatePromMetrics(nodeName string, nodeType string) map[string]string {
 	metrics := make(map[string]string)
 	cpuMetricExpr := `sum(increase(node_cpu_seconds_total{mode!="idle",node="` + nodeName + `"}[2m]))` +
 		` / sum(increase(node_cpu_seconds_total{node="` + nodeName + `"}[2m]))`
@@ -38,9 +39,11 @@ func generatePromMetrics(nodeName string) map[string]string {
 	// 添加其他 Prometheus 指标
 	metrics["TOTAL_MEMORY"] = `node_memory_MemTotal_bytes{node="` + nodeName + `"}`    // 内存总量
 	metrics["FREE_MEMORY"] = `node_memory_MemAvailable_bytes{node="` + nodeName + `"}` // 可用内存
-	metrics["GPU_UTIL"] = `DCGM_FI_DEV_GPU_UTIL{Hostname="` + nodeName + `"}`
-	metrics["GPU_MEMORY_FREE"] = `DCGM_FI_DEV_FB_FREE{Hostname="` + nodeName + `"}`
-	metrics["GPU_MEMORY_USED"] = `DCGM_FI_DEV_FB_USED{Hostname="` + nodeName + `"}`
+	if nodeType == "GPU" {
+		metrics["GPU_UTIL"] = `DCGM_FI_DEV_GPU_UTIL{Hostname="` + nodeName + `"}`
+		metrics["GPU_MEMORY_FREE"] = `DCGM_FI_DEV_FB_FREE{Hostname="` + nodeName + `"}`
+		metrics["GPU_MEMORY_USED"] = `DCGM_FI_DEV_FB_USED{Hostname="` + nodeName + `"}`
+	}
 	return metrics
 }
 
@@ -49,9 +52,14 @@ func (root *Root) getMetric() {
 	for _, datacenter := range root.DataCenterInfo {
 		for _, cluster := range datacenter.ClusterInfo {
 			for _, node := range cluster.NodeInfo {
-				metrics := generatePromMetrics(node.NodeID)
-				nodeMetric := make(map[string]Data)
 
+				// 异常处理
+				defer func() {
+					log.Printf("GetMetric error! DatacenterID:%v ClusterID:%v NodeID:%v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
+				}()
+
+				nodeMetric := make(map[string]Data)
+				metrics := generatePromMetrics(node.NodeID, node.NodeType)
 				// 以node为单位获取metric
 				for metric, metricExpr := range metrics {
 					var promResponse PromResponse
@@ -76,17 +84,19 @@ func (root *Root) getMetric() {
 				node.CPU_USAGE, _ = strconv.ParseFloat(nodeMetric["CPU_USAGE"].Result[0].Value[1].(string), 64)
 				node.TOTAL_MEMORY, _ = strconv.ParseInt(nodeMetric["TOTAL_MEMORY"].Result[0].Value[1].(string), 10, 64)
 				node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
-				for _, result := range nodeMetric["GPU_UTIL"].Result {
-					node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+				if node.NodeType == "GPU" {
+					for _, result := range nodeMetric["GPU_UTIL"].Result {
+						node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+					}
+					for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
+						node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_FREE, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+					}
+					for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
+						node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_USED, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+					}
 				}
-				for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
-					node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
-				}
-				for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
-					node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
-				}
-
 			}
 		}
 	}
+	fmt.Printf("%+v", *root)
 }

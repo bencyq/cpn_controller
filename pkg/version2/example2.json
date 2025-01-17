@@ -1,0 +1,100 @@
+{
+    "DataCenterNums": 1,
+    "DataCenterInfo": [
+        {
+            "DataCenterID": "lab",
+            "DataCenterLocation": "杭州",
+            "ClusterNums": 1,
+            "ClusterInfo": [
+                {
+                    "ClusterID": "49",
+                    "ClusterIP": "10.90.1.49",
+                    "NodeNums": 3,
+                    "NodeInfo": [
+                        {
+                            "NodeID": "k8s-master",
+                            "NodeIP": "10.90.1.49",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz",
+                                "CPUCore": 40
+                            },
+                            "NodeType": "CPU"
+                        },
+                        {
+                            "NodeID": "node16",
+                            "NodeIP": "10.90.1.16",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Gold 5318Y CPU @ 2.10GHz",
+                                "CPUCore": 96
+                            },
+                            "NodeType": "GPU",
+                            "CardNums": 2,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA RTX A6000"
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "NVIDIA RTX A6000"
+                                }
+                            ]
+                        },
+                        {
+                            "NodeID": "node235",
+                            "NodeIP": "10.90.1.235",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Platinum 8358 CPU @ 2.60GHz",
+                                "CPUCore": 128
+                            },
+                            "NodeType": "GPU",
+                            "CardNums": 8,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "2",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "3",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "4",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "5",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "6",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                },
+                                {
+                                    "CardID": "7",
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                }
+                            ]
+                        }
+                    ],
+                    "ClusterPromIpPort": "10.90.1.49:30778",
+                    "ClusterKubeconfigFilePath": "/etc/kubernetes/admin.conf"
+                }
+            ]
+        }
+    ]
+}

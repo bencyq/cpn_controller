@@ -94,5 +94,5 @@ type Data struct {
 }
 type PromResponse struct {
 	Status string `json:"status"`
-	Data
+	Data   Data
 }

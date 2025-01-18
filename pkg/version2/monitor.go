@@ -7,7 +7,7 @@ package version2
 import (
 	// "fmt"
 	"encoding/json"
-	"fmt"
+	// "fmt"
 	"io"
 	"log"
 	"net/http"
@@ -47,7 +47,6 @@ func generatePromMetrics(nodeName string, nodeType string) map[string]string {
 	return metrics
 }
 
-// TODO: 需要测试
 func (root *Root) getMetric() {
 	for _, datacenter := range root.DataCenterInfo {
 		for _, cluster := range datacenter.ClusterInfo {
@@ -55,7 +54,9 @@ func (root *Root) getMetric() {
 
 				// 异常处理
 				defer func() {
-					log.Printf("GetMetric error! DatacenterID:%v ClusterID:%v NodeID:%v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
+					if r := recover(); r != nil {
+						log.Printf("ERROR: GetMetric error! DatacenterID:%v ClusterID:%v NodeID:%v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
+					}
 				}()
 
 				nodeMetric := make(map[string]Data)
@@ -98,5 +99,6 @@ func (root *Root) getMetric() {
 			}
 		}
 	}
-	fmt.Printf("%+v", *root)
+	// fmt.Printf("%+v", *root)
+	log.Println("INFO: GetMetric done!")
 }

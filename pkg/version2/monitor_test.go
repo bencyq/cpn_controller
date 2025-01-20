@@ -1,38 +1,22 @@
 package version2
 
 import (
-	"io"
-	"log"
-	"os"
 	"testing"
 )
 
-func getJsonWithFile(fileName string) (content []byte) {
-	// 打开文件
-	file, err := os.Open(fileName)
-	if err != nil {
-		log.Println("Error opening file:", err)
-		return
-	}
-	defer file.Close()
-
-	// 读取文件内容
-	content, err = io.ReadAll(file)
-	if err != nil {
-		log.Println("Error reading file:", err)
-		return
-	}
-	return content
-}
-
 func TestUnmarshalJson(t *testing.T) {
-	var root Root
-	root.unmarshalJson(getJsonWithFile("example.json"))
+	var monitor Monitor
+	monitor.unmarshalJson(getJsonWithFile("example.json"))
 }
 
 func TestGetMetric(t *testing.T) {
-	var root Root
-	// 初始化root
-	root.unmarshalJson(getJsonWithFile("example2.json"))
-	root.getMetric()
+	var monitor Monitor
+	// 初始化monitor
+	monitor.unmarshalJson(getJsonWithFile("example2.json"))
+	monitor.getMetric()
+}
+
+func TestGetJob(t *testing.T) {
+	var monitor Monitor
+	monitor.getJob()
 }

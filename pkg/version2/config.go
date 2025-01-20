@@ -1,13 +1,21 @@
 package version2
 
+import (
+	"time"
+
+	batchv1 "k8s.io/api/batch/v1"
+	"k8s.io/client-go/kubernetes"
+)
+
 /////////////////////////////////////////////
 // 定义调度器接口发送的数据结构，以example.json为例
 /////////////////////////////////////////////
 
-// Root 根结构体，包含 DataCenterNums 和 DataCenterInfo
-type Root struct {
+// Monitor 根结构体，包含 DataCenterNums 和 DataCenterInfo
+type Monitor struct {
 	DataCenterNums int              `json:"DataCenterNums"`
 	DataCenterInfo []DataCenterInfo `json:"DataCenterInfo"`
+	JobPool        JobPool
 }
 
 // DataCenterInfo 数据中心信息结构体
@@ -26,6 +34,7 @@ type ClusterInfo struct {
 	NodeInfo                  []NodeInfo `json:"NodeInfo"`
 	ClusterPromIpPort         string     `json:"ClusterPromIpPort"`
 	ClusterKubeconfigFilePath string     `json:"ClusterKubeconfigFilePath"`
+	ClusterClientSet          *kubernetes.Clientset
 
 	// 以下通过prometheus获取
 	// TODO:网络指标，待定
@@ -95,4 +104,31 @@ type Data struct {
 type PromResponse struct {
 	Status string `json:"status"`
 	Data   Data
+}
+
+type JobPool struct {
+	Job []Job
+}
+
+type Job struct {
+	// 从yaml文件读取的详细信息
+	JobSpec batchv1.Job
+
+	// Job的属性信息
+	YamlFilePath string    `json:"YamlFilePath"` // yaml配置文件位置
+	Timestamp    time.Time `json:"timestamp"`    // 作业提交的时间
+	ID           string    `json:"id"`           // 作业ID
+	JobModelName string    `json:"jobmodelname"` // 作业模型名字，如yolo、resnet、llama3等
+	JobType      string    `json:"jobtype"`      // 作业类型 (CPU密集型 或 GPU密集型)
+	MemoryReq    float64   `json:"memoryreq"`    // 内存需求
+	GPUMemoryReq float64   `json:"gpumemoryreq"` // 显存需求 (仅GPU作业)
+	DataSize     float64   `json:"datasize"`     // 数据大小
+	// PresumedTime float64   `json:"presumedTime"` // 预计完成需要时间
+	// CPUPowerReq  float64   `json:"cpupowereq"`   // CPU需求量，以Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz的100%算力为基准
+	// GPUPowerReq  float64   `json:"gpupowereq"`   // GPU算力需求量，以A100的100%为基准
+
+	// Job 的分配信息
+	ClusterID string `json:"clusterid"`
+	NodeID    string `json:"nodeid"`
+	CardID    string `json:"cardid"`
 }

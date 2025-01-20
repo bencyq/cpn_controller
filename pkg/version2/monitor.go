@@ -2,17 +2,27 @@ package version2
 
 // 1. 初始化调度策略模块，从调度器接口获取到集群的详细信息
 // 2. 测试每个集群的prometheus是否能成功获取到需要的metric，并定期收集
-// 3. 测试每个集群的Job、Namespace等信息能能否成功获取到，（并缓存？）
+// 3. 测试每个集群的Job、Namespace等信息能能否成功获取到，（并缓存？）TODO:这部分功能先不开发，先完成静态的调度
+// 4. 设计接口接受调度器的作业提交，解析yaml文件，并缓存作业 TODO: 完成了本地的收集测试，等待对接接口
 
 import (
-	// "fmt"
+	"context"
 	"encoding/json"
-	// "fmt"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
+	"path/filepath"
 	"strconv"
+	"time"
+
+	batchv1 "k8s.io/api/batch/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/tools/clientcmd"
+	"sigs.k8s.io/yaml"
 )
 
 // 根据指定的url地址获取到调度器发送的json文件,格式如 example.json TODO:等调度器接口写好了再做
@@ -20,14 +30,32 @@ func getJson(url string) (body []byte) {
 	return nil
 }
 
+func getJsonWithFile(fileName string) (content []byte) {
+	// 打开文件
+	file, err := os.Open(fileName)
+	if err != nil {
+		log.Println("Error opening file:", err)
+		return
+	}
+	defer file.Close()
+
+	// 读取文件内容
+	content, err = io.ReadAll(file)
+	if err != nil {
+		log.Println("Error reading file:", err)
+		return
+	}
+	return content
+}
+
 // 解析json
-func (root *Root) unmarshalJson(body []byte) {
-	err := json.Unmarshal(body, &root)
+func (monitor *Monitor) unmarshalJson(body []byte) {
+	err := json.Unmarshal(body, &monitor)
 	if err != nil {
 		log.Println("Error:", err)
 		return
 	}
-	// fmt.Printf("%+v",root)
+	// fmt.Printf("%+v",monitor)
 }
 
 // 根据nodename生成prommetric查询语句
@@ -47,8 +75,8 @@ func generatePromMetrics(nodeName string, nodeType string) map[string]string {
 	return metrics
 }
 
-func (root *Root) getMetric() {
-	for _, datacenter := range root.DataCenterInfo {
+func (monitor *Monitor) getMetric() {
+	for _, datacenter := range monitor.DataCenterInfo {
 		for _, cluster := range datacenter.ClusterInfo {
 			for _, node := range cluster.NodeInfo {
 
@@ -99,6 +127,109 @@ func (root *Root) getMetric() {
 			}
 		}
 	}
-	// fmt.Printf("%+v", *root)
+	// fmt.Printf("%+v", *monitor)
 	log.Println("INFO: GetMetric done!")
+}
+
+// 创建集群外的客户端
+func NewClientSetOutOfCluster(kubeconfig string) (client *kubernetes.Clientset, err error) {
+	// use the current context in kubeconfig
+	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	if err != nil {
+		return nil, err
+	}
+
+	// create the clientset
+	clientset, err := kubernetes.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	// log.Println("clientset succeed !")
+	return clientset, nil
+}
+
+// TODO: 还没测试
+func (monitor *Monitor) NewClientSetForEachCluseter() {
+	for _, datacenter := range monitor.DataCenterInfo {
+		for _, cluster := range datacenter.ClusterInfo {
+			var err error
+			cluster.ClusterClientSet, err = NewClientSetOutOfCluster(cluster.ClusterKubeconfigFilePath)
+			if err != nil {
+				log.Println("ERROR: NewClientSetForEachCluseter failed!\t", err)
+			}
+		}
+	}
+}
+
+// TODO: 获取集群特定namespace的Job信息 还没测试
+func jobList(client *kubernetes.Clientset, namespace string) (joblist *batchv1.JobList, err error) {
+	joblist, err = client.BatchV1().Jobs(namespace).List(context.TODO(), metav1.ListOptions{})
+	if err != nil {
+		log.Println("Error: cannot list jobs", err)
+		return nil, err
+	}
+	return joblist, nil
+}
+
+func parseYamlFile(filePath string) (batchv1.Job, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return batchv1.Job{}, fmt.Errorf("failed to read file %s: %v", filePath, err)
+	}
+
+	// 使用 Kubernetes 库解析 YAML
+	// 这里假设 YAML 文件是一个 Pod 对象
+	var job batchv1.Job
+	err = yaml.Unmarshal(data, &job)
+	if err != nil {
+		return batchv1.Job{}, fmt.Errorf("failed to unmarshal YAML from file %s: %v", filePath, err)
+	}
+
+	// 打印出解析出来的名称作为示例
+	log.Printf("INFO: Parsed Job: %s\n", job.Name)
+	return job, nil
+}
+
+// TODO: 从调度器接口获取Job信息（起个http服务什么的）
+func (monitor *Monitor) getJob() {
+	monitor.getJobWithFile(`yaml_template`)
+}
+
+func (monitor *Monitor) getJobWithFile(directory string) {
+	dirEntry, err := os.ReadDir(directory)
+	if err != nil {
+		log.Println("ERROR: getJobWithFile failed!", err)
+	}
+	for _, file := range dirEntry { // TODO: 可以考虑开发定期查看目录并更新的功能
+		if filepath.Ext(file.Name()) == ".yaml" || filepath.Ext(file.Name()) == ".yml" {
+			filePath := filepath.Join(directory, file.Name())
+			jobSpec, err := parseYamlFile(filePath)
+			if err != nil {
+				log.Println("Error: process file failed", err)
+			}
+			monitor.JobPool.Job = append(monitor.JobPool.Job, Job{JobSpec: jobSpec})
+		}
+	}
+	fmt.Printf("%+v", monitor)
+}
+
+// TODO: Monitor的整体工作逻辑
+func NewMonitor() (monitor *Monitor) {
+	// 从接口读取基础信息，初始化数据结构 TODO: 正式版需要修改读取Json的方式
+	monitor.unmarshalJson(getJsonWithFile("example.json"))
+
+	// 为每个集群生成一个clientset
+	monitor.NewClientSetForEachCluseter()
+
+	// 每隔一分钟更新一次metric
+	go func() {
+		for {
+			time.Sleep(time.Minute)
+			monitor.getMetric()
+		}
+	}()
+
+	monitor.getJob()
+
+	return monitor
 }

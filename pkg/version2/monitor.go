@@ -185,6 +185,8 @@ func parseYamlFile(filePath string) (batchv1.Job, error) {
 		return batchv1.Job{}, fmt.Errorf("failed to unmarshal YAML from file %s: %v", filePath, err)
 	}
 
+	//TODO: 设定将annotation里的model字段解析到JobModelName里
+
 	// 打印出解析出来的名称作为示例
 	log.Printf("INFO: Parsed Job: %s\n", job.Name)
 	return job, nil
@@ -207,7 +209,7 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			if err != nil {
 				log.Println("Error: process file failed", err)
 			}
-			monitor.JobPool.Job = append(monitor.JobPool.Job, Job{JobSpec: jobSpec})
+			monitor.JobPool.Job = append(monitor.JobPool.Job, Job{JobSpec: jobSpec, YamlFilePath: filePath})
 		}
 	}
 	fmt.Printf("%+v", monitor)

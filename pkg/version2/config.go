@@ -53,6 +53,9 @@ type NodeInfo struct {
 	CPU_USAGE    float64
 	TOTAL_MEMORY int64
 	FREE_MEMORY  int64
+
+	// 基准测试程序获得的分数
+	BenchMark BenchMark
 }
 
 func (node *NodeInfo) FindCard(cardID string) (card *CardInfo) {
@@ -131,4 +134,11 @@ type Job struct {
 	ClusterID string `json:"clusterid"`
 	NodeID    string `json:"nodeid"`
 	CardID    string `json:"cardid"`
+}
+
+// 基准测试，收集三个类型的模型的单位epoch运行时间
+type BenchMark struct {
+	Model1AVGRunTime float64
+	Model2AVGRunTime float64
+	Model3AVGRunTime float64
 }

@@ -24,7 +24,7 @@ func (monitor *Monitor) runBenchMark(DataCenterID string, ClusterID string, Node
 
 }
 
-// 预测器
+// 预测器，调用python程序（考虑以容器注册的形式）TODO:
 func Predict(job *Job) {
 
 }

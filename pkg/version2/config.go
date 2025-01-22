@@ -28,13 +28,13 @@ type DataCenterInfo struct {
 
 // ClusterInfo 集群信息结构体
 type ClusterInfo struct {
-	ClusterID                 string     `json:"ClusterID"`
-	ClusterIP                 string     `json:"ClusterIP"`
-	NodeNums                  int        `json:"NodeNums"`
-	NodeInfo                  []NodeInfo `json:"NodeInfo"`
-	ClusterPromIpPort         string     `json:"ClusterPromIpPort"`
-	ClusterKubeconfigFilePath string     `json:"ClusterKubeconfigFilePath"`
-	ClusterClientSet          *kubernetes.Clientset
+	ClusterID                 string                `json:"ClusterID"`
+	ClusterIP                 string                `json:"ClusterIP"`
+	NodeNums                  int                   `json:"NodeNums"`
+	NodeInfo                  []NodeInfo            `json:"NodeInfo"`
+	ClusterPromIpPort         string                `json:"ClusterPromIpPort"`
+	ClusterKubeconfigFilePath string                `json:"ClusterKubeconfigFilePath"`
+	ClusterClientSet          *kubernetes.Clientset `json:"-"`
 
 	// 以下通过prometheus获取
 	// TODO:网络指标，待定
@@ -54,7 +54,7 @@ type NodeInfo struct {
 	TOTAL_MEMORY int64
 	FREE_MEMORY  int64
 
-	// 基准测试程序获得的分数
+	// 基准测试程序获得的分数，假定每个节点只有一种类型的卡
 	BenchMark BenchMark
 }
 
@@ -110,12 +110,15 @@ type PromResponse struct {
 }
 
 type JobPool struct {
-	Job []Job
+	OriginJobQueue []Job // 初始作业队列，按照FIFO排序
+	ScheduledJob   []Job // 由调度器返回，将PreJobID为null的排列在最前，只要PreJobID为null，则直接发送作业到指定位置
+	AssignedJob    []Job // 已经提交的作业，等待作业完成
+	FinishedJob    []Job
 }
 
 type Job struct {
 	// 从yaml文件读取的详细信息
-	JobSpec batchv1.Job
+	JobSpec batchv1.Job `json:"-"`
 
 	// Job的属性信息
 	YamlFilePath string    `json:"YamlFilePath"` // yaml配置文件位置
@@ -131,9 +134,10 @@ type Job struct {
 	// GPUPowerReq  float64   `json:"gpupowereq"`   // GPU算力需求量，以A100的100%为基准
 
 	// Job 的分配信息
-	ClusterID string `json:"clusterid"`
-	NodeID    string `json:"nodeid"`
-	CardID    string `json:"cardid"`
+	ClusterID string
+	NodeID    string
+	CardID    string
+	PreJobID  string // 作业队列信息
 }
 
 // 基准测试，收集三个类型的模型的单位epoch运行时间

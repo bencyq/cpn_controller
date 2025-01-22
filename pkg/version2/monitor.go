@@ -209,7 +209,7 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			if err != nil {
 				log.Println("Error: process file failed", err)
 			}
-			monitor.JobPool.Job = append(monitor.JobPool.Job, Job{JobSpec: jobSpec, YamlFilePath: filePath})
+			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, Job{JobSpec: jobSpec, YamlFilePath: filePath})
 		}
 	}
 	fmt.Printf("%+v", monitor)

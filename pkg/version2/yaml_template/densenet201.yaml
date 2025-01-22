@@ -1,7 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: pytorch-densenet-job
+  name: densenet201
+  annotations: 
+    model_name: "densenet201"
 spec:
   backoffLimit: 4
   template:
@@ -9,14 +11,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet121
+        - densenet201
         - --model-path
-        - /cyq/models/densenet/densenet121.pth
+        - /cyq/models/densenet/densenet201.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/densenet.py
+        - /cyq/test_demo/densenet_cycle.py
         image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
         name: pytorch-container
         resources:

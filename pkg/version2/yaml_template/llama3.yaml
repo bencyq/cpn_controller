@@ -1,0 +1,41 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: llama3
+  annotations: 
+    model_name: "llama3"
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - llama3
+        - --model-path
+        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
+        command:
+        - python
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/llm_with_flask:202410242310
+        name: llama3
+        resources:
+          limits:
+            k8s.amazonaws.com/vgpu: 1
+        volumeMounts:
+        - mountPath: /cyq
+          name: cyq-volume
+        - mountPath: /tmp/nvidia-mps
+          name: nvidia-mps
+      hostIPC: true
+      nodeSelector:
+        kubernetes.io/hostname: node16
+      restartPolicy: Never
+      volumes:
+      - hostPath:
+          path: /data/cyq
+          type: Directory
+        name: cyq-volume
+      - hostPath:
+          path: /tmp/nvidia-mps
+        name: nvidia-mps

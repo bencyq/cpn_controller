@@ -16,7 +16,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,14 +26,14 @@ import (
 
 // 根据指定的url地址获取到调度器发送的json文件,格式如 example.json TODO:等调度器接口写好了再做
 func getJson(url string) (body []byte) {
-	return nil
+	return getJsonWithFile(url)
 }
 
 func getJsonWithFile(fileName string) (content []byte) {
 	// 打开文件
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Println("Error opening file:", err)
+		log.Println("Error: opening file:", err)
 		return
 	}
 	defer file.Close()
@@ -42,7 +41,7 @@ func getJsonWithFile(fileName string) (content []byte) {
 	// 读取文件内容
 	content, err = io.ReadAll(file)
 	if err != nil {
-		log.Println("Error reading file:", err)
+		log.Println("Error: reading file:", err)
 		return
 	}
 	return content
@@ -55,6 +54,7 @@ func (monitor *Monitor) unmarshalJson(body []byte) {
 		log.Println("Error:", err)
 		return
 	}
+	log.Println("INFO: Information initiated")
 	// fmt.Printf("%+v",monitor)
 }
 
@@ -148,7 +148,6 @@ func NewClientSetOutOfCluster(kubeconfig string) (client *kubernetes.Clientset, 
 	return clientset, nil
 }
 
-// TODO: 还没测试
 func (monitor *Monitor) NewClientSetForEachCluseter() {
 	for _, datacenter := range monitor.DataCenterInfo {
 		for _, cluster := range datacenter.ClusterInfo {
@@ -188,13 +187,14 @@ func parseYamlFile(filePath string) (batchv1.Job, error) {
 	//TODO: 设定将annotation里的model字段解析到JobModelName里
 
 	// 打印出解析出来的名称作为示例
-	log.Printf("INFO: Parsed Job: %s\n", job.Name)
+	// log.Printf("INFO: Parsed Job: %s\n", job.Name)
 	return job, nil
 }
 
 // TODO: 从调度器接口获取Job信息（起个http服务什么的）
 func (monitor *Monitor) getJob() {
 	monitor.getJobWithFile(`yaml_template`)
+	log.Println("INFO: getJob finished")
 }
 
 func (monitor *Monitor) getJobWithFile(directory string) {
@@ -209,29 +209,37 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			if err != nil {
 				log.Println("Error: process file failed", err)
 			}
-			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, Job{JobSpec: jobSpec, YamlFilePath: filePath})
+			JobModelName := jobSpec.Annotations[`model_name`]
+			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName})
 		}
 	}
-	fmt.Printf("%+v", monitor)
+	// fmt.Printf("%+v", monitor)
 }
 
 // TODO: Monitor的整体工作逻辑
-func NewMonitor() (monitor *Monitor) {
+func NewMonitor() *Monitor {
+	monitor := &Monitor{}
+
 	// 从接口读取基础信息，初始化数据结构 TODO: 正式版需要修改读取Json的方式
-	monitor.unmarshalJson(getJsonWithFile("example.json"))
+	monitor.unmarshalJson(getJson("example2.json"))
 
 	// 为每个集群生成一个clientset
 	monitor.NewClientSetForEachCluseter()
 
 	// 每隔一分钟更新一次metric
-	go func() {
-		for {
-			time.Sleep(time.Minute)
-			monitor.getMetric()
-		}
-	}()
+	// go func() {
+	// 	for {
+	// 		time.Sleep(time.Minute)
+	// 		monitor.getMetric()
+	// 	}
+	// }()
+	monitor.getMetric()
 
+	// 获取Job
 	monitor.getJob()
+
+	// 调用python调度器模块
+	monitor.Scheduler()
 
 	return monitor
 }

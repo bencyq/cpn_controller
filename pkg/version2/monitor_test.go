@@ -20,3 +20,7 @@ func TestGetJob(t *testing.T) {
 	var monitor Monitor
 	monitor.getJob()
 }
+
+func TestNewMonitor(t *testing.T) {
+	NewMonitor()
+}

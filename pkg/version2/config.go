@@ -14,7 +14,7 @@ import (
 // Monitor 根结构体，包含 DataCenterNums 和 DataCenterInfo
 type Monitor struct {
 	DataCenterNums int              `json:"DataCenterNums"`
-	DataCenterInfo []DataCenterInfo `json:"DataCenterInfo"`
+	DataCenterInfo []*DataCenterInfo `json:"DataCenterInfo"`
 	JobPool        JobPool
 }
 
@@ -23,7 +23,7 @@ type DataCenterInfo struct {
 	DataCenterID       string        `json:"DataCenterID"`
 	DataCenterLocation string        `json:"DataCenterLocation"`
 	ClusterNums        int           `json:"ClusterNums"`
-	ClusterInfo        []ClusterInfo `json:"ClusterInfo"`
+	ClusterInfo        []*ClusterInfo `json:"ClusterInfo"`
 }
 
 // ClusterInfo 集群信息结构体
@@ -31,7 +31,7 @@ type ClusterInfo struct {
 	ClusterID                 string                `json:"ClusterID"`
 	ClusterIP                 string                `json:"ClusterIP"`
 	NodeNums                  int                   `json:"NodeNums"`
-	NodeInfo                  []NodeInfo            `json:"NodeInfo"`
+	NodeInfo                  []*NodeInfo            `json:"NodeInfo"`
 	ClusterPromIpPort         string                `json:"ClusterPromIpPort"`
 	ClusterKubeconfigFilePath string                `json:"ClusterKubeconfigFilePath"`
 	ClusterClientSet          *kubernetes.Clientset `json:"-"`
@@ -47,7 +47,7 @@ type NodeInfo struct {
 	CPUInfo  CPUInfo    `json:"CPUInfo"`
 	NodeType string     `json:"NodeType"`
 	CardNums int        `json:"CardNums"`
-	CardInfo []CardInfo `json:"CardInfo"`
+	CardInfo []*CardInfo `json:"CardInfo"`
 
 	// 以下通过prometheus获取
 	CPU_USAGE    float64
@@ -61,7 +61,7 @@ type NodeInfo struct {
 func (node *NodeInfo) FindCard(cardID string) (card *CardInfo) {
 	for idx := range node.CardInfo {
 		if node.CardInfo[idx].CardID == cardID {
-			return &node.CardInfo[idx]
+			return node.CardInfo[idx]
 		}
 	}
 	return nil

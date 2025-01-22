@@ -12,8 +12,8 @@ import (
 	"time"
 )
 
-// 发送monitor整个的配置信息，接受作业队列，预测器也集成到调度器的py实现里
-func (monitor *Monitor) clientForScheduler() {
+// 采用socket与py进程通信，发送monitor整个的配置信息，接受作业队列；预测器也集成到调度器的py实现里
+func (monitor *Monitor) Scheduler() {
 	// 创建连接
 	socketPath := "./scheduler.sock"
 	// conn, err := net.Dial("unix", socketPath)

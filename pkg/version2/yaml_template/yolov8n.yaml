@@ -4,6 +4,7 @@ metadata:
   name: yolov8n
   annotations: 
     model_name: "yolov8n"
+    data_size: 30
 spec:
   backoffLimit: 4
   template:

@@ -13,16 +13,17 @@ import (
 
 // Monitor 根结构体，包含 DataCenterNums 和 DataCenterInfo
 type Monitor struct {
-	DataCenterNums int              `json:"DataCenterNums"`
+	DataCenterNums int               `json:"DataCenterNums"`
 	DataCenterInfo []*DataCenterInfo `json:"DataCenterInfo"`
 	JobPool        JobPool
+	ModelBaseline  map[string][]string `json:"-"`
 }
 
 // DataCenterInfo 数据中心信息结构体
 type DataCenterInfo struct {
-	DataCenterID       string        `json:"DataCenterID"`
-	DataCenterLocation string        `json:"DataCenterLocation"`
-	ClusterNums        int           `json:"ClusterNums"`
+	DataCenterID       string         `json:"DataCenterID"`
+	DataCenterLocation string         `json:"DataCenterLocation"`
+	ClusterNums        int            `json:"ClusterNums"`
 	ClusterInfo        []*ClusterInfo `json:"ClusterInfo"`
 }
 
@@ -31,28 +32,30 @@ type ClusterInfo struct {
 	ClusterID                 string                `json:"ClusterID"`
 	ClusterIP                 string                `json:"ClusterIP"`
 	NodeNums                  int                   `json:"NodeNums"`
-	NodeInfo                  []*NodeInfo            `json:"NodeInfo"`
+	NodeInfo                  []*NodeInfo           `json:"NodeInfo"`
 	ClusterPromIpPort         string                `json:"ClusterPromIpPort"`
 	ClusterKubeconfigFilePath string                `json:"ClusterKubeconfigFilePath"`
 	ClusterClientSet          *kubernetes.Clientset `json:"-"`
 
 	// 以下通过prometheus获取
 	// TODO:网络指标，待定
+
+	Bandwidth int64 `json:"Bandwidth"` // 单位为 MB/s
 }
 
 // Node 节点信息结构体
 type NodeInfo struct {
-	NodeID   string     `json:"NodeID"`
-	NodeIP   string     `json:"NodeIP"`
-	CPUInfo  CPUInfo    `json:"CPUInfo"`
-	NodeType string     `json:"NodeType"`
-	CardNums int        `json:"CardNums"`
+	NodeID   string      `json:"NodeID"`
+	NodeIP   string      `json:"NodeIP"`
+	CPUInfo  CPUInfo     `json:"CPUInfo"`
+	NodeType string      `json:"NodeType"`
+	CardNums int         `json:"CardNums"`
 	CardInfo []*CardInfo `json:"CardInfo"`
 
 	// 以下通过prometheus获取
 	CPU_USAGE    float64
-	TOTAL_MEMORY int64
-	FREE_MEMORY  int64
+	TOTAL_MEMORY int64 // 单位为MB
+	FREE_MEMORY  int64 // 单位为MB
 
 	// 基准测试程序获得的分数，假定每个节点只有一种类型的卡
 	BenchMark BenchMark
@@ -82,6 +85,7 @@ type CardInfo struct {
 	GPU_UTIL        int64
 	GPU_MEMORY_FREE int64
 	GPU_MEMORY_USED int64
+	JobQueue        []*Job // 分配到该卡上的作业
 }
 
 // ////////////////////////////
@@ -110,10 +114,10 @@ type PromResponse struct {
 }
 
 type JobPool struct {
-	OriginJobQueue []Job // 初始作业队列，按照FIFO排序
-	ScheduledJob   []Job // 由调度器返回，将PreJobID为null的排列在最前，只要PreJobID为null，则直接发送作业到指定位置
-	AssignedJob    []Job // 已经提交的作业，等待作业完成
-	FinishedJob    []Job
+	OriginJobQueue []*Job // 初始作业队列，按照FIFO排序
+	ScheduledJob   []*Job // 由调度器返回，将PreJobID为null的排列在最前，只要PreJobID为null，则直接发送作业到指定位置
+	AssignedJob    []*Job // 已经提交的作业，等待作业完成
+	FinishedJob    []*Job
 }
 
 type Job struct {
@@ -124,11 +128,11 @@ type Job struct {
 	YamlFilePath string    `json:"YamlFilePath"` // yaml配置文件位置
 	Timestamp    time.Time `json:"timestamp"`    // 作业提交的时间
 	ID           string    `json:"id"`           // 作业ID
-	JobModelName string    `json:"jobmodelname"` // 作业模型名字，如yolo、resnet、llama3等
-	JobType      string    `json:"jobtype"`      // 作业类型 (CPU密集型 或 GPU密集型)
-	MemoryReq    float64   `json:"memoryreq"`    // 内存需求
-	GPUMemoryReq float64   `json:"gpumemoryreq"` // 显存需求 (仅GPU作业)
-	DataSize     float64   `json:"datasize"`     // 数据大小
+	JobModelName string    `json:"jobmodelname"` // 作业模型名字，如yolov8n、resnet50、llama3等
+	JobType      string    `json:"jobtype"`      // 作业类型 (CPU密集型 或 GPU密集型), 写为 CPU GPU
+	MemoryReq    int64     `json:"memoryreq"`    // 内存需求，单位为MB
+	GPUMemoryReq int64     `json:"gpumemoryreq"` // 显存需求，单位为MB (仅GPU作业)
+	DataSize     int64     `json:"datasize"`     // 数据大小，单位为GB
 	// PresumedTime float64   `json:"presumedTime"` // 预计完成需要时间
 	// CPUPowerReq  float64   `json:"cpupowereq"`   // CPU需求量，以Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz的100%算力为基准
 	// GPUPowerReq  float64   `json:"gpupowereq"`   // GPU算力需求量，以A100的100%为基准

@@ -68,7 +68,7 @@ def evaluate(individual):
 
         # 计算运行时间 TODO:
         cardBaseline = CardBaseline[cluster][node][card]
-        run_time = 
+        # run_time = TODO:
         total_time += transfer_time + run_time
 
     return (total_time,)

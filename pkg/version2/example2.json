@@ -91,6 +91,7 @@
                             ]
                         }
                     ],
+                    "Bandwidth": 100,
                     "ClusterPromIpPort": "10.90.1.49:30778",
                     "ClusterKubeconfigFilePath": "/etc/kubernetes/admin.conf"
                 }

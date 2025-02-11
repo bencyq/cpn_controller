@@ -4,6 +4,7 @@ metadata:
   name: densenet121
   annotations: 
     model_name: "densenet121"
+    data_size: 20
 spec:
   backoffLimit: 4
   template:

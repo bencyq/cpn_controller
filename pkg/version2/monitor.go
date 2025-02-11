@@ -33,7 +33,7 @@ func getJsonWithFile(fileName string) (content []byte) {
 	// 打开文件
 	file, err := os.Open(fileName)
 	if err != nil {
-		log.Println("Error: opening file:", err)
+		log.Println("ERROR: opening file:", err)
 		return
 	}
 	defer file.Close()
@@ -41,7 +41,7 @@ func getJsonWithFile(fileName string) (content []byte) {
 	// 读取文件内容
 	content, err = io.ReadAll(file)
 	if err != nil {
-		log.Println("Error: reading file:", err)
+		log.Println("ERROR: reading file:", err)
 		return
 	}
 	return content
@@ -51,7 +51,7 @@ func getJsonWithFile(fileName string) (content []byte) {
 func (monitor *Monitor) unmarshalJson(body []byte) {
 	err := json.Unmarshal(body, &monitor)
 	if err != nil {
-		log.Println("Error:", err)
+		log.Println("ERROR:", err)
 		return
 	}
 	log.Println("INFO: Information initiated")
@@ -96,7 +96,7 @@ func (monitor *Monitor) getMetric() {
 					prometheusURL := "http://" + cluster.ClusterPromIpPort + "/api/v1/query?query=" + metricExpr
 					resp, err := http.Get(prometheusURL)
 					if err != nil {
-						log.Println("Error: sending prometheus request failed", err)
+						log.Println("ERROR: sending prometheus request failed", err)
 					}
 					defer resp.Body.Close()
 					body, _ := io.ReadAll(resp.Body)
@@ -164,7 +164,7 @@ func (monitor *Monitor) NewClientSetForEachCluseter() {
 func jobList(client *kubernetes.Clientset, namespace string) (joblist *batchv1.JobList, err error) {
 	joblist, err = client.BatchV1().Jobs(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
-		log.Println("Error: cannot list jobs", err)
+		log.Println("ERROR: cannot list jobs", err)
 		return nil, err
 	}
 	return joblist, nil
@@ -207,10 +207,11 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			filePath := filepath.Join(directory, file.Name())
 			jobSpec, err := parseYamlFile(filePath)
 			if err != nil {
-				log.Println("Error: process file failed", err)
+				log.Println("ERROR: process file failed", err)
 			}
 			JobModelName := jobSpec.Annotations[`model_name`]
-			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName})
+			JobDataSize, _ := strconv.ParseInt(jobSpec.Annotations[`data_size`], 10, 64)
+			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize})
 		}
 	}
 	// fmt.Printf("%+v", monitor)
@@ -239,7 +240,7 @@ func NewMonitor() *Monitor {
 	monitor.getJob()
 
 	// 调用python调度器模块
-	monitor.Scheduler()
+	// monitor.Scheduler()
 
 	return monitor
 }

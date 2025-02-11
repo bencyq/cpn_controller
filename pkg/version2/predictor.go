@@ -67,10 +67,17 @@ func (monitor *Monitor) RuntimePredict(job *Job, dataCenterID string, clusterID 
 	return 300 // 以秒为单位
 }
 
+// TODO:  未测试 FIXME:
 func (monitor *Monitor) InitPredictor() {
 	monitor.readModelBaseline()
+	var SchduleFailedJob = []*Job{}
 	for _, job := range monitor.JobPool.OriginJobQueue {
 		monitor.JobAnalyze(job)
-		monitor.OptimalAllocate(job)
+		if monitor.OptimalAllocate(job) {
+			monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
+		} else {
+			SchduleFailedJob = append(SchduleFailedJob, job)
+		}
 	}
+	monitor.JobPool.OriginJobQueue = SchduleFailedJob
 }

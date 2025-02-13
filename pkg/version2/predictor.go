@@ -1,9 +1,13 @@
 package version2
 
 import (
+	"fmt"
 	"log"
+	"math"
 	"path/filepath"
+	"sort"
 	"strconv"
+	"time"
 )
 
 // 5. 在每个集群的每台服务器上运行基准测试程序，获得评价指标（暂定resnet50、yolov8m、llama3，每个各10mins）
@@ -37,19 +41,38 @@ func (monitor *Monitor) readModelBaseline() {
 	}
 	fp := filepath.Join(root, "pkg", "version2", "model_baseline.csv")
 
-	// 解析 TODO:
+	// 解析
 	_, lines := ReadCsv(fp)
 	var modelBaseline = map[string][]string{}
 	for _, ele := range lines {
 		modelBaseline[ele[0]] = ele[1:]
 	}
 	monitor.ModelBaseline = modelBaseline
+
+	fp2 := filepath.Join(root, "pkg", "version2", "model_baseline2.csv")
+	_, modelBaseline2 := ReadCsv(fp2)
+	// 对三个模型部分的内容进行排序 TODO:
+	for idx, ele := range modelBaseline2[135:] {
+		type Pair struct {
+			str1 string
+			str2 string
+		}
+		pair1 := Pair{ele[0], ele[1]}
+		pair2 := Pair{ele[2], ele[3]}
+		pair3 := Pair{ele[4], ele[5]}
+		pairs := []Pair{pair1, pair2, pair3}
+		sort.Slice(pairs, func(i int, j int) bool { return pairs[i].str1 < pairs[j].str1 })
+		modelBaseline2[135+idx] = []string{pairs[0].str1, pairs[0].str2, pairs[1].str1, pairs[1].str2, pairs[2].str1, pairs[2].str2}
+	}
+
+	monitor.ModelBaseline2 = modelBaseline2
 }
 
 // 作业分析器 分析作业的memoryReq、JobType等数据 TODO:现在都是静态配置，之后可以设计动态配置
 func (monitor *Monitor) JobAnalyze(job *Job) {
 	if _, exists := monitor.ModelBaseline[job.JobModelName]; exists {
 		job.GPUMemoryReq, _ = strconv.ParseInt(monitor.ModelBaseline[job.JobModelName][0], 10, 64)
+		job.BaselineSpeed, _ = strconv.ParseFloat(monitor.ModelBaseline[job.JobModelName][1], 10)
 	} else {
 	}
 
@@ -60,14 +83,95 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 	}
 }
 
-// 预测器 TODO:
-func (monitor *Monitor) RuntimePredict(job *Job, dataCenterID string, clusterID string, nodeID string, cardID string) (runtime int64) {
-	// 分析当前该卡上有的作业
+// 预测器逻辑实现 TODO:
+func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
+	jobs := [][]int64{}
+	jobModelNames := []string{newJob.JobModelName}
+	// 分析当前该卡上有的作业，以及其剩余轮次
+	for _, job := range monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].JobQueue {
+		// 先检测已有job的状态，比如job是否在传输过程中，并计算job的剩余轮次
+		var transferRemainTime = int64(math.MaxInt64)
+		var executeRemainTime = int64(math.MaxInt64)
+		if job.TransferTime > int64(time.Now().Sub(job.ScheduledTime).Seconds()) { // 还在传输中
+			transferRemainTime = job.TransferTime - int64(time.Now().Sub(job.ScheduledTime).Seconds())
+			executeRemainTime = int64(float64(job.Epoch) * job.BaselineSpeed)
+		} else { // 传输已完成
+			transferRemainTime = int64(0)
+		}
+		jobs = append(jobs, []int64{transferRemainTime, executeRemainTime})
+		jobModelNames = append(jobModelNames, job.JobModelName)
+	}
+	// 分析当前作业和已有作业并行时候的runtime
+	// 先按照jobModelNames的顺序进行排序
+	type Pair struct {
+		Str  string
+		Jobs []int64
+	}
+	pairs := make([]Pair, len(jobs))
+	for i := 0; i < len(jobs); i++ {
+		pairs[i] = Pair{
+			Str:  jobModelNames[i],
+			Jobs: jobs[i],
+		}
+	}
+	// 对 Pair 切片按照 Str 字段进行排序
+	sort.Slice(pairs, func(i, j int) bool {
+		return pairs[i].Str < pairs[j].Str
+	})
+	// 从排序后的 Pair 切片中提取出 jobs 元素，组成新的 int 切片
+	sortedIntSlice := make([][]int64, len(pairs))
+	for i := 0; i < len(pairs); i++ {
+		sortedIntSlice[i] = pairs[i].Jobs
+	}
+	jobs = sortedIntSlice
+
+	runtimes := monitor.RealDataPredict(jobModelNames)
+
 	// 分析该作业的预计运行时间
+	for idx, _ := range jobModelNames {
+		fmt.Print(runtimes, idx) //TODO:FIXME:
+	}
+
 	return 300 // 以秒为单位
 }
 
-// TODO:  未测试 FIXME:
+// 预测器算法实现（从实际数据中获取运行时间）
+func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
+	if len(jobModelNames) == 1 {
+		for _, ele := range monitor.ModelBaseline2 {
+			if ele[0] == jobModelNames[0] {
+				num, _ := strconv.ParseFloat(ele[1], 10)
+				return []float64{num}
+			}
+		}
+	} else if len(jobModelNames) == 2 {
+		for _, ele := range monitor.ModelBaseline2 {
+			if ele[0] == jobModelNames[0] && ele[2] == jobModelNames[1] {
+				num1, _ := strconv.ParseFloat(ele[1], 10)
+				num2, _ := strconv.ParseFloat(ele[3], 10)
+				return []float64{num1, num2}
+			}
+			if ele[0] == jobModelNames[1] && ele[2] == jobModelNames[0] {
+				num2, _ := strconv.ParseFloat(ele[1], 10)
+				num1, _ := strconv.ParseFloat(ele[3], 10)
+				return []float64{num1, num2}
+			}
+		}
+	} else if len(jobModelNames) == 3 {
+		// 对jobModelNames进行排序，方便比对
+		sort.Strings(jobModelNames)
+		for _, ele := range monitor.ModelBaseline2[135:] {
+			if ele[0] == jobModelNames[0] && ele[2] == jobModelNames[1] && ele[4] == jobModelNames[2] {
+				num1, _ := strconv.ParseFloat(ele[1], 10)
+				num2, _ := strconv.ParseFloat(ele[3], 10)
+				num3, _ := strconv.ParseFloat(ele[5], 10)
+				return []float64{num1, num2, num3}
+			}
+		}
+	}
+	return nil
+}
+
 func (monitor *Monitor) InitPredictor() {
 	monitor.readModelBaseline()
 	var SchduleFailedJob = []*Job{}

@@ -23,4 +23,5 @@
     annotations: 
         model_name: "densenet121"
         data_size: 20
+        epoch: 100
     ```

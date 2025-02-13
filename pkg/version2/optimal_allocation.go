@@ -9,7 +9,7 @@ import (
 
 // 对于一个作业，模拟其在各个集群运行的完成时间
 func (monitor *Monitor) OptimalAllocate(job *Job) bool {
-	var optAlc = [4]int{} // optimal Allocation, 存储job的分配位置
+	var optAlc = [5]int{math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt} // optimal Allocation, 存储job的分配位置
 	minTotalTime := int64(math.MaxInt64)
 
 	// 模拟计算作业在各个集群的各个节点的运行时间+传输时间，选取时间最少的
@@ -32,13 +32,14 @@ func (monitor *Monitor) OptimalAllocate(job *Job) bool {
 							continue
 						}
 					}
-					runtime := monitor.RuntimePredict(job, dataCenterInfo.DataCenterID, clusterInfo.ClusterID, nodeInfo.NodeID, cardInfo.CardID)
+					runtime := monitor.RuntimePredict(job, dc, cl, n, c)
 					if runtime+transferTime < minTotalTime {
 						minTotalTime = runtime + transferTime
 						optAlc[0] = dc
 						optAlc[1] = cl
 						optAlc[2] = n
 						optAlc[3] = c
+						optAlc[4] = int(transferTime)
 					}
 				}
 			}
@@ -46,9 +47,15 @@ func (monitor *Monitor) OptimalAllocate(job *Job) bool {
 	}
 
 	// 如果没有合适的位置分配任务
-	if optAlc[0] == 0 {
+	if optAlc[0] == math.MaxInt {
 		return false
 	}
+
+	// 在Job里填写挂载信息
+	job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX = optAlc[0], optAlc[1], optAlc[2], optAlc[3]
+
+	// 分析Job的传输时间
+	job.TransferTime = int64(optAlc[4])
 
 	// 给对应的card上的jobqueue挂上作业
 	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue = append(monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue, job)

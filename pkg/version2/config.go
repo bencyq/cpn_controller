@@ -17,6 +17,7 @@ type Monitor struct {
 	DataCenterInfo []*DataCenterInfo `json:"DataCenterInfo"`
 	JobPool        JobPool
 	ModelBaseline  map[string][]string `json:"-"`
+	ModelBaseline2 [][]string          `json:"-"`
 }
 
 // DataCenterInfo 数据中心信息结构体
@@ -125,23 +126,28 @@ type Job struct {
 	JobSpec batchv1.Job `json:"-"`
 
 	// Job的属性信息
-	YamlFilePath string    `json:"YamlFilePath"` // yaml配置文件位置
-	Timestamp    time.Time `json:"timestamp"`    // 作业提交的时间
-	ID           string    `json:"id"`           // 作业ID
-	JobModelName string    `json:"jobmodelname"` // 作业模型名字，如yolov8n、resnet50、llama3等
-	JobType      string    `json:"jobtype"`      // 作业类型 (CPU密集型 或 GPU密集型), 写为 CPU GPU
-	MemoryReq    int64     `json:"memoryreq"`    // 内存需求，单位为MB
-	GPUMemoryReq int64     `json:"gpumemoryreq"` // 显存需求，单位为MB (仅GPU作业)
-	DataSize     int64     `json:"datasize"`     // 数据大小，单位为GB
+	YamlFilePath  string    `json:"YamlFilePath"` // yaml配置文件位置
+	Timestamp     time.Time `json:"timestamp"`    // 作业提交的时间
+	ID            string    `json:"id"`           // 作业ID
+	JobModelName  string    `json:"jobmodelname"` // 作业模型名字，如yolov8n、resnet50、llama3等
+	JobType       string    `json:"jobtype"`      // 作业类型 (CPU密集型 或 GPU密集型), 写为 CPU GPU
+	MemoryReq     int64     `json:"memoryreq"`    // 内存需求，单位为MB
+	GPUMemoryReq  int64     `json:"gpumemoryreq"` // 显存需求，单位为MB (仅GPU作业)
+	DataSize      int64     `json:"datasize"`     // 数据大小，单位为GB
+	Epoch         int64
+	BaselineSpeed float64 // 单epoch的推理时间
 	// PresumedTime float64   `json:"presumedTime"` // 预计完成需要时间
 	// CPUPowerReq  float64   `json:"cpupowereq"`   // CPU需求量，以Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz的100%算力为基准
 	// GPUPowerReq  float64   `json:"gpupowereq"`   // GPU算力需求量，以A100的100%为基准
 
 	// Job 的分配信息
-	ClusterID string
-	NodeID    string
-	CardID    string
-	PreJobID  string // 作业队列信息
+	DataCenterIDX int
+	ClusterIDX    int
+	NodeIDX       int
+	CardIDX       int
+	PreJobIDX     int       // 作业队列信息
+	TransferTime  int64     // 以秒为单位
+	ScheduledTime time.Time // 调度器开始作业分配的时间
 }
 
 // 基准测试，收集三个类型的模型的单位epoch运行时间

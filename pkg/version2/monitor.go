@@ -76,9 +76,9 @@ func generatePromMetrics(nodeName string, nodeType string) map[string]string {
 }
 
 func (monitor *Monitor) getMetric() {
-	for _, datacenter := range monitor.DataCenterInfo {
-		for _, cluster := range datacenter.ClusterInfo {
-			for _, node := range cluster.NodeInfo {
+	for dc, datacenter := range monitor.DataCenterInfo {
+		for cl, cluster := range datacenter.ClusterInfo {
+			for n, node := range cluster.NodeInfo {
 
 				// 异常处理
 				defer func() {
@@ -112,6 +112,9 @@ func (monitor *Monitor) getMetric() {
 				// 解析nodeMetric并把值存入对应的变量中
 				node.CPU_USAGE, _ = strconv.ParseFloat(nodeMetric["CPU_USAGE"].Result[0].Value[1].(string), 64)
 				node.TOTAL_MEMORY, _ = strconv.ParseInt(nodeMetric["TOTAL_MEMORY"].Result[0].Value[1].(string), 10, 64)
+				if node.TOTAL_MEMORY == 0 {
+					log.Printf("ERROR: invalid metric at DCID:%v ClID:%v NID:%v", monitor.DataCenterInfo[dc].DataCenterID, monitor.DataCenterInfo[dc].ClusterInfo[cl].ClusterID, monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].NodeID)
+				}
 				node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
 				if node.NodeType == "GPU" {
 					for _, result := range nodeMetric["GPU_UTIL"].Result {
@@ -184,8 +187,6 @@ func parseYamlFile(filePath string) (batchv1.Job, error) {
 		return batchv1.Job{}, fmt.Errorf("failed to unmarshal YAML from file %s: %v", filePath, err)
 	}
 
-	//TODO: 设定将annotation里的model字段解析到JobModelName里
-
 	// 打印出解析出来的名称作为示例
 	// log.Printf("INFO: Parsed Job: %s\n", job.Name)
 	return job, nil
@@ -217,7 +218,7 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 	// fmt.Printf("%+v", monitor)
 }
 
-// TODO: Monitor的整体工作逻辑
+// Monitor的整体工作逻辑
 func NewMonitor() *Monitor {
 	monitor := &Monitor{}
 
@@ -238,9 +239,6 @@ func NewMonitor() *Monitor {
 
 	// 获取Job
 	monitor.getJob()
-
-	// 调用python调度器模块
-	// monitor.Scheduler()
 
 	return monitor
 }

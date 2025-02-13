@@ -1,7 +1,6 @@
 package version2
 
 import (
-	"fmt"
 	"log"
 	"math"
 	"path/filepath"
@@ -83,22 +82,23 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 	}
 }
 
-// 预测器逻辑实现 TODO:
+// 预测器逻辑实现 TODO: FIXME:未测试
 func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
 	jobs := [][]int64{}
 	jobModelNames := []string{newJob.JobModelName}
 	// 分析当前该卡上有的作业，以及其剩余轮次
 	for _, job := range monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].JobQueue {
 		// 先检测已有job的状态，比如job是否在传输过程中，并计算job的剩余轮次
-		var transferRemainTime = int64(math.MaxInt64)
-		var executeRemainTime = int64(math.MaxInt64)
+		var transferRemainTime = int64(math.MaxInt64)                              // 剩余传输时间
+		var remainedEpoch = int64(math.MaxInt64)                                   //  剩余运行轮次
 		if job.TransferTime > int64(time.Now().Sub(job.ScheduledTime).Seconds()) { // 还在传输中
 			transferRemainTime = job.TransferTime - int64(time.Now().Sub(job.ScheduledTime).Seconds())
-			executeRemainTime = int64(float64(job.Epoch) * job.BaselineSpeed)
+			remainedEpoch = job.Epoch
 		} else { // 传输已完成
 			transferRemainTime = int64(0)
+			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - time.Now().Sub(job.ScheduledTime).Seconds()) / float64(job.Epoch))
 		}
-		jobs = append(jobs, []int64{transferRemainTime, executeRemainTime})
+		jobs = append(jobs, []int64{transferRemainTime, remainedEpoch})
 		jobModelNames = append(jobModelNames, job.JobModelName)
 	}
 	// 分析当前作业和已有作业并行时候的runtime
@@ -125,17 +125,53 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 	}
 	jobs = sortedIntSlice
 
-	runtimes := monitor.RealDataPredict(jobModelNames)
+	newBaseline := monitor.RealDataPredict(jobModelNames)
 
 	// 分析该作业的预计运行时间
-	for idx, _ := range jobModelNames {
-		fmt.Print(runtimes, idx) //TODO:FIXME:
+	for idx, jmn := range jobModelNames {
+		if jmn == newJob.JobModelName {
+			return int64(newBaseline[idx] * float64(newJob.Epoch))
+		}
 	}
 
-	return 300 // 以秒为单位
+	// 逻辑比较复杂，未完成
+	// // 先找到最先结束的Job
+	// totalTime := int64(0)
+	// for len(jobs) > 0 {
+	// 	minRemainedTime := math.MaxFloat64
+	// 	minRemainedIDX := math.MaxInt
+	// 	for idx, nbl := range newBaseline {
+	// 		if float64(jobs[idx][0])+nbl*float64(jobs[idx][1]) < minRemainedTime {  //表达式为 传输时间+运行时间
+	// 			minRemainedTime = float64(jobs[idx][0]) + nbl*float64(jobs[idx][1])
+	// 			minRemainedIDX = idx
+	// 		}
+	// 	}
+	// 	totalTime += int64(minRemainedTime)
+	// 	if jobModelNames[minRemainedIDX] != newJob.JobModelName {
+	// 		return totalTime
+	// 	} else {
+	// 		// 移除已经结束的作业
+	// 		jobs = append(jobs[:minRemainedIDX], jobs[minRemainedIDX+1:]...)
+	// 		jobModelNames = append(jobModelNames[:minRemainedIDX], jobModelNames[minRemainedIDX+1:]...)
+	// 		newBaseline = append(newBaseline[:minRemainedIDX], newBaseline[minRemainedIDX+1:]...)
+
+	// 		// 更新当前作业的剩余epoch
+	// 		for i, _ := range jobs {
+	// 			if jobs[i][0]-totalTime>0 { //还在传输过程中
+	// 				jobs[i][0]-=totalTime
+	// 			}else{ //传输完成
+	// 				jobs[i][0]=0
+	// 				// 逻辑未完成
+	// 			}
+	// 		}
+	// 	}
+	// 	// 重新分析多作业并行的情况
+	// 	newBaseline = monitor.RealDataPredict(jobModelNames)
+	// }
+	return 0 // 以秒为单位
 }
 
-// 预测器算法实现（从实际数据中获取运行时间）
+// 预测器算法实现（从实际数据中获取运行时间）, 返回当前所有模型的单epoch运行时间
 func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	if len(jobModelNames) == 1 {
 		for _, ele := range monitor.ModelBaseline2 {

@@ -13,3 +13,8 @@ func TestRealDataPredict(t *testing.T) {
 	monitor.RealDataPredict([]string{`densenet169`, `resnet18`})
 	monitor.RealDataPredict([]string{`resnet152`, `yolov8x`, `densenet121`})
 }
+
+func TestRuntimePredict(t *testing.T) {
+	monitor := NewMonitor()
+	monitor.InitPredictor()
+}

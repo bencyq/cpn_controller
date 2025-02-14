@@ -24,3 +24,9 @@ func TestGetJob(t *testing.T) {
 func TestNewMonitor(t *testing.T) {
 	NewMonitor()
 }
+
+func TestMainLogic(t *testing.T) { // monitor主逻辑
+	monitor := NewMonitor()
+	monitor.InitPredictor()
+	monitor.AssignJob()
+}

@@ -212,7 +212,8 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			}
 			JobModelName := jobSpec.Annotations[`model_name`]
 			JobDataSize, _ := strconv.ParseInt(jobSpec.Annotations[`data_size`], 10, 64)
-			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize})
+			JobEpoch, _ := strconv.ParseInt(jobSpec.Annotations[`epoch`], 10, 64)
+			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch})
 		}
 	}
 	// fmt.Printf("%+v", monitor)
@@ -241,4 +242,20 @@ func NewMonitor() *Monitor {
 	monitor.getJob()
 
 	return monitor
+}
+
+func AssignJobWithSystem(job *Job) bool { // TODO:通过调度器后台来分发作业，由浪潮完成
+	return true
+}
+
+func (monitor *Monitor) AssignJob() {
+	failedJobQueue := []*Job{}
+	for _, job := range monitor.JobPool.AssignedJob {
+		if AssignJobWithSystem(job) {
+			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+		} else {
+			failedJobQueue = append(failedJobQueue, job)
+		}
+	}
+	monitor.JobPool.ScheduledJob = failedJobQueue
 }

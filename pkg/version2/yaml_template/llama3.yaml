@@ -4,7 +4,7 @@ metadata:
   name: llama3
   annotations: 
     model_name: "llama3"
-    data_size: 30
+    data_size: 40
     epoch: 100
 spec:
   backoffLimit: 4

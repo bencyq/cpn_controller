@@ -82,8 +82,9 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 	}
 }
 
-// 预测器逻辑实现 TODO: FIXME:未测试
+// 预测器逻辑实现 TODO:
 func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
+	startTime := time.Now()
 	jobs := [][]int64{}
 	jobModelNames := []string{newJob.JobModelName}
 	// 分析当前该卡上有的作业，以及其剩余轮次
@@ -127,7 +128,7 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 
 	newBaseline := monitor.RealDataPredict(jobModelNames)
 
-	// 分析该作业的预计运行时间
+	// 分析该作业的预计运行时间 TODO:FIXME: 未考虑部分作业完成后的运行速度
 	for idx, jmn := range jobModelNames {
 		if jmn == newJob.JobModelName {
 			return int64(newBaseline[idx] * float64(newJob.Epoch))
@@ -168,10 +169,11 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 	// 	// 重新分析多作业并行的情况
 	// 	newBaseline = monitor.RealDataPredict(jobModelNames)
 	// }
+	log.Println("job predict time consumed:", time.Now().Sub(startTime).Seconds())
 	return 0 // 以秒为单位
 }
 
-// 预测器算法实现（从实际数据中获取运行时间）, 返回当前所有模型的单epoch运行时间
+// 预测器算法实现（从实际数据中获取运行时间）, 返回当前所有模型的单epoch运行时间TODO:未考虑硬件性能
 func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	if len(jobModelNames) == 1 {
 		for _, ele := range monitor.ModelBaseline2 {

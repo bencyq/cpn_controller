@@ -1,4 +1,4 @@
-package version2
+package controller
 
 import (
 	"log"

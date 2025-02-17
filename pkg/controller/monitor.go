@@ -1,4 +1,4 @@
-package version2
+package controller
 
 // 1. 初始化调度策略模块，从调度器接口获取到集群的详细信息
 // 2. 测试每个集群的prometheus是否能成功获取到需要的metric，并定期收集

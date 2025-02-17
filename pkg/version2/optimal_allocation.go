@@ -1,6 +1,7 @@
 package version2
 
 import (
+	"log"
 	"math"
 )
 
@@ -33,6 +34,10 @@ func (monitor *Monitor) OptimalAllocate(job *Job) bool {
 						}
 					}
 					runtime := monitor.RuntimePredict(job, dc, cl, n, c)
+					if runtime <= 0 { // 返回了异常值，调过
+						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, job.JobSpec.Name)
+						continue
+					}
 					if runtime+transferTime < minTotalTime {
 						minTotalTime = runtime + transferTime
 						optAlc[0] = dc

@@ -11,6 +11,7 @@ import (
 
 // 5. 在每个集群的每台服务器上运行基准测试程序，获得评价指标（暂定resnet50、yolov8m、llama3，每个各10mins）
 // 6. 实现预测器的功能（能够根据提供的模型信息，给出指标），预测其在A100上的平均运行时间
+// 7. 模拟分析newJob在某个卡上的运行时间
 
 // 检测每个节点是否已经跑过benchmark
 func (monitor *Monitor) checkBenchMark() {
@@ -70,6 +71,7 @@ func (monitor *Monitor) readModelBaseline() {
 // 作业分析器 分析作业的memoryReq、JobType等数据 TODO:现在都是静态配置，之后可以设计动态配置
 func (monitor *Monitor) JobAnalyze(job *Job) {
 	if _, exists := monitor.ModelBaseline[job.JobModelName]; exists {
+		job.ID = job.JobSpec.Name
 		job.GPUMemoryReq, _ = strconv.ParseInt(monitor.ModelBaseline[job.JobModelName][0], 10, 64)
 		job.BaselineSpeed, _ = strconv.ParseFloat(monitor.ModelBaseline[job.JobModelName][1], 10)
 	} else {
@@ -82,10 +84,11 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 	}
 }
 
-// 预测器逻辑实现 TODO:
+// 预测器逻辑实现
 func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
 	startTime := time.Now()
-	jobs := [][]int64{}
+	jobs := [][]int64{{0, newJob.Epoch}}
+	jobID := []string{newJob.ID}
 	jobModelNames := []string{newJob.JobModelName}
 	// 分析当前该卡上有的作业，以及其剩余轮次
 	for _, job := range monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].JobQueue {
@@ -98,77 +101,90 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 		} else { // 传输已完成
 			transferRemainTime = int64(0)
 			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - time.Now().Sub(job.ScheduledTime).Seconds()) / float64(job.Epoch))
+			if remainedEpoch < 0 { // 作业已经完成，跳过
+				continue
+			}
 		}
 		jobs = append(jobs, []int64{transferRemainTime, remainedEpoch})
+		jobID = append(jobID, job.ID)
 		jobModelNames = append(jobModelNames, job.JobModelName)
 	}
 	// 分析当前作业和已有作业并行时候的runtime
 	// 先按照jobModelNames的顺序进行排序
 	type Pair struct {
-		Str  string
-		Jobs []int64
+		JobModelNames string
+		Jobs          []int64
+		JobID         string
 	}
-	pairs := make([]Pair, len(jobs))
-	for i := 0; i < len(jobs); i++ {
+	pairs := make([]Pair, len(jobModelNames))
+	for i := 0; i < len(jobModelNames); i++ {
 		pairs[i] = Pair{
-			Str:  jobModelNames[i],
-			Jobs: jobs[i],
+			JobModelNames: jobModelNames[i],
+			Jobs:          jobs[i],
+			JobID:         jobID[i],
 		}
 	}
 	// 对 Pair 切片按照 Str 字段进行排序
 	sort.Slice(pairs, func(i, j int) bool {
-		return pairs[i].Str < pairs[j].Str
+		return pairs[i].JobModelNames < pairs[j].JobModelNames
 	})
 	// 从排序后的 Pair 切片中提取出 jobs 元素，组成新的 int 切片
-	sortedIntSlice := make([][]int64, len(pairs))
+	sortedJobs := make([][]int64, len(pairs))
+	sortJobID := make([]string, len(pairs))
 	for i := 0; i < len(pairs); i++ {
-		sortedIntSlice[i] = pairs[i].Jobs
+		sortedJobs[i] = pairs[i].Jobs
+		sortJobID[i] = pairs[i].JobID
 	}
-	jobs = sortedIntSlice
+	jobs = sortedJobs
+	jobID = sortJobID
 
 	newBaseline := monitor.RealDataPredict(jobModelNames)
 
-	// 分析该作业的预计运行时间 TODO:FIXME: 未考虑部分作业完成后的运行速度
-	for idx, jmn := range jobModelNames {
-		if jmn == newJob.JobModelName {
-			return int64(newBaseline[idx] * float64(newJob.Epoch))
-		}
-	}
-
-	// 逻辑比较复杂，未完成
-	// // 先找到最先结束的Job
-	// totalTime := int64(0)
-	// for len(jobs) > 0 {
-	// 	minRemainedTime := math.MaxFloat64
-	// 	minRemainedIDX := math.MaxInt
-	// 	for idx, nbl := range newBaseline {
-	// 		if float64(jobs[idx][0])+nbl*float64(jobs[idx][1]) < minRemainedTime {  //表达式为 传输时间+运行时间
-	// 			minRemainedTime = float64(jobs[idx][0]) + nbl*float64(jobs[idx][1])
-	// 			minRemainedIDX = idx
-	// 		}
+	// // 分析该作业的预计运行时间 未考虑部分作业完成后的运行速度
+	// for idx, jmn := range jobModelNames {
+	// 	if jmn == newJob.JobModelName {
+	// 		return int64(newBaseline[idx] * float64(newJob.Epoch))
 	// 	}
-	// 	totalTime += int64(minRemainedTime)
-	// 	if jobModelNames[minRemainedIDX] != newJob.JobModelName {
-	// 		return totalTime
-	// 	} else {
-	// 		// 移除已经结束的作业
-	// 		jobs = append(jobs[:minRemainedIDX], jobs[minRemainedIDX+1:]...)
-	// 		jobModelNames = append(jobModelNames[:minRemainedIDX], jobModelNames[minRemainedIDX+1:]...)
-	// 		newBaseline = append(newBaseline[:minRemainedIDX], newBaseline[minRemainedIDX+1:]...)
-
-	// 		// 更新当前作业的剩余epoch
-	// 		for i, _ := range jobs {
-	// 			if jobs[i][0]-totalTime>0 { //还在传输过程中
-	// 				jobs[i][0]-=totalTime
-	// 			}else{ //传输完成
-	// 				jobs[i][0]=0
-	// 				// 逻辑未完成
-	// 			}
-	// 		}
-	// 	}
-	// 	// 重新分析多作业并行的情况
-	// 	newBaseline = monitor.RealDataPredict(jobModelNames)
 	// }
+
+	// 先找到最先结束的Job，循环分析该Job结束后剩余的Job的运行时间，直到Job全部运行完
+	totalTime := int64(0)
+	for len(jobs) > 0 {
+		minRemainedTime := math.MaxFloat64
+		minRemainedIDX := math.MaxInt
+		for idx, nbl := range newBaseline {
+			if float64(jobs[idx][0])+nbl*float64(jobs[idx][1]) < minRemainedTime { //表达式为 传输时间+运行时间
+				minRemainedTime = float64(jobs[idx][0]) + nbl*float64(jobs[idx][1])
+				minRemainedIDX = idx
+			}
+		}
+		totalTime += int64(minRemainedTime)
+		if jobID[minRemainedIDX] == newJob.ID {
+			return totalTime
+		} else {
+			// 移除已经结束的作业
+			jobs = append(jobs[:minRemainedIDX], jobs[minRemainedIDX+1:]...)
+			jobID = append(jobID[:minRemainedIDX], jobID[minRemainedIDX+1:]...)
+			jobModelNames = append(jobModelNames[:minRemainedIDX], jobModelNames[minRemainedIDX+1:]...)
+			newBaseline = append(newBaseline[:minRemainedIDX], newBaseline[minRemainedIDX+1:]...)
+
+			// 更新当前作业的剩余epoch
+			for i := range jobs {
+				if jobs[i][0]-totalTime > 0 { //还在传输过程中
+					jobs[i][0] -= totalTime
+				} else { //传输完成
+					jobs[i][0] = 0
+					partRuntime := totalTime - jobs[i][0] // 作业已经执行的时间
+					jobs[i][1] -= int64(float64(partRuntime) * newBaseline[i])
+					if jobs[i][1] < 0 {
+						jobs[i][1] = 0
+					}
+				}
+			}
+		}
+		// 重新分析多作业并行的情况
+		newBaseline = monitor.RealDataPredict(jobModelNames)
+	}
 	log.Println("job predict time consumed:", time.Now().Sub(startTime).Seconds())
 	return 0 // 以秒为单位
 }
@@ -213,13 +229,24 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 func (monitor *Monitor) InitPredictor() {
 	monitor.readModelBaseline()
 	var SchduleFailedJob = []*Job{}
+	var AssignedFailedJob = []*Job{}
 	for _, job := range monitor.JobPool.OriginJobQueue {
 		monitor.JobAnalyze(job)
 		if monitor.OptimalAllocate(job) {
 			monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
+			job.ScheduledTime = time.Now()
+			if AssignJobWithSystem(job) {
+				monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+			} else {
+				AssignedFailedJob = append(AssignedFailedJob, job)
+			}
 		} else {
 			SchduleFailedJob = append(SchduleFailedJob, job)
 		}
 	}
 	monitor.JobPool.OriginJobQueue = SchduleFailedJob
+	log.Println("ERROR: SchduleFailedJob", SchduleFailedJob)
+	monitor.JobPool.ScheduledJob = AssignedFailedJob
+	log.Println("ERROR: AssignedFailedJob", AssignedFailedJob)
+
 }

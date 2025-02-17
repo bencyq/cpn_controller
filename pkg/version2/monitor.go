@@ -248,14 +248,15 @@ func AssignJobWithSystem(job *Job) bool { // TODO:通过调度器后台来分发
 	return true
 }
 
-func (monitor *Monitor) AssignJob() {
-	failedJobQueue := []*Job{}
-	for _, job := range monitor.JobPool.AssignedJob {
-		if AssignJobWithSystem(job) {
-			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-		} else {
-			failedJobQueue = append(failedJobQueue, job)
-		}
-	}
-	monitor.JobPool.ScheduledJob = failedJobQueue
-}
+// func (monitor *Monitor) AssignJob() {
+// 	failedJobQueue := []*Job{}
+// 	for _, job := range monitor.JobPool.AssignedJob {
+// 		if AssignJobWithSystem(job) {
+// 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+// 			job.ScheduledTime = time.Now()
+// 		} else {
+// 			failedJobQueue = append(failedJobQueue, job)
+// 		}
+// 	}
+// 	monitor.JobPool.ScheduledJob = failedJobQueue
+// }

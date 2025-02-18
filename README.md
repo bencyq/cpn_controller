@@ -14,11 +14,11 @@
 6. 实现预测器的功能（能够根据提供的模型信息，给出指标）
 7. 模拟分析newJob在某个卡上的运行时间
 8. 设计算法生成调度队列（考虑作业的运行时间和作业的传输时间）
-9. 向调度器发送迁移镜像/模型的命令，并向集群发送作业
+9. 进行迁移镜像/模型，并向集群发送作业
 10. 收集作业的日志和完成时间等数据，以便后续更新算法（对预测器没有见过的模型，可以考虑第一次运行时给它独占资源来收集数据）
 
 ## 注意
-1. `pkg/controller/socket_client.go`和`pkg/controller/socket_server.py`里面定义的socket路径有可能会出问题
+1. `pkg/python/socket_client.go`和`pkg/python/socket_server.py`里面定义的socket路径有可能会出问题
 2. yaml文件里的annotations，格式为
     ```yaml
     annotations: 

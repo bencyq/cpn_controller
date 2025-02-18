@@ -14,6 +14,14 @@ func TestRealDataPredict(t *testing.T) {
 	monitor.RealDataPredict([]string{`resnet152`, `yolov8x`, `densenet121`})
 }
 
+func TestRandomForestPredict(t *testing.T) {
+	if NewRandomForestPredictor() {
+		monitor := NewMonitor()
+		monitor.RandomForestPredict([]string{`test`})
+	}
+
+}
+
 func TestRuntimePredict(t *testing.T) {
 	monitor := NewMonitor()
 	monitor.InitPredictor()

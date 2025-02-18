@@ -1,8 +1,11 @@
 package controller
 
 import (
+	"cpn-controller/pkg/python"
+	"cpn-controller/pkg/utils"
 	"log"
 	"math"
+	"os/exec"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -18,9 +21,14 @@ func (monitor *Monitor) checkBenchMark() {
 	for _, datacenter := range monitor.DataCenterInfo {
 		for _, cluster := range datacenter.ClusterInfo {
 			for _, node := range cluster.NodeInfo {
-				if node.BenchMark.Model1AVGRunTime == 0.0 {
-					monitor.runBenchMark(datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
-					log.Printf("INFO: No BenchMark in DataCenter: %v\tClusterID: %v\tNodeID: %v\t", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
+				for _, card := range node.CardInfo {
+					if card.BenchMark.Model1AVGRunTime == 0.0 {
+						if monitor.runBenchMark(datacenter.DataCenterID, cluster.ClusterID, node.NodeID, card.CardID) {
+							continue
+						} else {
+							log.Printf("ERROR: No BenchMark in DataCenter: %v ClusterID: %v NodeID: %v CardID: %v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID, card.CardID)
+						}
+					}
 				}
 			}
 		}
@@ -28,29 +36,29 @@ func (monitor *Monitor) checkBenchMark() {
 }
 
 // 运行基准测试程序，获得评价指标 TODO: 先在json文件里手动配置，后续增加功能
-func (monitor *Monitor) runBenchMark(DataCenterID string, ClusterID string, NodeID string) {
-
+func (monitor *Monitor) runBenchMark(DataCenterID string, ClusterID string, NodeID string, CardID string) bool {
+	return false
 }
 
 // 读取并解析model_baseline.csv文件
 func (monitor *Monitor) readModelBaseline() {
 	// 获取项目工作目录，并读取model_baseline.csv文件
-	root, err := getProjectRoot()
+	root, err := utils.GetProjectRoot()
 	if err != nil {
 		log.Println("ERROR: JobAnalyze faild", err)
 	}
-	fp := filepath.Join(root, "pkg", "version2", "model_baseline.csv")
+	fp := filepath.Join(root, "pkg", "controller", "model_baseline.csv")
 
 	// 解析
-	_, lines := ReadCsv(fp)
+	_, lines := utils.ReadCsv(fp)
 	var modelBaseline = map[string][]string{}
 	for _, ele := range lines {
 		modelBaseline[ele[0]] = ele[1:]
 	}
 	monitor.ModelBaseline = modelBaseline
 
-	fp2 := filepath.Join(root, "pkg", "version2", "model_baseline2.csv")
-	_, modelBaseline2 := ReadCsv(fp2)
+	fp2 := filepath.Join(root, "pkg", "controller", "model_baseline2.csv")
+	_, modelBaseline2 := utils.ReadCsv(fp2)
 	// 对三个模型部分的内容进行排序 TODO:
 	for idx, ele := range modelBaseline2[135:] {
 		type Pair struct {
@@ -187,6 +195,25 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 	}
 	log.Println("job predict time consumed:", time.Now().Sub(startTime).Seconds())
 	return 0 // 以秒为单位
+}
+
+func NewRandomForestPredictor() bool {
+	root, _ := utils.GetProjectRoot()
+	fp := filepath.Join(root, `pkg`, `python`, `socket_server.py`)
+	cmd := exec.Command("python", fp)
+
+	err := cmd.Start()
+	if err != nil {
+		log.Println("ERROR: NewRandomForestPredictor faild", err)
+		return false
+	}
+
+	return true
+}
+
+func (monitor *Monitor) RandomForestPredict(jobModelNames []string) []float64 {
+	python.SendStruct(`rfp.sock`, monitor, jobModelNames)
+	return []float64{0.0}
 }
 
 // 预测器算法实现（从实际数据中获取运行时间）, 返回当前所有模型的单epoch运行时间TODO:未考虑硬件性能

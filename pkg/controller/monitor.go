@@ -229,7 +229,7 @@ func NewMonitor() *Monitor {
 	// 为每个集群生成一个clientset
 	monitor.NewClientSetForEachCluseter()
 
-	// 每隔一分钟更新一次metric
+	// 每隔一分钟更新一次metric TODO:正式版上线
 	// go func() {
 	// 	for {
 	// 		time.Sleep(time.Minute)
@@ -237,6 +237,8 @@ func NewMonitor() *Monitor {
 	// 	}
 	// }()
 	monitor.getMetric()
+
+	monitor.checkBenchMark()
 
 	// 获取Job
 	monitor.getJob()

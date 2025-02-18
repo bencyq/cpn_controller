@@ -58,8 +58,6 @@ type NodeInfo struct {
 	TOTAL_MEMORY int64 // 单位为MB
 	FREE_MEMORY  int64 // 单位为MB
 
-	// 基准测试程序获得的分数，假定每个节点只有一种类型的卡
-	BenchMark BenchMark
 }
 
 func (node *NodeInfo) FindCard(cardID string) (card *CardInfo) {
@@ -87,18 +85,13 @@ type CardInfo struct {
 	GPU_MEMORY_FREE int64
 	GPU_MEMORY_USED int64
 	JobQueue        []*Job // 分配到该卡上的作业
+	// 基准测试程序获得的分数
+	BenchMark BenchMark
 }
 
 // ////////////////////////////
 // 以下为自定义数据结构，为算法所用
 // ////////////////////////////
-type Card struct {
-	ID              int
-	CARDMODEL       string
-	GPU_UTIL        float64
-	GPU_MEMORY_FREE int64
-	GPU_MEMORY_USED int64
-}
 
 // 定义prometheus的返回格式，不一定准确
 type Result struct {

@@ -36,11 +36,21 @@
                             "CardInfo": [
                                 {
                                     "CardID": "0",
-                                    "CardModel": "NVIDIA RTX A6000"
+                                    "CardModel": "NVIDIA RTX A6000",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "1",
-                                    "CardModel": "NVIDIA RTX A6000"
+                                    "CardModel": "NVIDIA RTX A6000",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 }
                             ]
                         },
@@ -58,35 +68,75 @@
                             "CardInfo": [
                                 {
                                     "CardID": "0",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "1",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                        "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "2",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "3",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "4",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "5",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "6",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 },
                                 {
                                     "CardID": "7",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation"
+                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.014736412,
+                                        "Model2AVGRunTime" : 0.051585681,
+                                        "Model3AVGRunTime" : 36.71008748
+                                    }
                                 }
                             ]
                         }

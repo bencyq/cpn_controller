@@ -18,7 +18,7 @@
 10. 收集作业的日志和完成时间等数据，以便后续更新算法（对预测器没有见过的模型，可以考虑第一次运行时给它独占资源来收集数据）
 
 ## 注意
-1. `pkg/version2/socket_client.go`和`pkg/version2/socket_server.py`里面定义的socket路径有可能会出问题
+1. `pkg/controller/socket_client.go`和`pkg/controller/socket_server.py`里面定义的socket路径有可能会出问题
 2. yaml文件里的annotations，格式为
     ```yaml
     annotations: 

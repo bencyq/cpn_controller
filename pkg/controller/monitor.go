@@ -213,7 +213,7 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			JobModelName := jobSpec.Annotations[`model_name`]
 			JobDataSize, _ := strconv.ParseInt(jobSpec.Annotations[`data_size`], 10, 64)
 			JobEpoch, _ := strconv.ParseInt(jobSpec.Annotations[`epoch`], 10, 64)
-			monitor.JobPool.OriginJobQueue = append(monitor.JobPool.OriginJobQueue, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch})
+			monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch})
 		}
 	}
 	// fmt.Printf("%+v", monitor)

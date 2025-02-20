@@ -23,13 +23,12 @@ model_FLOPs={
 # 加载模型（可选，用于验证）
 with open('/cyq/cpn-controller/pkg/python/random_forest_weight.pt', 'rb') as file:
     loaded_model = pickle.load(file)
+    print("INFO: random forest model loaded")
 
 def predict(models,benchmark):
-    # start_time=time.time()
-    prediction = loaded_model.predict(np.array([[model_FLOPs[models[0]],model_FLOPs[models[1]],model_FLOPs[models[2]],benchmark[0],benchmark[1],benchmark[2]]]))
-    return prediction
-    # print(f"加载的模型预测结果: {prediction}")
-    # print((time.time()-start_time)/10)
+    prediction :np.ndarray= loaded_model.predict(np.array([[model_FLOPs[models[0]],model_FLOPs[models[1]],model_FLOPs[models[2]],benchmark[0],benchmark[1],benchmark[2]]]))
+    return ','.join(map(str,prediction.flatten()))
+    # return ",".join([f"{x:.4f}" for x in prediction[0]])
 
 if __name__=="__main__":
     print(predict(['densenet169','llama3','yolov8x'],[0.01656568,0.065646874,21.20620537]))

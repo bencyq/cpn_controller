@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -59,7 +60,7 @@ func (monitor *Monitor) readModelBaseline() {
 
 	fp2 := filepath.Join(root, "pkg", "controller", "model_baseline2.csv")
 	_, modelBaseline2 := utils.ReadCsv(fp2)
-	// 对三个模型部分的内容进行排序 TODO:
+	// 对三个模型部分的内容进行排序
 	for idx, ele := range modelBaseline2[135:] {
 		type Pair struct {
 			str1 string
@@ -101,14 +102,14 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 	// 分析当前该卡上有的作业，以及其剩余轮次
 	for _, job := range monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].JobQueue {
 		// 先检测已有job的状态，比如job是否在传输过程中，并计算job的剩余轮次
-		var transferRemainTime = int64(math.MaxInt64)                              // 剩余传输时间
-		var remainedEpoch = int64(math.MaxInt64)                                   //  剩余运行轮次
-		if job.TransferTime > int64(time.Now().Sub(job.ScheduledTime).Seconds()) { // 还在传输中
-			transferRemainTime = job.TransferTime - int64(time.Now().Sub(job.ScheduledTime).Seconds())
+		var transferRemainTime = int64(math.MaxInt64)                             // 剩余传输时间
+		var remainedEpoch = int64(math.MaxInt64)                                  //  剩余运行轮次
+		if job.TransferTime > int64(time.Now().Sub(job.AssignedTime).Seconds()) { // 还在传输中
+			transferRemainTime = job.TransferTime - int64(time.Now().Sub(job.AssignedTime).Seconds())
 			remainedEpoch = job.Epoch
 		} else { // 传输已完成
 			transferRemainTime = int64(0)
-			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - time.Now().Sub(job.ScheduledTime).Seconds()) / float64(job.Epoch))
+			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - time.Now().Sub(job.AssignedTime).Seconds()) / float64(job.Epoch))
 			if remainedEpoch < 0 { // 作业已经完成，跳过
 				continue
 			}
@@ -118,35 +119,36 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 		jobModelNames = append(jobModelNames, job.JobModelName)
 	}
 	// 分析当前作业和已有作业并行时候的runtime
-	// 先按照jobModelNames的顺序进行排序
-	type Pair struct {
-		JobModelNames string
-		Jobs          []int64
-		JobID         string
-	}
-	pairs := make([]Pair, len(jobModelNames))
-	for i := 0; i < len(jobModelNames); i++ {
-		pairs[i] = Pair{
-			JobModelNames: jobModelNames[i],
-			Jobs:          jobs[i],
-			JobID:         jobID[i],
-		}
-	}
-	// 对 Pair 切片按照 Str 字段进行排序
-	sort.Slice(pairs, func(i, j int) bool {
-		return pairs[i].JobModelNames < pairs[j].JobModelNames
-	})
-	// 从排序后的 Pair 切片中提取出 jobs 元素，组成新的 int 切片
-	sortedJobs := make([][]int64, len(pairs))
-	sortJobID := make([]string, len(pairs))
-	for i := 0; i < len(pairs); i++ {
-		sortedJobs[i] = pairs[i].Jobs
-		sortJobID[i] = pairs[i].JobID
-	}
-	jobs = sortedJobs
-	jobID = sortJobID
+	// // 先按照jobModelNames的顺序进行排序 FIXME:
+	// type Pair struct {
+	// 	JobModelNames string
+	// 	Jobs          []int64
+	// 	JobID         string
+	// }
+	// pairs := make([]Pair, len(jobModelNames))
+	// for i := 0; i < len(jobModelNames); i++ {
+	// 	pairs[i] = Pair{
+	// 		JobModelNames: jobModelNames[i],
+	// 		Jobs:          jobs[i],
+	// 		JobID:         jobID[i],
+	// 	}
+	// }
+	// // 对 Pair 切片按照 Str 字段进行排序
+	// sort.Slice(pairs, func(i, j int) bool {
+	// 	return pairs[i].JobModelNames < pairs[j].JobModelNames
+	// })
+	// // 从排序后的 Pair 切片中提取出 jobs 元素，组成新的 int 切片
+	// sortedJobs := make([][]int64, len(pairs))
+	// sortJobID := make([]string, len(pairs))
+	// for i := 0; i < len(pairs); i++ {
+	// 	sortedJobs[i] = pairs[i].Jobs
+	// 	sortJobID[i] = pairs[i].JobID
+	// }
+	// jobs = sortedJobs
+	// jobID = sortJobID
 
-	newBaseline := monitor.RealDataPredict(jobModelNames)
+	// newBaseline := monitor.RealDataPredict(jobModelNames)
+	newBaseline := monitor.RandomForestPredict(jobModelNames, dc, cl, n, c)
 
 	// // 分析该作业的预计运行时间 未考虑部分作业完成后的运行速度
 	// for idx, jmn := range jobModelNames {
@@ -211,12 +213,32 @@ func NewRandomForestPredictor() bool {
 	return true
 }
 
-func (monitor *Monitor) RandomForestPredict(jobModelNames []string) []float64 {
-	python.SendStruct(`rfp.sock`, monitor, jobModelNames)
-	return []float64{0.0}
+func (monitor *Monitor) RandomForestPredict(jobModelNames []string, dc int, cl int, n int, c int) []float64 {
+	benchMark := monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].BenchMark
+	bm := []string{
+		strconv.FormatFloat(benchMark.Model1AVGRunTime, 'f', -1, 64),
+		strconv.FormatFloat(benchMark.Model2AVGRunTime, 'f', -1, 64),
+		strconv.FormatFloat(benchMark.Model3AVGRunTime, 'f', -1, 64),
+	}
+	str_response := python.SendStruct(`rfp.sock`, bm, jobModelNames)
+	response := []float64{}
+	strs := strings.Split(str_response, ",")
+	// for _, str := range strs {
+	// 	value, _ := strconv.ParseFloat(str, 64)
+	// 	if value < 0.01 {
+	// 		response = append(response, 0.0)
+	// 	} else {
+	// 		response = append(response, value)
+	// 	}
+	// }
+	for i := range jobModelNames {
+		value, _ := strconv.ParseFloat(strs[i], 64)
+		response = append(response, value)
+	}
+	return response
 }
 
-// 预测器算法实现（从实际数据中获取运行时间）, 返回当前所有模型的单epoch运行时间TODO:未考虑硬件性能
+// 预测器算法实现（从实际数据中获取运行时间）, 返回当前所有模型的单epoch运行时间
 func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	if len(jobModelNames) == 1 {
 		for _, ele := range monitor.ModelBaseline2 {
@@ -253,16 +275,19 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	return nil
 }
 
-func (monitor *Monitor) InitPredictor() {
+func (monitor *Monitor) InitPredictor() { // TODO:FIXME:新逻辑未测试
 	monitor.readModelBaseline()
+	if !NewRandomForestPredictor() {
+		log.Println("ERROR: NewRandomForestPredictor failed")
+	}
 	var SchduleFailedJob = []*Job{}
 	var AssignedFailedJob = []*Job{}
-	for _, job := range monitor.JobPool.OriginJobQueue {
+	for _, job := range monitor.JobPool.OriginJob {
 		monitor.JobAnalyze(job)
 		if monitor.OptimalAllocate(job) {
 			monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
-			job.ScheduledTime = time.Now()
 			if AssignJobWithSystem(job) {
+				job.AssignedTime = time.Now()
 				monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
 			} else {
 				AssignedFailedJob = append(AssignedFailedJob, job)
@@ -271,9 +296,11 @@ func (monitor *Monitor) InitPredictor() {
 			SchduleFailedJob = append(SchduleFailedJob, job)
 		}
 	}
-	monitor.JobPool.OriginJobQueue = SchduleFailedJob
+	monitor.JobPool.OriginJob = SchduleFailedJob
 	log.Println("ERROR: SchduleFailedJob", SchduleFailedJob)
 	monitor.JobPool.ScheduledJob = AssignedFailedJob
 	log.Println("ERROR: AssignedFailedJob", AssignedFailedJob)
+	log.Println("INFO: AssignedJob: ", monitor.JobPool.AssignedJob.GetID())
+	monitor.JobPool.AssignedJob.List()
 
 }

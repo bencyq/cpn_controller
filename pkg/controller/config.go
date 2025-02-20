@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
@@ -108,10 +109,25 @@ type PromResponse struct {
 }
 
 type JobPool struct {
-	OriginJobQueue []*Job // 初始作业队列，按照FIFO排序
-	ScheduledJob   []*Job // 由调度器返回，将PreJobID为null的排列在最前，只要PreJobID为null，则直接发送作业到指定位置
-	AssignedJob    []*Job // 已经提交的作业，等待作业完成
-	FinishedJob    []*Job
+	OriginJob    JobQueue // 初始作业队列，按照FIFO排序
+	ScheduledJob JobQueue // 由调度器返回，将PreJobID为null的排列在最前，只要PreJobID为null，则直接发送作业到指定位置
+	AssignedJob  JobQueue // 已经提交的作业，等待作业完成
+	FinishedJob  JobQueue
+}
+
+type JobQueue []*Job
+
+func (jq JobQueue) GetID() []string {
+	IDs := []string{}
+	for _, job := range jq {
+		IDs = append(IDs, job.ID)
+	}
+	return IDs
+}
+func (jq JobQueue) List() {
+	for _, job := range jq {
+		fmt.Printf("ID:%v JobModelName:%v Allocation: %v,%v,%v,%v\n", job.ID, job.JobModelName, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
+	}
 }
 
 type Job struct {
@@ -140,7 +156,7 @@ type Job struct {
 	CardIDX       int
 	PreJobIDX     int       // 作业队列信息
 	TransferTime  int64     // 以秒为单位
-	ScheduledTime time.Time // 调度器开始作业分配的时间
+	AssignedTime  time.Time // 调度器提交作业的时间
 }
 
 // 基准测试，收集三个类型的模型的单位epoch运行时间

@@ -1,6 +1,9 @@
 package controller
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestInitPredictor(t *testing.T) {
 	NewMonitor().InitPredictor()
@@ -17,9 +20,16 @@ func TestRealDataPredict(t *testing.T) {
 func TestRandomForestPredict(t *testing.T) {
 	if NewRandomForestPredictor() {
 		monitor := NewMonitor()
-		monitor.RandomForestPredict([]string{`test`})
+		fmt.Println(monitor.RandomForestPredict([]string{`llama3`, `densenet121`}, 0, 0, 1, 0))
+		fmt.Println(monitor.RandomForestPredict([]string{`llama3`}, 0, 0, 1, 0))
 	}
 
+}
+
+func TestRandomForestPredict2(t *testing.T) {
+	monitor := NewMonitor()
+	fmt.Println(monitor.RandomForestPredict([]string{`llama3`, `densenet121`}, 0, 0, 1, 0))
+	fmt.Println(monitor.RandomForestPredict([]string{`llama3`}, 0, 0, 1, 0))
 }
 
 func TestRuntimePredict(t *testing.T) {

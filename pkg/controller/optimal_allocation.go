@@ -9,33 +9,33 @@ import (
 // 对于一个作业，模拟其在各个集群运行的完成时间，并进行分配
 
 // 对于一个作业，模拟其在各个集群运行的完成时间
-func (monitor *Monitor) OptimalAllocate(job *Job) bool {
+func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	var optAlc = [5]int{math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt} // optimal Allocation, 存储job的分配位置
 	minTotalTime := int64(math.MaxInt64)
 
 	// 模拟计算作业在各个集群的各个节点的运行时间+传输时间，选取时间最少的
 	for dc, dataCenterInfo := range monitor.DataCenterInfo {
 		for cl, clusterInfo := range dataCenterInfo.ClusterInfo {
-			transferTime := (job.DataSize * 1024) / clusterInfo.Bandwidth
+			transferTime := (newJob.DataSize * 1024) / clusterInfo.Bandwidth
 			for n, nodeInfo := range clusterInfo.NodeInfo {
 				if nodeInfo.CPU_USAGE > 0.7 {
 					continue
 				}
-				if nodeInfo.FREE_MEMORY-10 < job.MemoryReq {
+				if nodeInfo.FREE_MEMORY-10 < newJob.MemoryReq {
 					continue
 				}
 				for c, cardInfo := range nodeInfo.CardInfo {
-					if cardInfo.GPU_MEMORY_FREE-1024 < job.GPUMemoryReq || len(cardInfo.JobQueue) >= 3 {
+					if cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq || len(cardInfo.JobQueue) >= 3 {
 						continue
 					}
 					for _, job := range cardInfo.JobQueue {
-						if job.JobType == `GPU` {
+						if job.JobType == `GPU` && newJob.JobType == `GPU` {
 							continue
 						}
 					}
-					runtime := monitor.RuntimePredict(job, dc, cl, n, c)
+					runtime := monitor.RuntimePredict(newJob, dc, cl, n, c)
 					if runtime <= 0 { // 返回了异常值，调过
-						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, job.JobSpec.Name)
+						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.JobSpec.Name)
 						continue
 					}
 					if runtime+transferTime < minTotalTime {
@@ -57,16 +57,16 @@ func (monitor *Monitor) OptimalAllocate(job *Job) bool {
 	}
 
 	// 在Job里填写挂载信息
-	job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX = optAlc[0], optAlc[1], optAlc[2], optAlc[3]
+	newJob.DataCenterIDX, newJob.ClusterIDX, newJob.NodeIDX, newJob.CardIDX = optAlc[0], optAlc[1], optAlc[2], optAlc[3]
 
 	// 分析Job的传输时间
-	job.TransferTime = int64(optAlc[4])
+	newJob.TransferTime = int64(optAlc[4])
 
 	// 给对应的card上的jobqueue挂上作业
-	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue = append(monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue, job)
+	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue = append(monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue, newJob)
 
 	// 在对应的Card上，减去该模型预测需要占用的资源 TODO: 目前只考虑了显存
-	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_USED += job.GPUMemoryReq
-	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_FREE -= job.GPUMemoryReq
+	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_USED += newJob.GPUMemoryReq
+	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_FREE -= newJob.GPUMemoryReq
 	return true
 }

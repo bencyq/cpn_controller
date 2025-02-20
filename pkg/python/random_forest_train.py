@@ -1,41 +1,72 @@
+from copy import deepcopy
+import copy
+import os
+import random
+import sys
+import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 import time
 import pickle
 
-# 1. 读取训练和测试数据
-train_data = pd.read_csv('train.csv') 
-test_data = pd.read_csv('test.csv')  
+from sympy import O
+from tables import test
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+from socket_server import get_project_root
 
-# 2. 检查并处理缺失值
+# 读取训练和测试数据
+root = get_project_root()
+train_data = pd.read_csv(root+'/pkg/python/'+'train.csv') 
+test_data = pd.read_csv(root+'/pkg/python/'+'test.csv')  
+
+# 检查并处理缺失值
 if train_data.isnull().sum().any() or test_data.isnull().sum().any():
     print("存在缺失值，开始处理...")
     train_data = train_data.dropna()
     test_data = test_data.dropna()
     print("缺失值已处理，删除包含缺失值的行。")
 
-X_train = train_data[['Flops1', 'Flops2', 'Flops3', 'performance1', 'performance2', 'performance3']]
-y_train = train_data[['averagetime1', 'averagetime2', 'averagetime3']]
+train_data=train_data.values
+test_data=test_data.values
 
-X_test = test_data[['Flops1', 'Flops2', 'Flops3', 'performance1', 'performance2', 'performance3']]
-y_test = test_data[['averagetime1', 'averagetime2', 'averagetime3']]
+def my_shuffle(data:list):
+    new_data=np.empty((0,9))
+    for ele in data:
+        order=[0,1,2]
+        tmp=copy.deepcopy(ele)
+        random.shuffle(order)
+        if order!=[0,1,2]:
+            tmp[0],tmp[6]=ele[order[0]],ele[order[0]+6]
+            tmp[1],tmp[7]=ele[order[1]],ele[order[1]+6]
+            tmp[2],tmp[8]=ele[order[2]],ele[order[2]+6]
+            tmp = tmp.reshape(1, -1)
+            new_data=np.concatenate((new_data,tmp),axis=0)
+    return np.concatenate((data, new_data), axis=0)
+
+train_data=my_shuffle(train_data)
+test_data=my_shuffle(test_data)
 
 model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X_train, y_train)
-with open('random_forest_weight.pt', 'wb') as file:
+model.fit(train_data[:,0:6], train_data[:,6:])
+with open(root+'/pkg/python/'+'random_forest_weight.pt', 'wb') as file:
     pickle.dump(model, file)
-start_time=time.time()
-y_pred = model.predict(X_test)
-comparison = pd.DataFrame({
-    'True Time1': y_test['averagetime1'],
-    'Predicted Time1': y_pred[:, 0],
-    'True Time2': y_test['averagetime2'],
-    'Predicted Time2': y_pred[:, 1],
-    'True Time3': y_test['averagetime3'],
-    'Predicted Time3': y_pred[:, 2]
-})
-print(comparison)
-r2_overall = r2_score(y_test.values.flatten(), y_pred.flatten())
-print(f"Overall R²: {r2_overall}")
-print((time.time()-start_time)/10)
+
+# 测试
+def compare(data):
+    start_time=time.time()
+    y_pred = model.predict(data[:,0:6])
+    comparison = pd.DataFrame({
+        'True Time1': data[:,6],
+        'Predicted Time1': y_pred[:, 0],
+        'True Time2': data[:,7],
+        'Predicted Time2': y_pred[:, 1],
+        'True Time3': data[:,8],
+        'Predicted Time3': y_pred[:, 2]
+    })
+    print(comparison)
+    r2_overall = r2_score(data[:,6:], y_pred)
+    print(f"Overall R²: {r2_overall}")
+    print((time.time()-start_time)/10)
+compare(train_data)
+compare(test_data)

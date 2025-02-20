@@ -24,7 +24,7 @@ func (monitor *Monitor) checkBenchMark() {
 			for _, node := range cluster.NodeInfo {
 				for _, card := range node.CardInfo {
 					if card.BenchMark.Model1AVGRunTime == 0.0 {
-						if monitor.runBenchMark(datacenter.DataCenterID, cluster.ClusterID, node.NodeID, card.CardID) {
+						if !monitor.runBenchMark(datacenter.DataCenterID, cluster.ClusterID, node.NodeID, card.CardID) {
 							continue
 						} else {
 							log.Printf("ERROR: No BenchMark in DataCenter: %v ClusterID: %v NodeID: %v CardID: %v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID, card.CardID)
@@ -38,7 +38,7 @@ func (monitor *Monitor) checkBenchMark() {
 
 // 运行基准测试程序，获得评价指标 TODO: 先在json文件里手动配置，后续增加功能
 func (monitor *Monitor) runBenchMark(DataCenterID string, ClusterID string, NodeID string, CardID string) bool {
-	return false
+	return true
 }
 
 // 读取并解析model_baseline.csv文件
@@ -93,10 +93,10 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 	}
 }
 
-// 预测器逻辑实现
-func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
+// 预测器逻辑实现，返回预估的作业完成的总时间，即传输+运行时间
+func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
 	startTime := time.Now()
-	jobs := [][]int64{{0, newJob.Epoch}}
+	jobs := [][]int64{{newJob.DataSize * 1024 / monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].Bandwidth, newJob.Epoch}} // FIXME:第一列为传输时间，第二列为剩余运行epoch
 	jobID := []string{newJob.ID}
 	jobModelNames := []string{newJob.JobModelName}
 	// 分析当前该卡上有的作业，以及其剩余轮次
@@ -107,7 +107,7 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 		if job.TransferTime > int64(time.Now().Sub(job.AssignedTime).Seconds()) { // 还在传输中
 			transferRemainTime = job.TransferTime - int64(time.Now().Sub(job.AssignedTime).Seconds())
 			remainedEpoch = job.Epoch
-		} else { // 传输已完成
+		} else { // 传输已完成 TODO:这部分测试未覆盖到，因为当前算法未作业队列一次性读入并分配位置，不存在传输完成了的情况
 			transferRemainTime = int64(0)
 			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - time.Now().Sub(job.AssignedTime).Seconds()) / float64(job.Epoch))
 			if remainedEpoch < 0 { // 作业已经完成，跳过
@@ -119,7 +119,7 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 		jobModelNames = append(jobModelNames, job.JobModelName)
 	}
 	// 分析当前作业和已有作业并行时候的runtime
-	// // 先按照jobModelNames的顺序进行排序 FIXME:
+	// // 先按照jobModelNames的顺序进行排序
 	// type Pair struct {
 	// 	JobModelNames string
 	// 	Jobs          []int64
@@ -182,7 +182,7 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 			for i := range jobs {
 				if jobs[i][0]-totalTime > 0 { //还在传输过程中
 					jobs[i][0] -= totalTime
-				} else { //传输完成
+				} else { //传输完成  TODO:这部分的测试也未覆盖
 					jobs[i][0] = 0
 					partRuntime := totalTime - jobs[i][0] // 作业已经执行的时间
 					jobs[i][1] -= int64(float64(partRuntime) * newBaseline[i])
@@ -194,6 +194,7 @@ func (monitor *Monitor) RuntimePredict(newJob *Job, dc int, cl int, n int, c int
 		}
 		// 重新分析多作业并行的情况
 		newBaseline = monitor.RealDataPredict(jobModelNames)
+		newBaseline = monitor.RandomForestPredict(jobModelNames, dc, cl, n, c)
 	}
 	log.Println("job predict time consumed:", time.Now().Sub(startTime).Seconds())
 	return 0 // 以秒为单位
@@ -235,6 +236,7 @@ func (monitor *Monitor) RandomForestPredict(jobModelNames []string, dc int, cl i
 		value, _ := strconv.ParseFloat(strs[i], 64)
 		response = append(response, value)
 	}
+	log.Printf("DEBUG: jobModelNames:%v response:%v", jobModelNames, response)
 	return response
 }
 
@@ -275,7 +277,7 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	return nil
 }
 
-func (monitor *Monitor) InitPredictor() { // TODO:FIXME:新逻辑未测试
+func (monitor *Monitor) InitPredictor() { // TODO:FIXME:random forest 需要优化，llama3那块还要检测
 	monitor.readModelBaseline()
 	if !NewRandomForestPredictor() {
 		log.Println("ERROR: NewRandomForestPredictor failed")
@@ -297,9 +299,13 @@ func (monitor *Monitor) InitPredictor() { // TODO:FIXME:新逻辑未测试
 		}
 	}
 	monitor.JobPool.OriginJob = SchduleFailedJob
-	log.Println("ERROR: SchduleFailedJob", SchduleFailedJob)
+	if len(SchduleFailedJob) > 0 {
+		log.Println("ERROR: SchduleFailedJob", SchduleFailedJob)
+	}
 	monitor.JobPool.ScheduledJob = AssignedFailedJob
-	log.Println("ERROR: AssignedFailedJob", AssignedFailedJob)
+	if len(AssignedFailedJob) > 0 {
+		log.Println("ERROR: AssignedFailedJob", AssignedFailedJob)
+	}
 	log.Println("INFO: AssignedJob: ", monitor.JobPool.AssignedJob.GetID())
 	monitor.JobPool.AssignedJob.List()
 

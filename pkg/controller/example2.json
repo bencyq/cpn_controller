@@ -20,7 +20,8 @@
                                 "CPUModel": "Intel(R) Xeon(R) CPU E5-2640 v4 @ 2.40GHz",
                                 "CPUCore": 40
                             },
-                            "NodeType": "CPU"
+                            "NodeType": "CPU",
+                            "Bandwidth": 100
                         },
                         {
                             "NodeID": "node16",
@@ -32,6 +33,7 @@
                                 "CPUCore": 96
                             },
                             "NodeType": "GPU",
+                            "Bandwidth": 100,
                             "CardNums": 2,
                             "CardInfo": [
                                 {
@@ -64,6 +66,7 @@
                                 "CPUCore": 128
                             },
                             "NodeType": "GPU",
+                            "Bandwidth": 100,
                             "CardNums": 8,
                             "CardInfo": [
                                 {
@@ -141,7 +144,6 @@
                             ]
                         }
                     ],
-                    "Bandwidth": 100,
                     "ClusterPromIpPort": "10.90.1.49:30778",
                     "ClusterKubeconfigFilePath": "/etc/kubernetes/admin.conf"
                 }

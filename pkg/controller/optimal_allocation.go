@@ -16,7 +16,6 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	// 模拟计算作业在各个集群的各个节点的运行时间+传输时间，选取时间最少的
 	for dc, dataCenterInfo := range monitor.DataCenterInfo {
 		for cl, clusterInfo := range dataCenterInfo.ClusterInfo {
-			transferTime := (newJob.DataSize * 1024) / clusterInfo.Bandwidth
 			for n, nodeInfo := range clusterInfo.NodeInfo {
 				if nodeInfo.CPU_USAGE > 0.7 {
 					continue
@@ -25,6 +24,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 					continue
 				}
 				for c, cardInfo := range nodeInfo.CardInfo {
+					transferTime := (newJob.DataSize * 1024) / nodeInfo.Bandwidth
 					if cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq || len(cardInfo.JobQueue) >= 3 {
 						continue
 					}
@@ -33,13 +33,13 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 							continue
 						}
 					}
-					runtime := monitor.RuntimePredict(newJob, dc, cl, n, c)
-					if runtime <= 0 { // 返回了异常值，调过
+					runtime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
+					if runtime <= 0 { // 返回了异常值，跳过
 						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.JobSpec.Name)
 						continue
 					}
-					if runtime+transferTime < minTotalTime {
-						minTotalTime = runtime + transferTime
+					if runtime < minTotalTime {
+						minTotalTime = runtime
 						optAlc[0] = dc
 						optAlc[1] = cl
 						optAlc[2] = n

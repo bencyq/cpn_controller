@@ -1,7 +1,9 @@
 {
 	"folders": [
 		{
+			"name": "cpn-controller",
 			"path": "."
 		}
-	]
+	],
+	"settings": {}
 }

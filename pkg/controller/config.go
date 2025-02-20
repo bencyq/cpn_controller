@@ -41,8 +41,6 @@ type ClusterInfo struct {
 
 	// 以下通过prometheus获取
 	// TODO:网络指标，待定
-
-	Bandwidth int64 `json:"Bandwidth"` // 单位为 MB/s
 }
 
 // Node 节点信息结构体
@@ -58,6 +56,8 @@ type NodeInfo struct {
 	CPU_USAGE    float64
 	TOTAL_MEMORY int64 // 单位为MB
 	FREE_MEMORY  int64 // 单位为MB
+
+	Bandwidth int64 `json:"Bandwidth"` // 单位为 MB/s
 
 }
 

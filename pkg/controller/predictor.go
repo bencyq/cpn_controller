@@ -1,6 +1,8 @@
 package controller
 
 import (
+	"bufio"
+	"context"
 	"cpn-controller/pkg/python"
 	"cpn-controller/pkg/utils"
 	"log"
@@ -102,15 +104,17 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 	// 分析当前该卡上有的作业，以及其剩余轮次
 	for _, job := range monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].JobQueue {
 		// 先检测已有job的状态，比如job是否在传输过程中，并计算job的剩余轮次
-		var transferRemainTime = int64(math.MaxInt64)                             // 剩余传输时间
-		var remainedEpoch = int64(math.MaxInt64)                                  //  剩余运行轮次
-		if job.TransferTime > int64(time.Now().Sub(job.AssignedTime).Seconds()) { // 还在传输中
-			transferRemainTime = job.TransferTime - int64(time.Now().Sub(job.AssignedTime).Seconds())
+		var transferRemainTime = int64(math.MaxInt64) // 剩余传输时间
+		var remainedEpoch = int64(math.MaxInt64)      //  剩余运行轮次
+		passed_time := time.Now().Sub(job.AssignedTime).Seconds()
+		log.Println("DEBUG: Passed time", passed_time)
+		if job.TransferTime > int64(passed_time) { // 还在传输中
+			transferRemainTime = job.TransferTime - int64(passed_time)
 			remainedEpoch = job.Epoch
-		} else { // 传输已完成 TODO:这部分测试未覆盖到，因为当前算法未作业队列一次性读入并分配位置，不存在传输完成了的情况FIXME:有问题
+		} else { // 传输已完成 TODO:FIXME:问题很大 这部分测试未覆盖到，因为当前算法未作业队列一次性读入并分配位置，不存在传输完成了的情况
 			transferRemainTime = int64(0)
-			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - time.Now().Sub(job.AssignedTime).Seconds()) / float64(job.Epoch))
-			if remainedEpoch < 0 { // 作业已经完成，跳过
+			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - passed_time) / float64(job.BaselineSpeed))
+			if remainedEpoch <= 0 { // 作业已经完成，跳过
 				continue
 			}
 		}
@@ -118,44 +122,9 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 		jobID = append(jobID, job.ID)
 		jobModelNames = append(jobModelNames, job.JobModelName)
 	}
-	// 分析当前作业和已有作业并行时候的runtime
-	// // 先按照jobModelNames的顺序进行排序
-	// type Pair struct {
-	// 	JobModelNames string
-	// 	Jobs          []int64
-	// 	JobID         string
-	// }
-	// pairs := make([]Pair, len(jobModelNames))
-	// for i := 0; i < len(jobModelNames); i++ {
-	// 	pairs[i] = Pair{
-	// 		JobModelNames: jobModelNames[i],
-	// 		Jobs:          jobs[i],
-	// 		JobID:         jobID[i],
-	// 	}
-	// }
-	// // 对 Pair 切片按照 Str 字段进行排序
-	// sort.Slice(pairs, func(i, j int) bool {
-	// 	return pairs[i].JobModelNames < pairs[j].JobModelNames
-	// })
-	// // 从排序后的 Pair 切片中提取出 jobs 元素，组成新的 int 切片
-	// sortedJobs := make([][]int64, len(pairs))
-	// sortJobID := make([]string, len(pairs))
-	// for i := 0; i < len(pairs); i++ {
-	// 	sortedJobs[i] = pairs[i].Jobs
-	// 	sortJobID[i] = pairs[i].JobID
-	// }
-	// jobs = sortedJobs
-	// jobID = sortJobID
 
 	// newBaseline := monitor.RealDataPredict(jobModelNames)
 	newBaseline := monitor.RandomForestPredict(jobModelNames, dc, cl, n, c)
-
-	// // 分析该作业的预计运行时间 未考虑部分作业完成后的运行速度
-	// for idx, jmn := range jobModelNames {
-	// 	if jmn == newJob.JobModelName {
-	// 		return int64(newBaseline[idx] * float64(newJob.Epoch))
-	// 	}
-	// }
 
 	// 先找到最先结束的Job，循环分析该Job结束后剩余的Job的运行时间，直到Job全部运行完
 	totalTime := int64(0)
@@ -182,7 +151,7 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 			for i := range jobs {
 				if jobs[i][0]-totalTime > 0 { //还在传输过程中
 					jobs[i][0] -= totalTime
-				} else { //传输完成  TODO:这部分的测试也未覆盖 FIXME:
+				} else { //传输完成  TODO:这部分的测试也未覆盖 FIXME:问题很大
 					jobs[i][0] = 0
 					partRuntime := totalTime - jobs[i][0] // 作业已经执行的时间
 					jobs[i][1] -= int64(float64(partRuntime) * newBaseline[i])
@@ -200,17 +169,29 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 	return 0 // 以秒为单位
 }
 
-func NewRandomForestPredictor() bool {
+func NewRandomForestPredictor(ctx context.Context) bool {
 	root, _ := utils.GetProjectRoot()
 	fp := filepath.Join(root, `pkg`, `python`, `socket_server.py`)
-	cmd := exec.Command("python", fp)
+	cmd := exec.CommandContext(ctx, "python", "-u", fp) //加入-u避免python进程输出在缓冲
+	stdout, _ := cmd.StdoutPipe()
 
 	err := cmd.Start()
 	if err != nil {
 		log.Println("ERROR: NewRandomForestPredictor faild", err)
 		return false
 	}
-
+	scanner := bufio.NewScanner(stdout)
+	if scanner.Scan() {
+		log.Println(scanner.Text())
+	}
+	if scanner.Scan() {
+		log.Println(scanner.Text())
+	}
+	go func() {
+		for scanner.Scan() {
+			log.Println(scanner.Text())
+		}
+	}()
 	return true
 }
 
@@ -277,9 +258,9 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	return nil
 }
 
-func (monitor *Monitor) InitPredictor() { // TODO:FIXME:random forest 需要优化，llama3那块还要检测
+func (monitor *Monitor) InitPredictor(ctx context.Context) { // TODO:FIXME:random forest 需要优化，llama3那块还要检测
 	monitor.readModelBaseline()
-	if !NewRandomForestPredictor() {
+	if !NewRandomForestPredictor(ctx) {
 		log.Println("ERROR: NewRandomForestPredictor failed")
 	}
 	var SchduleFailedJob = JobQueue{}

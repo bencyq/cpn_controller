@@ -1,9 +1,9 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: densenet169
+  name: resnet50
   annotations: 
-    model_name: "densenet169"
+    model_name: "resnet50"
     data_size: 20
     epoch: 1000
 spec:
@@ -13,14 +13,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet169
+        - resnet50
         - --model-path
-        - /cyq/models/densenet/densenet169.pth
+        - /cyq/models/resnet/resnet50.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/densenet_cycle.py
+        - /cyq/test_demo/resnet_cycle.py
         image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
         name: pytorch-container
         resources:

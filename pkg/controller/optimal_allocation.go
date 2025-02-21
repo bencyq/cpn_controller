@@ -33,13 +33,14 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 							continue
 						}
 					}
-					runtime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
-					if runtime <= 0 { // 返回了异常值，跳过
+					totaltime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
+					log.Println("DEBUG: Totaltime: ", totaltime, newJob.ID, dc, cl, n, c)
+					if totaltime <= 0 { // 返回了异常值，跳过
 						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.JobSpec.Name)
 						continue
 					}
-					if runtime < minTotalTime {
-						minTotalTime = runtime
+					if totaltime < minTotalTime {
+						minTotalTime = totaltime
 						optAlc[0] = dc
 						optAlc[1] = cl
 						optAlc[2] = n

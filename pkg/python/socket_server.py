@@ -41,7 +41,7 @@ def init_socket():
             try:
                 # 接受新连接
                 conn, addr = server.accept()
-                print(f"\nINFO: New connection established")
+                # print(f"DEBUG: New connection established")
 
                 # 接收数据
                 data = conn.recv(65536)
@@ -54,16 +54,16 @@ def init_socket():
                     # 调用预测器
                     response:str=random_forest_predict.predict(data[1],data[0])
                     conn.sendall(response.encode())
-                    print(f"INFO: Sent to Go: {response}")
+                    # print(f"DEBUG: Sent to Go: {response}")
                 
             except ConnectionResetError:
-                print("WARN: Client disconnected unexpectedly")
+                print("WARNING: Client disconnected unexpectedly")
             except Exception as e:
                 print(f"ERROR: {str(e)}")
             finally:
                 if conn:
                     conn.close()
-                print("INFO: Waiting for new connection...")
+                # print("DEBUG: Waiting for new connection...")
 
     except KeyboardInterrupt:
         print("\nINFO: Shutting down server...")

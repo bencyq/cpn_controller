@@ -31,4 +31,16 @@ def predict(models,benchmark):
     # return ",".join([f"{x:.4f}" for x in prediction[0]])
 
 if __name__=="__main__":
-    print(predict(['densenet169','densenet201','none'],[0.01656568,0.065646874,21.20620537]))
+    print(predict(['densenet121','none','none'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['none','densenet121','none'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['none','none','densenet121'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['densenet169','none','none'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['none','densenet169','none'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['none','none','densenet169'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['densenet169','densenet201','none'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['densenet169','densenet201','none'],[0.01656568,0.065646874,21.20620537]))  # 4090的硬件信息
+    print(predict(['densenet169','densenet201','none'],[0.014736412,0.051585681,36.71008748]))  # A6000的硬件信息
+    print(predict(['densenet201','densenet169','none'],[0.017401139,0.054753114,18.97077145]))  # A100的硬件信息
+    print(predict(['densenet201','densenet169','none'],[0.01656568,0.065646874,21.20620537]))  # 4090的硬件信息
+    print(predict(['densenet201','densenet169','none'],[0.014736412,0.051585681,36.71008748]))  # A6000的硬件信息
+

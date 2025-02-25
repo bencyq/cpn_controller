@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import r2_score
 import time
 import pickle
+import itertools
 
 from sympy import O
 from tables import test
@@ -31,15 +32,16 @@ train_data=train_data.values
 test_data=test_data.values
 
 def my_shuffle(data:list):
+    
+    original_list = [0, 1, 2]
+    permutations = list(itertools.permutations(original_list))
     new_data=np.empty((0,9))
     for ele in data:
-        order=[0,1,2]
-        tmp=copy.deepcopy(ele)
-        random.shuffle(order)
-        if order!=[0,1,2]:
-            tmp[0],tmp[6]=ele[order[0]],ele[order[0]+6]
-            tmp[1],tmp[7]=ele[order[1]],ele[order[1]+6]
-            tmp[2],tmp[8]=ele[order[2]],ele[order[2]+6]
+        for p in permutations:
+            tmp=copy.deepcopy(ele)
+            tmp[0],tmp[6]=ele[p[0]],ele[p[0]+6]
+            tmp[1],tmp[7]=ele[p[1]],ele[p[1]+6]
+            tmp[2],tmp[8]=ele[p[2]],ele[p[2]+6]
             tmp = tmp.reshape(1, -1)
             new_data=np.concatenate((new_data,tmp),axis=0)
     return np.concatenate((data, new_data), axis=0)

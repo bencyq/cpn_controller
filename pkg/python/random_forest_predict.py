@@ -31,4 +31,4 @@ def predict(models,benchmark):
     # return ",".join([f"{x:.4f}" for x in prediction[0]])
 
 if __name__=="__main__":
-    print(predict(['densenet169','llama3','yolov8x'],[0.01656568,0.065646874,21.20620537]))
+    print(predict(['densenet169','densenet201','none'],[0.01656568,0.065646874,21.20620537]))

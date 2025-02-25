@@ -126,6 +126,11 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 	// newBaseline := monitor.RealDataPredict(jobModelNames)
 	newBaseline := monitor.RandomForestPredict(jobModelNames, dc, cl, n, c)
 
+	// 更新多作业并行情况下的当前JobQueue内baseline信息
+	for idx, job := range monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].JobQueue {
+		job.BaselineSpeed = newBaseline[idx+1]
+	}
+
 	// 先找到最先结束的Job，循环分析该Job结束后剩余的Job的运行时间，直到Job全部运行完
 	totalTime := int64(0)
 	for len(jobs) > 0 {

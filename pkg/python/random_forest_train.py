@@ -14,7 +14,7 @@ import itertools
 from sympy import O
 from tables import test
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-from socket_server import get_project_root
+from utils import get_project_root
 
 # 读取训练和测试数据
 root = get_project_root()

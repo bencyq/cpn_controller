@@ -26,3 +26,4 @@
         data_size: 20
         epoch: 100
     ```
+3. github仓库里没有模型权重文件，运行pkg/python/random_forest_train.py获取

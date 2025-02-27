@@ -1,31 +1,32 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: densenet201
-  annotations: 
-    model_name: "densenet201"
-    data_size: 20
-    epoch: 1000
+  annotations:
+    data_size: "24"
+    epoch: "102"
+    model_name: llama3
+  creationTimestamp: null
+  name: "20"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - densenet201
+        - llama3
         - --model-path
-        - /cyq/models/densenet/densenet201.pth
-        - --images-path
-        - /cyq/datasets/animals/main/
+        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
         command:
         - python
-        - /cyq/test_demo/densenet_cycle.py
-        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
-        name: pytorch-container
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/llm_with_flask:202410242310
+        name: llama3
         resources:
           limits:
-            k8s.amazonaws.com/vgpu: 1
+            k8s.amazonaws.com/vgpu: "1"
         volumeMounts:
         - mountPath: /cyq
           name: cyq-volume
@@ -43,3 +44,4 @@ spec:
       - hostPath:
           path: /tmp/nvidia-mps
         name: nvidia-mps
+status: {}

@@ -1,29 +1,34 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: llama3
-  annotations: 
-    model_name: "llama3"
-    data_size: 40
-    epoch: 100
+  annotations:
+    data_size: "24"
+    epoch: "12897"
+    model_name: resnet50
+  creationTimestamp: null
+  name: "2"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - llama3
+        - resnet50
         - --model-path
-        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
+        - /cyq/models/resnet/resnet50.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llm_with_flask:202410242310
-        name: llama3
+        - /cyq/test_demo/resnet_cycle.py
+        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        name: pytorch-container
         resources:
           limits:
-            k8s.amazonaws.com/vgpu: 1
+            k8s.amazonaws.com/vgpu: "1"
         volumeMounts:
         - mountPath: /cyq
           name: cyq-volume
@@ -41,3 +46,4 @@ spec:
       - hostPath:
           path: /tmp/nvidia-mps
         name: nvidia-mps
+status: {}

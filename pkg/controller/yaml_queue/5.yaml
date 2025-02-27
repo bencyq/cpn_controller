@@ -1,0 +1,47 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "20"
+    epoch: "155"
+    model_name: glm4
+  creationTimestamp: null
+  name: "5"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - glm4
+        - --model-path
+        - /cyq/models/THUDM/glm-4-9b-chat
+        command:
+        - python
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/llm_with_flask:202410242310
+        name: glm4
+        resources:
+          limits:
+            k8s.amazonaws.com/vgpu: "1"
+        volumeMounts:
+        - mountPath: /cyq
+          name: cyq-volume
+        - mountPath: /tmp/nvidia-mps
+          name: nvidia-mps
+      hostIPC: true
+      nodeSelector:
+        kubernetes.io/hostname: node16
+      restartPolicy: Never
+      volumes:
+      - hostPath:
+          path: /data/cyq
+          type: Directory
+        name: cyq-volume
+      - hostPath:
+          path: /tmp/nvidia-mps
+        name: nvidia-mps
+status: {}

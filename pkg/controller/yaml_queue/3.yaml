@@ -1,31 +1,34 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: yolov8n
-  annotations: 
-    model_name: "yolov8n"
-    data_size: 30
-    epoch: 1000
+  annotations:
+    data_size: "21"
+    epoch: "11714"
+    model_name: vgg19
+  creationTimestamp: null
+  name: "3"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - yolov8n
+        - vgg19
         - --model-path
-        - /cyq/models/yolov8/yolov8n.pt
+        - /cyq/models/resnet/vgg19.pth
         - --images-path
-        - /cyq/datasets/Mapillary_Vistas/sorted_images/
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/yolo_cycle.py
-        image: bencyq/sam:202411072002
-        name: yolov8n
+        - /cyq/test_demo/vgg_cycle.py
+        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        name: pytorch-container
         resources:
           limits:
-            k8s.amazonaws.com/vgpu: 1
+            k8s.amazonaws.com/vgpu: "1"
         volumeMounts:
         - mountPath: /cyq
           name: cyq-volume
@@ -43,3 +46,4 @@ spec:
       - hostPath:
           path: /tmp/nvidia-mps
         name: nvidia-mps
+status: {}

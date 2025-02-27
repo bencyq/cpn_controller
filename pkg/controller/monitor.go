@@ -194,7 +194,7 @@ func parseYamlFile(filePath string) (batchv1.Job, error) {
 
 // TODO: 从调度器接口获取Job信息（起个http服务什么的）
 func (monitor *Monitor) getJob() {
-	monitor.getJobWithFile(`yaml_template`)
+	monitor.getJobWithFile(`yaml_queue`)
 	log.Println("INFO: getJob finished")
 }
 

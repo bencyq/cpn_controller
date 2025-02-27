@@ -58,7 +58,7 @@
                         }
                     ],
                     "ClusterPromIpPort": "27.154.1.16:30561",
-                    "ClusterKubeconfigFilePath": "/root/cyq/kubeconfig/16-admin.conf"
+                    "ClusterKubeconfigFilePath": "/root/16-admin.conf"
                 },
                 {
                     "ClusterID": "sgcc1",
@@ -103,7 +103,7 @@
                         }
                     ],
                     "ClusterPromIpPort": "27.154.1.10:31466",
-                    "ClusterKubeconfigFilePath": "/root/cyq/kubeconfig/10-admin.conf"
+                    "ClusterKubeconfigFilePath": "/root/10-admin.conf"
                 },
                 {
                     "ClusterID": "aigpuserver",
@@ -181,7 +181,7 @@
                         }
                     ],
                     "ClusterPromIpPort": "27.154.2.240:30521",
-                    "ClusterKubeconfigFilePath": "/root/cyq/kubeconfig/240-admin.conf"
+                    "ClusterKubeconfigFilePath": "/root/240-admin.conf"
                 }
             ]
         }

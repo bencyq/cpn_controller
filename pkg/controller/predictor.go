@@ -159,7 +159,7 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 				} else { //传输完成  TODO:这部分的测试也未覆盖 FIXME:问题很大
 					jobs[i][0] = 0
 					partRuntime := totalTime - jobs[i][0] // 作业已经执行的时间
-					jobs[i][1] -= int64(float64(partRuntime) * newBaseline[i])
+					jobs[i][1] -= int64(float64(partRuntime) / newBaseline[i])
 					if jobs[i][1] < 0 {
 						jobs[i][1] = 0
 					}

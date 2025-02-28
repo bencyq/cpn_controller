@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "26"
-    epoch: "136"
-    model_name: qwen2.5
+    data_size: "10"
+    epoch: "12166"
+    model_name: resnet18
   creationTimestamp: null
-  name: "15"
+  name: "017"
 spec:
   backoffLimit: 4
   template:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - qwen2.5
+        - resnet18
         - --model-path
-        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
+        - /cyq/models/resnet/resnet18.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llm_with_flask:202410242310
-        name: qwen2.5
+        - /cyq/test_demo/resnet_cycle.py
+        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        name: pytorch-container
         resources:
           limits:
             k8s.amazonaws.com/vgpu: "1"

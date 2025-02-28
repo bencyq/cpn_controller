@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "25"
-    epoch: "156"
-    model_name: glm4
+    data_size: "23"
+    epoch: "13085"
+    model_name: resnet50
   creationTimestamp: null
-  name: "0"
+  name: "012"
 spec:
   backoffLimit: 4
   template:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - glm4
+        - resnet50
         - --model-path
-        - /cyq/models/THUDM/glm-4-9b-chat
+        - /cyq/models/resnet/resnet50.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llm_with_flask:202410242310
-        name: glm4
+        - /cyq/test_demo/resnet_cycle.py
+        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        name: pytorch-container
         resources:
           limits:
             k8s.amazonaws.com/vgpu: "1"

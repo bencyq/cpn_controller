@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "20"
-    epoch: "11281"
-    model_name: vgg19
+    data_size: "16"
+    epoch: "10332"
+    model_name: vgg16
   creationTimestamp: null
-  name: "23"
+  name: "021"
 spec:
   backoffLimit: 4
   template:
@@ -16,9 +16,9 @@ spec:
       containers:
       - args:
         - --model-name
-        - vgg19
+        - vgg16
         - --model-path
-        - /cyq/models/resnet/vgg19.pth
+        - /cyq/models/resnet/vgg16.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:

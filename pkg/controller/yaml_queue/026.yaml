@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "19"
-    epoch: "10968"
-    model_name: densenet201
+    data_size: "15"
+    epoch: "144"
+    model_name: llama3
   creationTimestamp: null
-  name: "8"
+  name: "026"
 spec:
   backoffLimit: 4
   template:
@@ -16,16 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet201
+        - llama3
         - --model-path
-        - /cyq/models/densenet/densenet201.pth
-        - --images-path
-        - /cyq/datasets/animals/main/
+        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
         command:
         - python
-        - /cyq/test_demo/densenet_cycle.py
-        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
-        name: pytorch-container
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/llm_with_flask:202410242310
+        name: llama3
         resources:
           limits:
             k8s.amazonaws.com/vgpu: "1"

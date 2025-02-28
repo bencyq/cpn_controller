@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "20"
-    epoch: "155"
-    model_name: glm4
+    data_size: "21"
+    epoch: "13431"
+    model_name: yolov8m
   creationTimestamp: null
-  name: "5"
+  name: "030"
 spec:
   backoffLimit: 4
   template:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - glm4
+        - yolov8m
         - --model-path
-        - /cyq/models/THUDM/glm-4-9b-chat
+        - /cyq/models/yolov8/yolov8m.pt
+        - --images-path
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llm_with_flask:202410242310
-        name: glm4
+        - /cyq/test_demo/yolo_cycle.py
+        image: bencyq/sam:202411072002
+        name: yolov8m
         resources:
           limits:
             k8s.amazonaws.com/vgpu: "1"

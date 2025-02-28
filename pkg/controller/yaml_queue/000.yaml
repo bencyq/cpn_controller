@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "11"
-    epoch: "12573"
+    data_size: "22"
+    epoch: "10115"
     model_name: yolov8m
   creationTimestamp: null
-  name: "16"
+  name: "000"
 spec:
   backoffLimit: 4
   template:

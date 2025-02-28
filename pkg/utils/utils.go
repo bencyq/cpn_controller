@@ -89,7 +89,7 @@ func MakeRandomJobQueue(directoryIn, directoryOut string) {
 
 	// 按照顺序修改Job的ID，并随机Job的epoch和Datasize
 	for idx, job := range JobQueue {
-		job.Name = fmt.Sprint(idx)
+		job.Name = fmt.Sprintf("%03d", idx)
 		job.Annotations[`data_size`] = fmt.Sprint(randSrc.Intn(20) + 10)
 		if job.Annotations[`model_name`] == `llama3` || job.Annotations[`model_name`] == `qwen2.5` || job.Annotations[`model_name`] == `glm4` {
 			job.Annotations[`epoch`] = fmt.Sprint(randSrc.Intn(100) + 100)
@@ -100,6 +100,7 @@ func MakeRandomJobQueue(directoryIn, directoryOut string) {
 		// 将Job写入目标地址，文件名为序号
 		content, _ := yaml.Marshal(job)
 		os.WriteFile(directoryOut+`/`+job.Name+`.yaml`, content, 0644)
+		fmt.Println(job.Name, job.Annotations[`model_name`])
 	}
 
 }

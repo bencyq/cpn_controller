@@ -1,0 +1,49 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "21"
+    epoch: "10496"
+    model_name: yolov8n
+  creationTimestamp: null
+  name: "031"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - yolov8n
+        - --model-path
+        - /cyq/models/yolov8/yolov8n.pt
+        - --images-path
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
+        command:
+        - python
+        - /cyq/test_demo/yolo_cycle.py
+        image: bencyq/sam:202411072002
+        name: yolov8n
+        resources:
+          limits:
+            k8s.amazonaws.com/vgpu: "1"
+        volumeMounts:
+        - mountPath: /cyq
+          name: cyq-volume
+        - mountPath: /tmp/nvidia-mps
+          name: nvidia-mps
+      hostIPC: true
+      nodeSelector:
+        kubernetes.io/hostname: node16
+      restartPolicy: Never
+      volumes:
+      - hostPath:
+          path: /data/cyq
+          type: Directory
+        name: cyq-volume
+      - hostPath:
+          path: /tmp/nvidia-mps
+        name: nvidia-mps
+status: {}

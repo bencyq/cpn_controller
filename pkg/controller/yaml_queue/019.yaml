@@ -2,11 +2,11 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   annotations:
-    data_size: "18"
-    epoch: "13467"
-    model_name: densenet121
+    data_size: "23"
+    epoch: "11880"
+    model_name: yolov8n
   creationTimestamp: null
-  name: "17"
+  name: "019"
 spec:
   backoffLimit: 4
   template:
@@ -16,16 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet121
+        - yolov8n
         - --model-path
-        - /cyq/models/densenet/densenet121.pth
+        - /cyq/models/yolov8/yolov8n.pt
         - --images-path
-        - /cyq/datasets/animals/main/
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
         command:
         - python
-        - /cyq/test_demo/densenet_cycle.py
-        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
-        name: pytorch-container
+        - /cyq/test_demo/yolo_cycle.py
+        image: bencyq/sam:202411072002
+        name: yolov8n
         resources:
           limits:
             k8s.amazonaws.com/vgpu: "1"

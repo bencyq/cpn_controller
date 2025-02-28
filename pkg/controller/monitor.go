@@ -210,10 +210,12 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			if err != nil {
 				log.Println("ERROR: process file failed", err)
 			}
+			// 初始化Job信息
 			JobModelName := jobSpec.Annotations[`model_name`]
+			jobID := jobSpec.Name
 			JobDataSize, _ := strconv.ParseInt(jobSpec.Annotations[`data_size`], 10, 64)
 			JobEpoch, _ := strconv.ParseInt(jobSpec.Annotations[`epoch`], 10, 64)
-			monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch})
+			monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch, ID: jobID})
 		}
 	}
 	// fmt.Printf("%+v", monitor)
@@ -229,13 +231,6 @@ func NewMonitor() *Monitor {
 	// 为每个集群生成一个clientset
 	monitor.NewClientSetForEachCluseter()
 
-	// 每隔一分钟更新一次metric TODO:正式版上线
-	// go func() {
-	// 	for {
-	// 		time.Sleep(time.Minute)
-	// 		monitor.getMetric()
-	// 	}
-	// }()
 	monitor.getMetric()
 
 	monitor.checkBenchMark()

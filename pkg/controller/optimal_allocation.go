@@ -59,6 +59,8 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 
 	// 在Job里填写挂载信息
 	newJob.DataCenterIDX, newJob.ClusterIDX, newJob.NodeIDX, newJob.CardIDX = optAlc[0], optAlc[1], optAlc[2], optAlc[3]
+	log.Println("DEBUG: final alc ", optAlc[0], optAlc[1], optAlc[2], optAlc[3])
+	log.Println()
 
 	// 分析Job的传输时间
 	newJob.TransferTime = int64(optAlc[4])

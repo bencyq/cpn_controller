@@ -105,9 +105,8 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 		// 先检测已有job的状态，比如job是否在传输过程中，并计算job的剩余轮次
 		var transferRemainTime = int64(math.MaxInt64) // 剩余传输时间
 		var remainedEpoch = int64(math.MaxInt64)      //  剩余运行轮次
-		// passed_time := time.Now().Sub(job.AssignedTime).Seconds()
 		passed_time := time.Since(job.AssignedTime).Seconds()
-		log.Println("DEBUG: Passed time", passed_time)
+		// log.Println("DEBUG: Passed time", passed_time)
 		if job.TransferTime > int64(passed_time) { // 还在传输中
 			transferRemainTime = job.TransferTime - int64(passed_time)
 			remainedEpoch = job.Epoch
@@ -154,11 +153,11 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 
 			// 更新当前作业的剩余epoch
 			for i := range jobs {
-				if jobs[i][0]-totalTime > 0 { //还在传输过程中
-					jobs[i][0] -= totalTime
-				} else { //传输完成  TODO:这部分的测试也未覆盖 FIXME:问题很大
+				if jobs[i][0]-int64(minRemainedTime) > 0 { //还在传输过程中
+					jobs[i][0] -= int64(minRemainedTime)
+				} else { //传输完成
+					partRuntime := int64(minRemainedTime) - jobs[i][0] // 作业已经执行的时间
 					jobs[i][0] = 0
-					partRuntime := totalTime - jobs[i][0] // 作业已经执行的时间
 					jobs[i][1] -= int64(float64(partRuntime) / newBaseline[i])
 					if jobs[i][1] < 0 {
 						jobs[i][1] = 0

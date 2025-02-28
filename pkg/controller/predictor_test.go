@@ -9,7 +9,9 @@ import (
 func TestInitPredictor(t *testing.T) {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	NewMonitor().InitPredictor(ctx)
+	monitor := NewMonitor()
+	monitor.InitPredictor(ctx)
+	// monitor.PersistentPredictor()
 }
 
 func TestRealDataPredict(t *testing.T) {

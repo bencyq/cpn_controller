@@ -11,5 +11,12 @@ func main() {
 	defer cancel()
 	monitor := controller.NewMonitor()
 	monitor.InitPredictor(ctx)
+	// 每隔一分钟更新一次metric TODO:正式版上线
+	// go func() {
+	// 	for {
+	// 		time.Sleep(time.Minute)
+	// 		monitor.getMetric()
+	// 	}
+	// }()
 	monitor.PersistentPredictor()
 }

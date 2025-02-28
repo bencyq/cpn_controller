@@ -165,3 +165,5 @@ type BenchMark struct {
 	Model2AVGRunTime float64
 	Model3AVGRunTime float64
 }
+
+const NAMESPACE = `cpn-controller`

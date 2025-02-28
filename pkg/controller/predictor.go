@@ -84,7 +84,7 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 	if _, exists := monitor.ModelBaseline[job.JobModelName]; exists {
 		job.ID = job.JobSpec.Name
 		job.GPUMemoryReq, _ = strconv.ParseInt(monitor.ModelBaseline[job.JobModelName][0], 10, 64)
-		job.BaselineSpeed, _ = strconv.ParseFloat(monitor.ModelBaseline[job.JobModelName][1], 10)
+		job.BaselineSpeed, _ = strconv.ParseFloat(monitor.ModelBaseline[job.JobModelName][1], 64)
 	} else {
 	}
 
@@ -97,7 +97,6 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 
 // 预测器逻辑实现，返回预估的作业完成的总时间，即传输+运行时间
 func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c int) (runtime int64) {
-	startTime := time.Now()
 	jobs := [][]int64{{newJob.DataSize * 1024 / monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].Bandwidth, newJob.Epoch}} // 第一列为传输时间，第二列为剩余运行epoch
 	jobID := []string{newJob.ID}
 	jobModelNames := []string{newJob.JobModelName}
@@ -106,7 +105,8 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 		// 先检测已有job的状态，比如job是否在传输过程中，并计算job的剩余轮次
 		var transferRemainTime = int64(math.MaxInt64) // 剩余传输时间
 		var remainedEpoch = int64(math.MaxInt64)      //  剩余运行轮次
-		passed_time := time.Now().Sub(job.AssignedTime).Seconds()
+		// passed_time := time.Now().Sub(job.AssignedTime).Seconds()
+		passed_time := time.Since(job.AssignedTime).Seconds()
 		log.Println("DEBUG: Passed time", passed_time)
 		if job.TransferTime > int64(passed_time) { // 还在传输中
 			transferRemainTime = job.TransferTime - int64(passed_time)
@@ -170,7 +170,6 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 		// newBaseline = monitor.RealDataPredict(jobModelNames)
 		newBaseline = monitor.RandomForestPredict(jobModelNames, dc, cl, n, c)
 	}
-	log.Println("job predict time consumed:", time.Now().Sub(startTime).Seconds())
 	return 0 // 以秒为单位
 }
 
@@ -231,20 +230,20 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	if len(jobModelNames) == 1 {
 		for _, ele := range monitor.ModelBaseline2 {
 			if ele[0] == jobModelNames[0] {
-				num, _ := strconv.ParseFloat(ele[1], 10)
+				num, _ := strconv.ParseFloat(ele[1], 64)
 				return []float64{num}
 			}
 		}
 	} else if len(jobModelNames) == 2 {
 		for _, ele := range monitor.ModelBaseline2 {
 			if ele[0] == jobModelNames[0] && ele[2] == jobModelNames[1] {
-				num1, _ := strconv.ParseFloat(ele[1], 10)
-				num2, _ := strconv.ParseFloat(ele[3], 10)
+				num1, _ := strconv.ParseFloat(ele[1], 64)
+				num2, _ := strconv.ParseFloat(ele[3], 64)
 				return []float64{num1, num2}
 			}
 			if ele[0] == jobModelNames[1] && ele[2] == jobModelNames[0] {
-				num2, _ := strconv.ParseFloat(ele[1], 10)
-				num1, _ := strconv.ParseFloat(ele[3], 10)
+				num2, _ := strconv.ParseFloat(ele[1], 64)
+				num1, _ := strconv.ParseFloat(ele[3], 64)
 				return []float64{num1, num2}
 			}
 		}
@@ -253,9 +252,9 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 		sort.Strings(jobModelNames)
 		for _, ele := range monitor.ModelBaseline2[135:] {
 			if ele[0] == jobModelNames[0] && ele[2] == jobModelNames[1] && ele[4] == jobModelNames[2] {
-				num1, _ := strconv.ParseFloat(ele[1], 10)
-				num2, _ := strconv.ParseFloat(ele[3], 10)
-				num3, _ := strconv.ParseFloat(ele[5], 10)
+				num1, _ := strconv.ParseFloat(ele[1], 64)
+				num2, _ := strconv.ParseFloat(ele[3], 64)
+				num3, _ := strconv.ParseFloat(ele[5], 64)
 				return []float64{num1, num2, num3}
 			}
 		}
@@ -263,11 +262,7 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	return nil
 }
 
-func (monitor *Monitor) InitPredictor(ctx context.Context) { // TODO:FIXME:random forest 需要优化，llama3那块还要检测
-	monitor.readModelBaseline()
-	if !NewRandomForestPredictor(ctx) {
-		log.Println("ERROR: NewRandomForestPredictor failed")
-	}
+func (monitor *Monitor) ScheduleAndAssign() { // TODO:FIXME:需要测试
 	var SchduleFailedJob = JobQueue{}
 	var AssignedFailedJob = JobQueue{}
 	for _, job := range monitor.JobPool.OriginJob {
@@ -294,5 +289,84 @@ func (monitor *Monitor) InitPredictor(ctx context.Context) { // TODO:FIXME:rando
 	}
 	log.Println("INFO: AssignedJob: ", monitor.JobPool.AssignedJob.GetID())
 	monitor.JobPool.AssignedJob.List()
+}
 
+// 负责开启python预测器进程，提交一次JobQueue
+func (monitor *Monitor) InitPredictor(ctx context.Context) {
+	monitor.readModelBaseline()
+	if !NewRandomForestPredictor(ctx) {
+		log.Println("ERROR: NewRandomForestPredictor failed")
+	}
+	monitor.ScheduleAndAssign()
+	// var SchduleFailedJob = JobQueue{}
+	// var AssignedFailedJob = JobQueue{}
+	// for _, job := range monitor.JobPool.OriginJob {
+	// 	monitor.JobAnalyze(job)
+	// 	if monitor.OptimalAllocate(job) {
+	// 		monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
+	// 		if AssignJobWithSystem(job) {
+	// 			job.AssignedTime = time.Now()
+	// 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+	// 		} else {
+	// 			AssignedFailedJob = append(AssignedFailedJob, job)
+	// 		}
+	// 	} else {
+	// 		SchduleFailedJob = append(SchduleFailedJob, job)
+	// 	}
+	// }
+	// monitor.JobPool.OriginJob = SchduleFailedJob
+	// if len(SchduleFailedJob) > 0 {
+	// 	log.Println("ERROR: SchduleFailedJob", SchduleFailedJob.GetID())
+	// }
+	// monitor.JobPool.ScheduledJob = AssignedFailedJob
+	// if len(AssignedFailedJob) > 0 {
+	// 	log.Println("ERROR: AssignedFailedJob", AssignedFailedJob.GetID())
+	// }
+	// log.Println("INFO: AssignedJob: ", monitor.JobPool.AssignedJob.GetID())
+	// monitor.JobPool.AssignedJob.List()
+
+}
+
+// 对SchduleFailedJob和AssignedFailedJob进行持续处理 // TODO:FIXME:未测试
+func (monitor *Monitor) PersistentPredictor() {
+	for {
+		// 对AssignedFailedJob(即ScheduledJob）进行重试，若还是失败，重新放回originJob
+		for _, job := range monitor.JobPool.ScheduledJob {
+			times := 0
+			for !AssignJobWithSystem(job) && times < 3 {
+				times += 1
+			}
+			job.AssignedTime = time.Now()
+			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+		}
+
+		// 对AssignedJob进行监控
+		flag := false // 指示是否有AssignedJob已经完成
+		finishedJobIdx := []int{}
+		for idx, ele := range monitor.JobPool.AssignedJob {
+			joblist, _ := jobList(monitor.DataCenterInfo[ele.DataCenterIDX].ClusterInfo[ele.ClusterIDX].ClusterClientSet, NAMESPACE)
+			for _, job := range joblist.Items {
+				if job.Name == ele.JobSpec.Name {
+					if job.Status.Conditions[0].Type == "Complete" {
+						flag = true
+						log.Printf("INFO:AssignedJob finished, %v %v %v %v", ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
+					} else if job.Status.Conditions[0].Type == "Failed" {
+						log.Printf("ERROR:AssignedJob failed, %v %v %v %v", ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
+					}
+					finishedJobIdx = append(finishedJobIdx, idx)
+				}
+			}
+		}
+		// 删除已经完成的Job
+		for i := len(finishedJobIdx) - 1; i >= 0; i-- {
+			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob[:i], monitor.JobPool.AssignedJob[i+1:]...)
+		}
+
+		// 对OriginJob进行分配
+		if flag {
+			monitor.ScheduleAndAssign()
+		}
+
+		time.Sleep(time.Minute)
+	}
 }

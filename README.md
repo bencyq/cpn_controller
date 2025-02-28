@@ -26,6 +26,11 @@ TODO:
 - 作业调度的功能未接入，浪潮的调度器不涉及到网络参数部分，准备自行模拟
 - 后续可以用别的算法来对作业队列进行分配
 
+## 后续优化方向
+1. 设计作业完成后的触发机制，避免定期遍历带来的资源浪费（TODO:现在是一分钟遍历一次AssignedJob）
+2. 设计OriginJob获取的动态机制
+3. 设计monitor信息的动态扩展（现在很多引用都是用monitor.DataCentorInfo[idx]这种形式进行的）
+
 ## 注意
 1. `pkg/python/socket_client.go`和`pkg/python/socket_server.py`里面定义的socket路径有可能会出问题
 2. yaml文件里的annotations，格式为

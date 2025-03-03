@@ -36,7 +36,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 					totaltime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
 					log.Println("DEBUG: Totaltime: ", totaltime, newJob.ID, dc, cl, n, c)
 					if totaltime <= 0 { // 返回了异常值，跳过
-						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.JobSpec.Name)
+						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.Batchv1Job.Name)
 						continue
 					}
 					if totaltime < minTotalTime {

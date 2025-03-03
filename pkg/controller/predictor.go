@@ -82,7 +82,7 @@ func (monitor *Monitor) readModelBaseline() {
 // 作业分析器 分析作业的memoryReq、JobType等数据 TODO:现在都是静态配置，之后可以设计动态配置
 func (monitor *Monitor) JobAnalyze(job *Job) {
 	if _, exists := monitor.ModelBaseline[job.JobModelName]; exists {
-		job.ID = job.JobSpec.Name
+		job.ID = job.Batchv1Job.Name
 		job.GPUMemoryReq, _ = strconv.ParseInt(monitor.ModelBaseline[job.JobModelName][0], 10, 64)
 		job.BaselineSpeed, _ = strconv.ParseFloat(monitor.ModelBaseline[job.JobModelName][1], 64)
 	} else {
@@ -268,7 +268,7 @@ func (monitor *Monitor) ScheduleAndAssign() { // TODO:FIXME:需要测试
 		monitor.JobAnalyze(job)
 		if monitor.OptimalAllocate(job) {
 			monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
-			if AssignJobWithSystem(job) {
+			if monitor.AssignJob(job) {
 				job.AssignedTime = time.Now()
 				monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
 			} else {
@@ -332,7 +332,7 @@ func (monitor *Monitor) PersistentPredictor() {
 		// 对AssignedFailedJob(即ScheduledJob）进行重试，若还是失败，重新放回originJob
 		for _, job := range monitor.JobPool.ScheduledJob {
 			times := 0
-			for !AssignJobWithSystem(job) && times < 3 {
+			for !monitor.AssignJob(job) && times < 3 {
 				times += 1
 			}
 			job.AssignedTime = time.Now()
@@ -345,7 +345,7 @@ func (monitor *Monitor) PersistentPredictor() {
 		for idx, ele := range monitor.JobPool.AssignedJob {
 			joblist, _ := jobList(monitor.DataCenterInfo[ele.DataCenterIDX].ClusterInfo[ele.ClusterIDX].ClusterClientSet, NAMESPACE)
 			for _, job := range joblist.Items {
-				if job.Name == ele.JobSpec.Name {
+				if job.Name == ele.Batchv1Job.Name {
 					if job.Status.Conditions[0].Type == "Complete" {
 						flag = true
 						log.Printf("INFO:AssignedJob finished, %v %v %v %v", ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)

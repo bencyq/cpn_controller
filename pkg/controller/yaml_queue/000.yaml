@@ -28,7 +28,7 @@ spec:
         name: yolov8m
         resources:
           limits:
-            k8s.amazonaws.com/vgpu: "1"
+            nvidia.com/gpu: 1
         volumeMounts:
         - mountPath: /cyq
           name: cyq-volume
@@ -36,7 +36,7 @@ spec:
           name: nvidia-mps
       hostIPC: true
       nodeSelector:
-        kubernetes.io/hostname: node16
+        kubernetes.io/hostname: aigpuserver
       restartPolicy: Never
       volumes:
       - hostPath:

@@ -132,7 +132,7 @@ func (jq JobQueue) List() {
 
 type Job struct {
 	// 从yaml文件读取的详细信息
-	JobSpec batchv1.Job `json:"-"`
+	Batchv1Job batchv1.Job `json:"-"`
 
 	// Job的属性信息
 	YamlFilePath  string    `json:"YamlFilePath"` // yaml配置文件位置

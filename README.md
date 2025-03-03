@@ -21,6 +21,7 @@
 - 上述设计流程的大部分功能已经实现
 - 预测器功能实现完成，精度较高
 TODO:
+- 准备好能运行的负载镜像 TODO:FIXME:
 - optimal_allocation算法完成，效果还可以，等待大批量的Job队列测试
 - 预测器的输入结果偶尔会有问题，需要调整
 - 大规模队列测试方面，需要加入应对资源不足的处理，即对分配失败的作业进行处理
@@ -42,3 +43,14 @@ TODO:
         epoch: 100
     ```
 3. github仓库里没有模型权重文件，运行pkg/python/random_forest_train.py获取
+4. kubeconfig文件里，修改目标ip
+5. 国网环境下，作业需要配置hami scheduler
+   ```
+   spec:
+        backoffLimit: 4
+        template:
+            metadata:
+            creationTimestamp: null
+            annotations:
+                hami.io/resource-pool: "poc"
+    ```

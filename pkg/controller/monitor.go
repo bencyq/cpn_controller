@@ -18,6 +18,7 @@ import (
 	"strconv"
 
 	batchv1 "k8s.io/api/batch/v1"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/clientcmd"
@@ -159,8 +160,42 @@ func (monitor *Monitor) NewClientSetForEachCluseter() {
 			if err != nil {
 				log.Println("ERROR: NewClientSetForEachCluseter failed!\t", err)
 			}
+
+			// // 检查Namespace
+			// namespaceList,err:=cluster.ClusterClientSet.CoreV1().Namespaces().List(context.TODO(),metav1.ListOptions{})
+			// if err!=nil{
+			// 	log.Println("ERROR: list namespace faild",err)
+			// }
+			// flag:=false
+			// for _,ns:= range namespaceList.Items{
+			// 	if ns.Name==NAMESPACE{
+			// 		flag=true
+			// 	}
+			// }
+			// if flag{
+			// 	cluster.ClusterClientSet.CoreV1().Namespaces().Create(context.TODO(),&corev1.Namespace{Name:NAMESPACE},metav1.CreateOptions{})
+			// }
+			_, err = cluster.ClusterClientSet.CoreV1().Namespaces().Get(context.TODO(), NAMESPACE, metav1.GetOptions{})
+			if err != nil {
+				namespaceClient := cluster.ClusterClientSet.CoreV1().Namespaces()
+				namespace := &corev1.Namespace{
+					ObjectMeta: metav1.ObjectMeta{
+						Name: NAMESPACE,
+					},
+				}
+				result, err := namespaceClient.Create(context.TODO(), namespace, metav1.CreateOptions{})
+				if err != nil {
+					log.Println("ERROR: create namespace failed", err.Error())
+				} else {
+					log.Printf("DEBUG: Create namespace %s SuccessFul !", result.ObjectMeta.Name) // TODO:
+				}
+			}
+			// } else {
+			// 	log.Println("Namespace cpn-job exist")
+			// }
 		}
 	}
+
 }
 
 // TODO: 获取集群特定namespace的Job信息 还没测试
@@ -215,7 +250,7 @@ func (monitor *Monitor) getJobWithFile(directory string) {
 			jobID := jobSpec.Name
 			JobDataSize, _ := strconv.ParseInt(jobSpec.Annotations[`data_size`], 10, 64)
 			JobEpoch, _ := strconv.ParseInt(jobSpec.Annotations[`epoch`], 10, 64)
-			monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, &Job{JobSpec: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch, ID: jobID})
+			monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, &Job{Batchv1Job: jobSpec, YamlFilePath: filePath, JobModelName: JobModelName, DataSize: JobDataSize, Epoch: JobEpoch, ID: jobID})
 		}
 	}
 	// fmt.Printf("%+v", monitor)
@@ -228,7 +263,7 @@ func NewMonitor() *Monitor {
 	// 从接口读取基础信息，初始化数据结构 TODO: 正式版需要修改读取Json的方式
 	monitor.unmarshalJson(getJson("example.json"))
 
-	// 为每个集群生成一个clientset
+	// 为每个集群生成一个clientset，并检查namespace
 	monitor.NewClientSetForEachCluseter()
 
 	monitor.getMetric()
@@ -240,20 +275,3 @@ func NewMonitor() *Monitor {
 
 	return monitor
 }
-
-func AssignJobWithSystem(job *Job) bool { // TODO:通过调度器后台来分发作业，由浪潮完成
-	return true
-}
-
-// func (monitor *Monitor) AssignJob() {
-// 	failedJobQueue := []*Job{}
-// 	for _, job := range monitor.JobPool.AssignedJob {
-// 		if AssignJobWithSystem(job) {
-// 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-// 			job.ScheduledTime = time.Now()
-// 		} else {
-// 			failedJobQueue = append(failedJobQueue, job)
-// 		}
-// 	}
-// 	monitor.JobPool.ScheduledJob = failedJobQueue
-// }

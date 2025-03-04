@@ -4,7 +4,7 @@ metadata:
   annotations:
     data_size: "22"
     epoch: "10115"
-    model_name: yolov8m
+    model_name: resnet18
   creationTimestamp: null
   name: "000"
 spec:
@@ -15,17 +15,11 @@ spec:
     spec:
       containers:
       - args:
-        - --model-name
-        - yolov8m
-        - --model-path
-        - /cyq/models/yolov8/yolov8m.pt
-        - --images-path
-        - /cyq/datasets/Mapillary_Vistas/sorted_images/
         command:
-        - python
-        - /cyq/test_demo/yolo_cycle.py
-        image: bencyq/sam:202411072002
-        name: yolov8m
+        - sleep
+        - 100000
+        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        name: resnet18
         resources:
           limits:
             nvidia.com/gpu: 1

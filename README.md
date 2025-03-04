@@ -29,9 +29,10 @@ TODO:
 - 后续可以用别的算法来对作业队列进行分配
 
 ## 后续优化方向
-1. 设计作业完成后的触发机制，避免定期遍历带来的资源浪费（TODO:现在是一分钟遍历一次AssignedJob）
-2. 设计OriginJob获取的动态机制
-3. 设计monitor信息的动态扩展（现在很多引用都是用monitor.DataCentorInfo[idx]这种形式进行的）
+1. 目前的策略，会导致资源需求量高的作业一直等待，需要优化；准备对GPU密集型作业进行预留策略，避免长时等待 TODO:FIXME:
+2. 设计作业完成后的触发机制，避免定期遍历带来的资源浪费（TODO:现在是一分钟遍历一次AssignedJob）
+3. 设计OriginJob获取的动态机制
+4. 设计monitor信息的动态扩展（现在很多引用都是用monitor.DataCentorInfo[idx]这种形式进行的）
 
 ## 注意
 1. `pkg/python/socket_client.go`和`pkg/python/socket_server.py`里面定义的socket路径有可能会出问题

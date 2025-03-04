@@ -85,7 +85,14 @@ type CardInfo struct {
 	GPU_UTIL        int64
 	GPU_MEMORY_FREE int64
 	GPU_MEMORY_USED int64
-	JobQueue        []*Job // 分配到该卡上的作业
+
+	// 分配到该卡上的作业
+	JobQueue []*Job
+
+	// 预留的Job和时间
+	ReservedTime int64
+	ReservedJob  *Job
+
 	// 基准测试程序获得的分数
 	BenchMark BenchMark
 }
@@ -113,6 +120,7 @@ type JobPool struct {
 	ScheduledJob JobQueue // 由调度器返回，将PreJobID为null的排列在最前，只要PreJobID为null，则直接发送作业到指定位置
 	AssignedJob  JobQueue // 已经提交的作业，等待作业完成
 	FinishedJob  JobQueue
+	ReservedJob  JobQueue // 预留资源的作业
 }
 
 type JobQueue []*Job
@@ -157,6 +165,11 @@ type Job struct {
 	PreJobIDX     int       // 作业队列信息
 	TransferTime  int64     // 以秒为单位
 	AssignedTime  time.Time // 调度器提交作业的时间
+
+	// Job的预留信息
+	IsReserved           bool  //是否为预留类型的作业
+	ReservedTime         int64 // 预计的等待时间
+	ReservationStartTime time.Time
 }
 
 // 基准测试，收集三个类型的模型的单位epoch运行时间

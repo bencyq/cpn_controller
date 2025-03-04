@@ -267,12 +267,16 @@ func (monitor *Monitor) ScheduleAndAssign() { // TODO:FIXME:需要测试
 	for _, job := range monitor.JobPool.OriginJob {
 		monitor.JobAnalyze(job)
 		if monitor.OptimalAllocate(job) {
-			monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
-			if monitor.AssignJob(job) {
-				job.AssignedTime = time.Now()
-				monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+			if job.IsReserved {
+				monitor.JobPool.ReservedJob = append(monitor.JobPool.ReservedJob, job)
 			} else {
-				AssignedFailedJob = append(AssignedFailedJob, job)
+				monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
+				if monitor.AssignJob(job) {
+					job.AssignedTime = time.Now()
+					monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+				} else {
+					AssignedFailedJob = append(AssignedFailedJob, job)
+				}
 			}
 		} else {
 			SchduleFailedJob = append(SchduleFailedJob, job)
@@ -326,9 +330,22 @@ func (monitor *Monitor) InitPredictor(ctx context.Context) {
 
 }
 
-// 对SchduleFailedJob和AssignedFailedJob进行持续处理 // TODO:FIXME:未测试
+// 对SchduleFailedJob、AssignedFailedJob以及ReservedJob进行持续处理 // TODO:FIXME:未测试
 func (monitor *Monitor) PersistentPredictor() {
 	for {
+		// 对ReservedJob进行持续处理
+		var AssignFailedJobQueue = JobQueue{}
+		for _, job := range monitor.JobPool.ReservedJob {
+			if int64(time.Since(job.ReservationStartTime).Seconds()) > job.ReservedTime {
+				if monitor.AssignJob(job) {
+					monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+				} else {
+					AssignFailedJobQueue = append(AssignFailedJobQueue, job)
+				}
+			}
+		}
+		monitor.JobPool.ReservedJob = AssignFailedJobQueue
+
 		// 对AssignedFailedJob(即ScheduledJob）进行重试，若还是失败，重新放回originJob
 		for _, job := range monitor.JobPool.ScheduledJob {
 			times := 0

@@ -7,6 +7,7 @@ package controller
 
 import (
 	"context"
+	"cpn-controller/pkg/utils"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -31,8 +32,10 @@ func getJson(url string) (body []byte) {
 }
 
 func getJsonWithFile(fileName string) (content []byte) {
+	root, _ := utils.GetProjectRoot()
+
 	// 打开文件
-	file, err := os.Open(fileName)
+	file, err := os.Open(root + "/pkg/controller/" + fileName)
 	if err != nil {
 		log.Println("ERROR: opening file:", err)
 		return
@@ -229,7 +232,8 @@ func parseYamlFile(filePath string) (batchv1.Job, error) {
 
 // TODO: 从调度器接口获取Job信息（起个http服务什么的）
 func (monitor *Monitor) getJob() {
-	monitor.getJobWithFile(`yaml_queue`)
+	root, _ := utils.GetProjectRoot()
+	monitor.getJobWithFile(root + "/pkg/controller/" + `yaml_queue`)
 	log.Println("INFO: getJob finished")
 }
 

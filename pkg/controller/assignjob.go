@@ -66,6 +66,7 @@ func AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string,
 }
 
 func (monitor *Monitor) AssignJob(job *Job) bool {
+	// return true // 测试用
 	if monitor.AssignJobWithinController(job) {
 		log.Printf("DEBUG: Job %v assigned", job.ID)
 		return true

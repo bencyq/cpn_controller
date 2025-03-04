@@ -40,10 +40,11 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.Batchv1Job.Name)
 						continue
 					}
-					if totaltime > monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].ReservedTime { // 判断是否小于reserved time
+					switch {
+					// 如果该节点上存在reservation，且newJob的预计时间超过了reservation time
+					case totaltime > monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime && monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime != 0:
 						continue
-					}
-					if totaltime < minTotalTime {
+					case totaltime < minTotalTime:
 						minTotalTime = totaltime
 						optAlc[0] = dc
 						optAlc[1] = cl
@@ -93,7 +94,10 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 					if cardInfo.GPU_MEMORY_USED+cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq {
 						continue
 					}
-					totaltime := int64(monitor.RandomForestPredict([]string{newJob.JobModelName}, dc, cl, n, c)[0]) // 计算卡上状态为空时的运行时间
+					if monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime != 0 {
+						continue
+					}
+					totaltime := int64(monitor.RandomForestPredict([]string{newJob.JobModelName}, dc, cl, n, c)[0]) * newJob.Epoch // 计算卡上状态为空时的运行时间
 					log.Println("DEBUG: TotaltimeWithoutLoads: ", totaltime, newJob.ID, dc, cl, n, c)
 					if totaltime <= 0 { // 返回了异常值，跳过
 						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.Batchv1Job.Name)
@@ -117,12 +121,12 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 	}
 
 	// 计算该卡上当前作业的最长剩余运行时间
-	minRemainedTime := int64(math.MaxInt64)
+	minRemainedTime := int64(0)
 	// minIdx := math.MaxInt64
 	for _, job := range monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue {
 		passed_time := time.Since(job.AssignedTime).Seconds()
 		remainedTime := job.TransferTime + int64(float64(job.Epoch)*job.BaselineSpeed) - int64(passed_time)
-		if remainedTime < minRemainedTime {
+		if remainedTime > minRemainedTime {
 			minRemainedTime = remainedTime
 			// minIdx = idx
 		}
@@ -137,6 +141,7 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 	// 分析Job的传输时间
 	newJob.TransferTime = int64(optAlc[4])
 
+	newJob.IsReserved = true
 	newJob.ReservedTime = minRemainedTime
 	newJob.ReservationStartTime = time.Now()
 

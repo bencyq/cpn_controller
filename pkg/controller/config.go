@@ -87,7 +87,7 @@ type CardInfo struct {
 	GPU_MEMORY_USED int64
 
 	// 分配到该卡上的作业
-	JobQueue []*Job
+	JobQueue JobQueue
 
 	// 预留的Job和时间
 	ReservedTime int64
@@ -136,6 +136,16 @@ func (jq JobQueue) List() {
 	for _, job := range jq {
 		fmt.Printf("ID:%v JobModelName:%v Allocation: %v,%v,%v,%v\n", job.ID, job.JobModelName, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
 	}
+}
+
+func (jq *JobQueue) RemoveJob(jobID string) bool {
+	for i := range *jq {
+		if (*jq)[i].ID == jobID {
+			*jq = append((*jq)[:i], (*jq)[i+1:]...)
+			return true
+		}
+	}
+	return true
 }
 
 type Job struct {

@@ -339,6 +339,9 @@ func (monitor *Monitor) PersistentPredictor() {
 			if int64(time.Since(job.ReservationStartTime).Seconds()) > job.ReservedTime {
 				if monitor.AssignJob(job) {
 					monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+					monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue = append(monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue, job)
+					monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].ReservedTime = 0
+					monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].ReservedJob = nil
 				} else {
 					AssignFailedJobQueue = append(AssignFailedJobQueue, job)
 				}
@@ -375,6 +378,9 @@ func (monitor *Monitor) PersistentPredictor() {
 		}
 		// 删除已经完成的Job
 		for i := len(finishedJobIdx) - 1; i >= 0; i-- {
+			job := monitor.JobPool.AssignedJob[i]
+			// TODO:FIXME:未测试
+			monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue.RemoveJob(job.ID)
 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob[:i], monitor.JobPool.AssignedJob[i+1:]...)
 		}
 

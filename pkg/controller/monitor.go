@@ -265,7 +265,7 @@ func NewMonitor() *Monitor {
 	monitor := &Monitor{}
 
 	// 从接口读取基础信息，初始化数据结构 TODO: 正式版需要修改读取Json的方式
-	monitor.unmarshalJson(getJson("example.json"))
+	monitor.unmarshalJson(getJson(JsonUrl))
 
 	// 为每个集群生成一个clientset，并检查namespace
 	monitor.NewClientSetForEachCluseter()

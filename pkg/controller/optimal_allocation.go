@@ -60,7 +60,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	// 如果没有合适的位置分配任务
 	if optAlc[0] == math.MaxInt && newJob.JobType != "GPU" {
 		return false
-	} else if optAlc[0] == math.MaxInt && newJob.JobType == "GPU" { // 给资源需求量大的作业进行资源预留，避免大作业长时间等待 TODO:FIXME:
+	} else if optAlc[0] == math.MaxInt && newJob.JobType == "GPU" { // 给资源需求量大的作业进行资源预留，避免大作业长时间等待
 		return monitor.ReserveAllocate(newJob)
 	}
 
@@ -72,12 +72,13 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	// 分析Job的传输时间
 	newJob.TransferTime = int64(optAlc[4])
 
-	// 给对应的card上的jobqueue挂上作业
-	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue = append(monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue, newJob)
+	// 以下操作应该在发送作业成功的时候进行
+	// // 给对应的card上的jobqueue挂上作业
+	// monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue = append(monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue, newJob)
 
-	// 在对应的Card上，减去该模型预测需要占用的资源 TODO: 目前只考虑了显存
-	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_USED += newJob.GPUMemoryReq
-	monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_FREE -= newJob.GPUMemoryReq
+	// // 在对应的Card上，减去该模型预测需要占用的资源 TODO: 目前只考虑了显存
+	// monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_USED += newJob.GPUMemoryReq
+	// monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].GPU_MEMORY_FREE -= newJob.GPUMemoryReq
 	return true
 }
 

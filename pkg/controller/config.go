@@ -97,6 +97,11 @@ type CardInfo struct {
 	BenchMark BenchMark
 }
 
+// 通过Job里的IDX信息，查找对应的CardInfo指针
+func (monitor *Monitor) GetCardInfoPointerFromJob(job *Job) *CardInfo {
+	return monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX]
+}
+
 // ////////////////////////////
 // 以下为自定义数据结构，为算法所用
 // ////////////////////////////
@@ -190,3 +195,5 @@ type BenchMark struct {
 }
 
 const NAMESPACE = `cpn-controller`
+
+var JsonUrl = "example.json"

@@ -110,7 +110,7 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 		if job.TransferTime > int64(passed_time) { // 还在传输中
 			transferRemainTime = job.TransferTime - int64(passed_time)
 			remainedEpoch = job.Epoch
-		} else { // 传输已完成 TODO:FIXME:问题很大 这部分测试未覆盖到，因为当前算法未作业队列一次性读入并分配位置，不存在传输完成了的情况
+		} else { // 传输已完成
 			transferRemainTime = int64(0)
 			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - passed_time) / float64(job.BaselineSpeed))
 			if remainedEpoch <= 0 { // 作业已经完成，跳过
@@ -261,39 +261,6 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 	return nil
 }
 
-func (monitor *Monitor) ScheduleAndAssign() { // TODO:FIXME:需要测试
-	var SchduleFailedJob = JobQueue{}
-	var AssignedFailedJob = JobQueue{}
-	for _, job := range monitor.JobPool.OriginJob {
-		monitor.JobAnalyze(job)
-		if monitor.OptimalAllocate(job) {
-			if job.IsReserved {
-				monitor.JobPool.ReservedJob = append(monitor.JobPool.ReservedJob, job)
-			} else {
-				monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
-				if monitor.AssignJob(job) {
-					job.AssignedTime = time.Now()
-					monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-				} else {
-					AssignedFailedJob = append(AssignedFailedJob, job)
-				}
-			}
-		} else {
-			SchduleFailedJob = append(SchduleFailedJob, job)
-		}
-	}
-	monitor.JobPool.OriginJob = SchduleFailedJob
-	if len(SchduleFailedJob) > 0 {
-		log.Println("ERROR: SchduleFailedJob", SchduleFailedJob.GetID())
-	}
-	monitor.JobPool.ScheduledJob = AssignedFailedJob
-	if len(AssignedFailedJob) > 0 {
-		log.Println("ERROR: AssignedFailedJob", AssignedFailedJob.GetID())
-	}
-	log.Println("INFO: AssignedJob: ", monitor.JobPool.AssignedJob.GetID())
-	monitor.JobPool.AssignedJob.List()
-}
-
 // 负责开启python预测器进程，提交一次JobQueue
 func (monitor *Monitor) InitPredictor(ctx context.Context) {
 	monitor.readModelBaseline()
@@ -301,94 +268,5 @@ func (monitor *Monitor) InitPredictor(ctx context.Context) {
 		log.Println("ERROR: NewRandomForestPredictor failed")
 	}
 	monitor.ScheduleAndAssign()
-	// var SchduleFailedJob = JobQueue{}
-	// var AssignedFailedJob = JobQueue{}
-	// for _, job := range monitor.JobPool.OriginJob {
-	// 	monitor.JobAnalyze(job)
-	// 	if monitor.OptimalAllocate(job) {
-	// 		monitor.JobPool.ScheduledJob = append(monitor.JobPool.ScheduledJob, job)
-	// 		if AssignJobWithSystem(job) {
-	// 			job.AssignedTime = time.Now()
-	// 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-	// 		} else {
-	// 			AssignedFailedJob = append(AssignedFailedJob, job)
-	// 		}
-	// 	} else {
-	// 		SchduleFailedJob = append(SchduleFailedJob, job)
-	// 	}
-	// }
-	// monitor.JobPool.OriginJob = SchduleFailedJob
-	// if len(SchduleFailedJob) > 0 {
-	// 	log.Println("ERROR: SchduleFailedJob", SchduleFailedJob.GetID())
-	// }
-	// monitor.JobPool.ScheduledJob = AssignedFailedJob
-	// if len(AssignedFailedJob) > 0 {
-	// 	log.Println("ERROR: AssignedFailedJob", AssignedFailedJob.GetID())
-	// }
-	// log.Println("INFO: AssignedJob: ", monitor.JobPool.AssignedJob.GetID())
-	// monitor.JobPool.AssignedJob.List()
 
-}
-
-// 对SchduleFailedJob、AssignedFailedJob以及ReservedJob进行持续处理 // TODO:FIXME:未测试
-func (monitor *Monitor) PersistentPredictor() {
-	for {
-		// 对ReservedJob进行持续处理
-		var AssignFailedJobQueue = JobQueue{}
-		for _, job := range monitor.JobPool.ReservedJob {
-			if int64(time.Since(job.ReservationStartTime).Seconds()) > job.ReservedTime {
-				if monitor.AssignJob(job) {
-					monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-					monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue = append(monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue, job)
-					monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].ReservedTime = 0
-					monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].ReservedJob = nil
-				} else {
-					AssignFailedJobQueue = append(AssignFailedJobQueue, job)
-				}
-			}
-		}
-		monitor.JobPool.ReservedJob = AssignFailedJobQueue
-
-		// 对AssignedFailedJob(即ScheduledJob）进行重试，若还是失败，重新放回originJob
-		for _, job := range monitor.JobPool.ScheduledJob {
-			times := 0
-			for !monitor.AssignJob(job) && times < 3 {
-				times += 1
-			}
-			job.AssignedTime = time.Now()
-			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-		}
-
-		// 对AssignedJob进行监控
-		flag := false // 指示是否有AssignedJob已经完成
-		finishedJobIdx := []int{}
-		for idx, ele := range monitor.JobPool.AssignedJob {
-			joblist, _ := jobList(monitor.DataCenterInfo[ele.DataCenterIDX].ClusterInfo[ele.ClusterIDX].ClusterClientSet, NAMESPACE)
-			for _, job := range joblist.Items {
-				if job.Name == ele.Batchv1Job.Name {
-					if job.Status.Conditions[0].Type == "Complete" {
-						flag = true
-						log.Printf("INFO:AssignedJob finished, %v %v %v %v", ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
-					} else if job.Status.Conditions[0].Type == "Failed" {
-						log.Printf("ERROR:AssignedJob failed, %v %v %v %v", ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
-					}
-					finishedJobIdx = append(finishedJobIdx, idx)
-				}
-			}
-		}
-		// 删除已经完成的Job
-		for i := len(finishedJobIdx) - 1; i >= 0; i-- {
-			job := monitor.JobPool.AssignedJob[i]
-			// TODO:FIXME:未测试
-			monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue.RemoveJob(job.ID)
-			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob[:i], monitor.JobPool.AssignedJob[i+1:]...)
-		}
-
-		// 对OriginJob进行分配
-		if flag {
-			monitor.ScheduleAndAssign()
-		}
-
-		time.Sleep(time.Minute)
-	}
 }

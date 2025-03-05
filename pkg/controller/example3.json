@@ -1,0 +1,135 @@
+{
+    "DataCenterNums": 1,
+    "DataCenterInfo": [
+        {
+            "DataCenterID": "test1",
+            "DataCenterLocation": "北京",
+            "ClusterNums": 3,
+            "ClusterInfo": [
+                {
+                    "ClusterID": "sgcc1",
+                    "ClusterIP": "27.154.1.10",
+                    "NodeNums": 2,
+                    "NodeInfo": [
+                        {
+                            "NodeID": "sgcc1",
+                            "NodeIP": "27.154.1.10",
+                            "CPUInfo": {
+                                "CPUNums": 4,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz",
+                                "CPUCore": 144
+                            },
+                            "NodeType": "CPU",
+                            "Bandwidth": 100
+                        },
+                        {
+                            "NodeID": "node2",
+                            "NodeIP": "27.154.1.12",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) CPU E5-2630 v4 @ 2.20GHz",
+                                "CPUCore": 40
+                            },
+                            "NodeType": "GPU",
+                            "Bandwidth": 100,
+                            "CardNums": 1,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.017401139,
+                                        "Model2AVGRunTime" : 0.054753114,
+                                        "Model3AVGRunTime" : 18.97077145
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "ClusterPromIpPort": "27.154.1.10:31466",
+                    "ClusterKubeconfigFilePath": "/root/10-admin.conf"
+                },
+                {
+                    "ClusterID": "aigpuserver",
+                    "ClusterIP": "27.154.2.240",
+                    "NodeNums": 1,
+                    "NodeInfo": [
+                        {
+                            "NodeID": "aigpuserver",
+                            "NodeIP": "27.154.2.240",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) CPU E5-2620 v4 @ 2.10GHz",
+                                "CPUCore": 32
+                            },
+                            "NodeType": "GPU",
+                            "Bandwidth": 100,
+                            "CardNums": 6,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "Tesla P100-PCIE-16GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.022269968,
+                                        "Model2AVGRunTime" : 0.065642652,
+                                        "Model3AVGRunTime" : 42.71008748
+                                    }
+                                    
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "Tesla P100-PCIE-16GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.022269968,
+                                        "Model2AVGRunTime" : 0.065642652,
+                                        "Model3AVGRunTime" : 42.71008748
+                                    }
+                                },
+                                {
+                                    "CardID": "2",
+                                    "CardModel": "Tesla P100-PCIE-16GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.022269968,
+                                        "Model2AVGRunTime" : 0.065642652,
+                                        "Model3AVGRunTime" : 42.71008748
+                                    }
+                                },
+                                {
+                                    "CardID": "3",
+                                    "CardModel": "Tesla P100-PCIE-16GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.022269968,
+                                        "Model2AVGRunTime" : 0.065642652,
+                                        "Model3AVGRunTime" : 42.71008748
+                                    }
+                                },
+                                {
+                                    "CardID": "4",
+                                    "CardModel": "Tesla P100-PCIE-16GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.022269968,
+                                        "Model2AVGRunTime" : 0.065642652,
+                                        "Model3AVGRunTime" : 42.71008748
+                                    }
+                                },
+                                {
+                                    "CardID": "5",
+                                    "CardModel": "Tesla P100-PCIE-16GB",                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.022269968,
+                                        "Model2AVGRunTime" : 0.065642652,
+                                        "Model3AVGRunTime" : 42.71008748
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "ClusterPromIpPort": "27.154.2.240:30521",
+                    "ClusterKubeconfigFilePath": "/root/240-admin.conf"
+                }
+            ]
+        }
+    ]
+}

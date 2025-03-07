@@ -10,10 +10,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	// "k8s.io/apimachinery/pkg/util/yaml"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
 )
 
-func AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string, namespace string) bool {
+func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string, namespace string) bool {
 	// // 解析YAML为Job对象
 	// decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(yamlContent), 4096)
 	// var job batchv1.Job
@@ -34,6 +35,9 @@ func AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string,
 		if !flag {
 			container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
 		}
+
+		// 设置resources:limits:nvidia.com/gpu: 为物理卡的数量（hami环境需要这样才能正常运行mps）
+		container.Resources.Limits[`nvidia.com/gpu`] = *resource.NewQuantity(int64(monitor.GetNodeInfoPointerFromJob(job).CardNums), resource.DecimalSI)
 	}
 
 	// 设置节点选择器
@@ -42,17 +46,16 @@ func AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string,
 	}
 	job.Batchv1Job.Spec.Template.Spec.NodeSelector["kubernetes.io/hostname"] = nodeName
 
-	// // 确定命名空间（默认为default）
-	// namespace := job.Namespace
-	// if namespace == "" {
-	// 	namespace = "default"
-	// }
-
 	// 设置annatation 国网环境下hami schduler需要
 	if job.Batchv1Job.Spec.Template.Annotations == nil {
 		job.Batchv1Job.Spec.Template.Annotations = make(map[string]string)
 	}
 	job.Batchv1Job.Spec.Template.Annotations["hami.io/resource-pool"] = "poc" // TODO:FIXME:
+
+	// 设置IPChost为true
+	if !job.Batchv1Job.Spec.Template.Spec.HostIPC {
+		job.Batchv1Job.Spec.Template.Spec.HostIPC = true
+	}
 
 	// 创建Job
 	_, err := clientset.BatchV1().Jobs(namespace).Create(
@@ -77,7 +80,7 @@ func (monitor *Monitor) AssignJob(job *Job) bool {
 }
 
 func (monitor *Monitor) AssignJobWithinController(job *Job) bool { // 使用controller内部的方案提交作业
-	return AssignJobToNode(monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].ClusterClientSet, job, monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].NodeID, NAMESPACE)
+	return monitor.AssignJobToNode(monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].ClusterClientSet, job, monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].NodeID, NAMESPACE)
 }
 
 func AssignJobWithSystem(job *Job) bool { // 通过调度器后台来分发作业，由浪潮完成

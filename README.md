@@ -34,7 +34,7 @@
 4. 设计monitor信息的动态扩展（现在很多引用都是用monitor.DataCentorInfo[idx]这种形式进行的）
 5. 考虑用别的算法来对作业队列进行分配
 6. 重构代码结构，把部分predictor里的代码迁移到别处 TODO:
-7. - 预测器的输入结果偶尔会有问题，需要调整
+7. 预测器的输入结果偶尔会有问题，需要调整
 
 ## 注意
 1. `pkg/python/socket_client.go`和`pkg/python/socket_server.py`里面定义的socket路径有可能会出问题

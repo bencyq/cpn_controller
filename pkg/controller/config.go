@@ -102,6 +102,11 @@ func (monitor *Monitor) GetCardInfoPointerFromJob(job *Job) *CardInfo {
 	return monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX]
 }
 
+// 通过Job里的IDX信息，查找对应的NodeInfo指针
+func (monitor *Monitor) GetNodeInfoPointerFromJob(job *Job) *NodeInfo {
+	return monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX]
+}
+
 // ////////////////////////////
 // 以下为自定义数据结构，为算法所用
 // ////////////////////////////

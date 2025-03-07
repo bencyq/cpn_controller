@@ -55,5 +55,11 @@
             metadata:
             creationTimestamp: null
             annotations:
-                hami.io/resource-pool: "poc"
+                **hami.io/resource-pool: "poc"**
+    ```
+    且需要如下配置，才能正常使用mps
+    ```
+    resources:
+        limits:
+            nvidia.com/gpu: <物理GPU的个数>
     ```

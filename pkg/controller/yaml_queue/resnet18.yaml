@@ -5,7 +5,7 @@ metadata:
   annotations: 
     model_name: "resnet18"
     data_size: 20
-    epoch: 1000
+    epoch: 10000
 spec:
   backoffLimit: 4
   template:
@@ -24,4 +24,3 @@ spec:
         image: bencyq/infer:202503071541
         name: pytorch-container
       restartPolicy: Never
-      

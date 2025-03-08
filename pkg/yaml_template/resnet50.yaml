@@ -20,26 +20,7 @@ spec:
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/resnet_cycle.py
-        image: pytorch/pytorch:2.2.0-cuda11.8-cudnn8-runtime
+        - /cyq/test_demo/resnet_epoch.py
+        image: bencyq/infer:202503071541
         name: pytorch-container
-        resources:
-          limits:
-            k8s.amazonaws.com/vgpu: 1
-        volumeMounts:
-        - mountPath: /cyq
-          name: cyq-volume
-        - mountPath: /tmp/nvidia-mps
-          name: nvidia-mps
-      hostIPC: true
-      nodeSelector:
-        kubernetes.io/hostname: node16
       restartPolicy: Never
-      volumes:
-      - hostPath:
-          path: /data/cyq
-          type: Directory
-        name: cyq-volume
-      - hostPath:
-          path: /tmp/nvidia-mps
-        name: nvidia-mps

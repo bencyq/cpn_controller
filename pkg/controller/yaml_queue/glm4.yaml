@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: llama3
+  name: glm4
   annotations: 
-    model_name: "llama3"
+    model_name: "glm4"
     data_size: 40
-    epoch: 100
+    epoch: 5
 spec:
   backoffLimit: 4
   template:
@@ -13,12 +13,12 @@ spec:
       containers:
       - args:
         - --model-name
-        - llama3
+        - glm4
         - --model-path
-        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
+        - /cyq/models/THUDM/glm-4-9b-chat
         command:
         - python
         - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llama3:202503071526
-        name: llama3
+        image: bencyq/glm4:202503071531
+        name: glm4
       restartPolicy: Never

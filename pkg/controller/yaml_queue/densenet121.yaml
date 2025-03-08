@@ -1,11 +1,11 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: resnet18
+  name: densenet121
   annotations: 
-    model_name: "resnet18"
+    model_name: "densenet121"
     data_size: 20
-    epoch: 1000
+    epoch: 10000
 spec:
   backoffLimit: 4
   template:
@@ -13,15 +13,15 @@ spec:
       containers:
       - args:
         - --model-name
-        - resnet18
+        - densenet121
         - --model-path
-        - /cyq/models/resnet/resnet18.pth
+        - /cyq/models/densenet/densenet121.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/resnet_epoch.py
+        - /cyq/test_demo/densenet_epoch.py
         image: bencyq/infer:202503071541
         name: pytorch-container
       restartPolicy: Never
-      
+

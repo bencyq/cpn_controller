@@ -1,14 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: glm4
-  annotations: 
-    model_name: "glm4"
-    data_size: 40
-    epoch: 5
+  annotations:
+    data_size: "0"
+    epoch: "10"
+    model_name: glm4
+  creationTimestamp: null
+  name: "030"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
@@ -21,4 +24,6 @@ spec:
         - /cyq/test_demo/llm_cycle.py
         image: bencyq/glm4:202503071531
         name: glm4
+        resources: {}
       restartPolicy: Never
+status: {}

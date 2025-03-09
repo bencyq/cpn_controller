@@ -7,6 +7,7 @@ import (
 	"cpn-controller/pkg/utils"
 	"log"
 	"math"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"sort"
@@ -111,10 +112,11 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 			transferRemainTime = job.TransferTime - int64(passed_time)
 			remainedEpoch = job.Epoch
 		} else { // 传输已完成
-			transferRemainTime = int64(0)
+			transferRemainTime = 0
 			remainedEpoch = int64((float64(job.Epoch)*job.BaselineSpeed - passed_time) / float64(job.BaselineSpeed))
 			if remainedEpoch <= 0 { // 作业已经完成，跳过
-				continue
+				// continue
+				remainedEpoch = 0 // TODO:FIXME: 可能导致错误
 			}
 		}
 		jobs = append(jobs, []int64{transferRemainTime, remainedEpoch})
@@ -266,7 +268,9 @@ func (monitor *Monitor) InitPredictor(ctx context.Context) {
 	monitor.readModelBaseline()
 	if !NewRandomForestPredictor(ctx) {
 		log.Println("ERROR: NewRandomForestPredictor failed")
+		os.Exit(1)
 	}
+	log.Println("INFO: NewRandomForestPredictor completed")
 	monitor.ScheduleAndAssign()
 
 }

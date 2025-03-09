@@ -4,8 +4,8 @@ import "testing"
 
 func TestAssignJobWithinController(t *testing.T) {
 	monitor := NewMonitor()
-	testJob := monitor.JobPool.OriginJob[4]
-	testJob.DataCenterIDX, testJob.ClusterIDX, testJob.NodeIDX, testJob.CardIDX = 0, 0, 1, 1
+	testJob := monitor.JobPool.OriginJob[1]
+	testJob.DataCenterIDX, testJob.ClusterIDX, testJob.NodeIDX, testJob.CardIDX = 0, 1, 1, 0
 	monitor.AssignJobWithinController(testJob)
 }
 

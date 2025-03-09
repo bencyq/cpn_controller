@@ -1,21 +1,24 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: resnet18
-  annotations: 
-    model_name: "resnet18"
-    data_size: 20
-    epoch: 10000
+  annotations:
+    data_size: "0"
+    epoch: "2789"
+    model_name: resnet50
+  creationTimestamp: null
+  name: "014"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - resnet18
+        - resnet50
         - --model-path
-        - /cyq/models/resnet/resnet18.pth
+        - /cyq/models/resnet/resnet50.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
@@ -23,4 +26,6 @@ spec:
         - /cyq/test_demo/resnet_epoch.py
         image: bencyq/infer:202503071541
         name: pytorch-container
+        resources: {}
       restartPolicy: Never
+status: {}

@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	// "k8s.io/apimachinery/pkg/util/yaml"
-	"k8s.io/apimachinery/pkg/api/resource"
+	// "k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
 )
 
@@ -22,16 +22,17 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 	// 	return false
 	// }
 
-	// 将job中的所有容器，env：NVIDIA_VISIBLE_DEVICES 设置为对应的卡
 	for i := range job.Batchv1Job.Spec.Template.Spec.Containers {
 		container := &job.Batchv1Job.Spec.Template.Spec.Containers[i]
 		flag := false
 		for j := range container.Env {
 			// 国网Hami环境下使用mps，必须能见所有卡，不能用NVIDIA_VISIBLE_DEVICES，改用CUDA_VISIBLE_DEVICES
-			// if container.Env[j].Name == "NVIDIA_VISIBLE_DEVICES" {
-			// 	flag = true
-			// 	container.Env[j].Value = fmt.Sprint(job.CardIDX)
-			// }
+
+			// 不申请nvidia.com/gpu，不走hami scheduler，适应国网的当前环境，使用NVIDIA_VISIBLE_DEVICES=all来可见所有卡，用CUDA_VISIBLE_DEVICES来指定卡
+			if container.Env[j].Name == "NVIDIA_VISIBLE_DEVICES" {
+				flag = true
+				container.Env[j].Value = "true"
+			}
 			if container.Env[j].Name == "CUDA_VISIBLE_DEVICES" {
 				flag = true
 				container.Env[j].Value = fmt.Sprint(job.CardIDX)
@@ -43,13 +44,15 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 
 		}
 
-		// 设置resources:limits:nvidia.com/gpu: 为物理卡的数量（hami环境需要这样才能正常运行mps）
-		if container.Resources.Limits == nil {
-			container.Resources.Limits = make(corev1.ResourceList)
-		}
-		nodeInfo := monitor.GetNodeInfoPointerFromJob(job)
-		container.Resources.Limits[`nvidia.com/gpu`] = *resource.NewQuantity(int64(nodeInfo.CardNums), resource.DecimalSI)
-		container.Resources.Limits[`nvidia.com/gpumem`] = *resource.NewQuantity(int64(nodeInfo.CardNums)*(nodeInfo.CardInfo[0].GPU_MEMORY_USED+nodeInfo.CardInfo[0].GPU_MEMORY_FREE), resource.DecimalSI)
+		// 不申请nvidia.com/gpu，不走hami scheduler，适应国网的当前环境
+
+		// // 设置resources:limits:nvidia.com/gpu: 为物理卡的数量（hami环境需要这样才能正常运行mps）
+		// if container.Resources.Limits == nil {
+		// 	container.Resources.Limits = make(corev1.ResourceList)
+		// }
+		// nodeInfo := monitor.GetNodeInfoPointerFromJob(job)
+		// container.Resources.Limits[`nvidia.com/gpu`] = *resource.NewQuantity(int64(nodeInfo.CardNums), resource.DecimalSI)
+		// container.Resources.Limits[`nvidia.com/gpumem`] = *resource.NewQuantity(int64(nodeInfo.CardNums)*(nodeInfo.CardInfo[0].GPU_MEMORY_USED+nodeInfo.CardInfo[0].GPU_MEMORY_FREE), resource.DecimalSI)
 
 		// 将Job中的epoch写入yaml中
 		container.Args = append(container.Args, "--epoch", fmt.Sprint(job.Epoch))
@@ -67,11 +70,11 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 	}
 	job.Batchv1Job.Spec.Template.Spec.NodeSelector["kubernetes.io/hostname"] = nodeName
 
-	// 设置annatation 国网环境下hami schduler需要
-	if job.Batchv1Job.Spec.Template.Annotations == nil {
-		job.Batchv1Job.Spec.Template.Annotations = make(map[string]string)
-	}
-	job.Batchv1Job.Spec.Template.Annotations["hami.io/resource-pool"] = "poc"
+	// // 设置annatation 国网环境下hami schduler需要
+	// if job.Batchv1Job.Spec.Template.Annotations == nil {
+	// 	job.Batchv1Job.Spec.Template.Annotations = make(map[string]string)
+	// }
+	// job.Batchv1Job.Spec.Template.Annotations["hami.io/resource-pool"] = "poc"
 
 	// 设置IPChost为true
 	if !job.Batchv1Job.Spec.Template.Spec.HostIPC {
@@ -99,8 +102,14 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 
 func (monitor *Monitor) AssignJob(job *Job) bool {
 	// return true // 测试用
+
+	// 先验证卡上有足够的显存
+	if job.GPUMemoryReq > monitor.GetCardInfoPointerFromJob(job).GPU_MEMORY_FREE {
+		log.Printf("DEBUG: Job %v GPUMemoryReq not satisfied, %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
+		return false
+	}
 	if monitor.AssignJobWithinController(job) {
-		log.Printf("DEBUG: Job %v assigned", job.ID)
+		log.Printf("DEBUG: Job %v assigned, %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
 		return true
 	}
 	return false
@@ -153,8 +162,13 @@ func (monitor *Monitor) ScheduleAndAssign() {
 
 // 对SchduleFailedJob、AssignedFailedJob以及ReservedJob进行持续处理
 func (monitor *Monitor) PersistentPredictor() {
+	log.Println("INFO: Start PersistentPredictor")
+
+	monitor.GetMetric(1)
+
 	for {
 		// 对AssignedFailedJob(即ScheduledJob）进行重试，若还是失败，重新放回originJob
+		log.Println("INFO: Start ReAssignjob")
 		for _, job := range monitor.JobPool.ScheduledJob {
 			times := 0
 			for !monitor.AssignJob(job) && times < 3 {
@@ -172,6 +186,7 @@ func (monitor *Monitor) PersistentPredictor() {
 		// 对AssignedJob进行监控
 		flag := false // 指示是否有AssignedJob已经完成
 		finishedJobIdx := []int{}
+		log.Println("INFO: Start monitor AssignedJob")
 		for idx, ele := range monitor.JobPool.AssignedJob {
 			joblist, _ := jobList(monitor.DataCenterInfo[ele.DataCenterIDX].ClusterInfo[ele.ClusterIDX].ClusterClientSet, NAMESPACE)
 			for _, job := range joblist.Items {
@@ -179,13 +194,12 @@ func (monitor *Monitor) PersistentPredictor() {
 					switch {
 					case job.Status.Succeeded == 1:
 						flag = true
-						log.Printf("INFO:AssignedJob finished, %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
+						log.Printf("INFO:AssignedJob finished, %v %v %v %v %v, runtime %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX, time.Since(job.Status.StartTime.Time).Seconds())
 					case job.Status.Failed == 1:
 						flag = true
 						log.Printf("ERROR:AssignedJob failed, %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
 					case job.Status.Active == 1:
 						continue
-					default:
 					}
 					finishedJobIdx = append(finishedJobIdx, idx)
 					break
@@ -203,8 +217,16 @@ func (monitor *Monitor) PersistentPredictor() {
 		if flag {
 			// 对ReservedJob进行再分配
 			var AssignFailedJobQueue = JobQueue{}
+			log.Println("INFO: Start assign ReservedJob")
+
+		overloop:
 			for _, job := range monitor.JobPool.ReservedJob {
-				if int64(time.Since(job.ReservationStartTime).Seconds()) > job.ReservedTime {
+				for _, j := range monitor.GetCardInfoPointerFromJob(job).JobQueue {
+					if j.JobType == "GPU" { // 避免一个卡上存在两个GPU Job
+						continue overloop
+					}
+				}
+				if int64(time.Since(job.ReservationStartTime).Seconds()) > job.ReservedTime { // 这个方案下，预留任务上去了可能会遇到显存不够的状态，导致任务失败。解决方案：1. 分配任务前，先检验显存是否够；2. 给Job设定RestartPolicy，定时重启来抢占资源
 					if monitor.AssignJob(job) {
 						monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
 						monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue = append(monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX].JobQueue, job)
@@ -220,9 +242,18 @@ func (monitor *Monitor) PersistentPredictor() {
 			monitor.JobPool.ReservedJob = AssignFailedJobQueue
 
 			// 对OriginJob进行分配
-			monitor.ScheduleAndAssign()
+			if len(monitor.JobPool.OriginJob) != 0 {
+				log.Println("INFO: ReAssign OriginJob")
+				monitor.ScheduleAndAssign()
+			}
 		}
 
+		if len(monitor.JobPool.OriginJob) == 0 && len(monitor.JobPool.ScheduledJob) == 0 && len(monitor.JobPool.AssignedJob) == 0 {
+			return
+		}
+
+		log.Println("INFO: AssignedJob:", monitor.JobPool.AssignedJob.GetID())
+		log.Println("INFO: Sleeping...")
 		time.Sleep(time.Minute)
 	}
 }

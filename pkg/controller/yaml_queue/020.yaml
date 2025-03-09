@@ -1,26 +1,31 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: vgg11
-  annotations: 
-    model_name: "vgg11"
-    data_size: 20
-    epoch: 1000
+  annotations:
+    data_size: "0"
+    epoch: "2592"
+    model_name: resnet18
+  creationTimestamp: null
+  name: "020"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - vgg11
+        - resnet18
         - --model-path
-        - /cyq/models/vgg/vgg11.pth
+        - /cyq/models/resnet/resnet18.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/vgg_epoch.py
+        - /cyq/test_demo/resnet_epoch.py
         image: bencyq/infer:202503071541
         name: pytorch-container
+        resources: {}
       restartPolicy: Never
+status: {}

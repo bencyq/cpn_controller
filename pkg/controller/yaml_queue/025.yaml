@@ -1,14 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: llama3
-  annotations: 
-    model_name: "llama3"
-    data_size: 40
-    epoch: 5
+  annotations:
+    data_size: "0"
+    epoch: "15"
+    model_name: llama3
+  creationTimestamp: null
+  name: "025"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
@@ -21,4 +24,6 @@ spec:
         - /cyq/test_demo/llm_cycle.py
         image: bencyq/llama3:202503071526
         name: llama3
+        resources: {}
       restartPolicy: Never
+status: {}

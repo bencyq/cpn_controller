@@ -1,14 +1,17 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: yolov8m
-  annotations: 
-    model_name: "yolov8m"
-    data_size: 30
-    epoch: 1000
+  annotations:
+    data_size: "0"
+    epoch: "2571"
+    model_name: yolov8m
+  creationTimestamp: null
+  name: "006"
 spec:
   backoffLimit: 4
   template:
+    metadata:
+      creationTimestamp: null
     spec:
       containers:
       - args:
@@ -23,4 +26,6 @@ spec:
         - /cyq/test_demo/yolo_epoch.py
         image: bencyq/yolo:202503071542
         name: yolov8m
+        resources: {}
       restartPolicy: Never
+status: {}

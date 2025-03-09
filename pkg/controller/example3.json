@@ -7,6 +7,60 @@
             "ClusterNums": 3,
             "ClusterInfo": [
                 {
+                    "ClusterID": "sgcc",
+                    "ClusterIP": "27.154.1.16",
+                    "NodeNums": 2,
+                    "NodeInfo": [
+                        {
+                            "NodeID": "sgcc",
+                            "NodeIP": "27.154.1.16",
+                            "CPUInfo": {
+                                "CPUNums": 4,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Gold 6140 CPU @ 2.30GHz",
+                                "CPUCore": 144
+                            },
+                            "NodeType": "CPU",
+                            "Bandwidth": 100
+                        },
+                        {
+                            "NodeID": "aigpuserver-4090",
+                            "NodeIP": "27.154.1.18",
+                            "CPUInfo": {
+                                "CPUNums": 2,
+                                "Architecture": "x86_64",
+                                "CPUModel": "Intel(R) Xeon(R) Gold 6133 CPU @ 2.50GHz",
+                                "CPUCore": 80
+                            },
+                            "NodeType": "GPU",
+                            "Bandwidth": 100,
+                            "CardNums": 2,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA GeForce RTX 4090",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.01656568,
+                                        "Model2AVGRunTime" : 0.065646874,
+                                        "Model3AVGRunTime" : 21.20620537
+                                    }
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "NVIDIA GeForce RTX 4090",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime" : 0.01656568,
+                                        "Model2AVGRunTime" : 0.065646874,
+                                        "Model3AVGRunTime" : 21.20620537
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "ClusterPromIpPort": "27.154.1.16:30561",
+                    "ClusterKubeconfigFilePath": "/root/16-admin.conf"
+                },
+                {
                     "ClusterID": "sgcc1",
                     "ClusterIP": "27.154.1.10",
                     "NodeNums": 2,

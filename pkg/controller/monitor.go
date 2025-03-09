@@ -79,7 +79,7 @@ func generatePromMetrics(nodeName string, nodeType string) map[string]string {
 	return metrics
 }
 
-func (monitor *Monitor) getMetric() {
+func (monitor *Monitor) GetMetric(retries int) {
 	for dc, datacenter := range monitor.DataCenterInfo {
 		for cl, cluster := range datacenter.ClusterInfo {
 			for n, node := range cluster.NodeInfo {
@@ -88,6 +88,9 @@ func (monitor *Monitor) getMetric() {
 				defer func() {
 					if r := recover(); r != nil {
 						log.Printf("ERROR: GetMetric error! DatacenterID:%v ClusterID:%v NodeID:%v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
+					}
+					if retries > 0 {
+						monitor.GetMetric(retries - 1) // 递归调用，再GetMetric一遍
 					}
 				}()
 
@@ -270,7 +273,7 @@ func NewMonitor() *Monitor {
 	// 为每个集群生成一个clientset，并检查namespace
 	monitor.NewClientSetForEachCluseter()
 
-	monitor.getMetric()
+	monitor.GetMetric(1)
 
 	monitor.checkBenchMark()
 

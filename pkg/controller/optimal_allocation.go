@@ -24,6 +24,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 				if nodeInfo.FREE_MEMORY-10 < newJob.MemoryReq {
 					continue
 				}
+			overloop:
 				for c, cardInfo := range nodeInfo.CardInfo {
 					transferTime := (newJob.DataSize * 1024) / nodeInfo.Bandwidth
 					if cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq || len(cardInfo.JobQueue) >= 3 {
@@ -31,7 +32,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 					}
 					for _, job := range cardInfo.JobQueue {
 						if job.JobType == `GPU` && newJob.JobType == `GPU` {
-							continue
+							continue overloop
 						}
 					}
 					totaltime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
@@ -96,6 +97,11 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 					}
 					if monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime != 0 {
 						continue
+					}
+					for _, job := range cardInfo.JobQueue {
+						if job.JobType == `GPU` && newJob.JobType == `GPU` {
+							continue
+						}
 					}
 					totaltime := int64(monitor.RandomForestPredict([]string{newJob.JobModelName}, dc, cl, n, c)[0]) * newJob.Epoch // 计算卡上状态为空时的运行时间
 					log.Println("DEBUG: TotaltimeWithoutLoads: ", totaltime, newJob.ID, dc, cl, n, c)

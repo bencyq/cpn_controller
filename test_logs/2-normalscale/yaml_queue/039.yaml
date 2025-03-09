@@ -3,10 +3,10 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5627"
+    epoch: "5210"
     model_name: densenet201
   creationTimestamp: null
-  name: "024"
+  name: "039"
 spec:
   backoffLimit: 4
   template:

@@ -88,9 +88,9 @@ func (monitor *Monitor) GetMetric(retries int) {
 				defer func() {
 					if r := recover(); r != nil {
 						log.Printf("ERROR: GetMetric error! DatacenterID:%v ClusterID:%v NodeID:%v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
-					}
-					if retries > 0 {
-						monitor.GetMetric(retries - 1) // 递归调用，再GetMetric一遍
+						if retries > 0 {
+							monitor.GetMetric(retries - 1) // 递归调用，再GetMetric一遍
+						}
 					}
 				}()
 
@@ -273,7 +273,7 @@ func NewMonitor() *Monitor {
 	// 为每个集群生成一个clientset，并检查namespace
 	monitor.NewClientSetForEachCluseter()
 
-	monitor.GetMetric(1)
+	monitor.GetMetric(3)
 
 	monitor.checkBenchMark()
 

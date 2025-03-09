@@ -75,7 +75,7 @@ func MakeRandomJobQueue(directoryIn, directoryOut string) {
 	randSrc := rand.New(rand.NewSource(time.Now().UnixNano()))
 	NewJobQueue := []batchv1.Job{}
 	for _, job := range JobQueue {
-		times := randSrc.Intn(3) + 1
+		times := randSrc.Intn(4) + 1
 		for i := 0; i < times; i += 1 {
 			NewJobQueue = append(NewJobQueue, job)
 		}
@@ -97,9 +97,9 @@ func MakeRandomJobQueue(directoryIn, directoryOut string) {
 
 		// 随机epoch
 		if job.Annotations[`model_name`] == `llama3` || job.Annotations[`model_name`] == `qwen2.5` || job.Annotations[`model_name`] == `glm4` {
-			job.Annotations[`epoch`] = fmt.Sprint(randSrc.Intn(10) + 10)
+			job.Annotations[`epoch`] = fmt.Sprint(randSrc.Intn(50) + 50)
 		} else {
-			job.Annotations[`epoch`] = fmt.Sprint(randSrc.Intn(1000) + 2000)
+			job.Annotations[`epoch`] = fmt.Sprint(randSrc.Intn(1000) + 5000)
 		}
 
 		// 将Job写入目标地址，文件名为序号

@@ -3,10 +3,10 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5627"
-    model_name: densenet201
+    epoch: "5422"
+    model_name: yolov8m
   creationTimestamp: null
-  name: "024"
+  name: "037"
 spec:
   backoffLimit: 4
   template:
@@ -16,16 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet201
+        - yolov8m
         - --model-path
-        - /cyq/models/densenet/densenet201.pth
+        - /cyq/models/yolov8/yolov8m.pt
         - --images-path
-        - /cyq/datasets/animals/main/
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
         command:
         - python
-        - /cyq/test_demo/densenet_epoch.py
-        image: bencyq/infer:202503071541
-        name: pytorch-container
+        - /cyq/test_demo/yolo_epoch.py
+        image: bencyq/yolo:202503071542
+        name: yolov8m
         resources: {}
       restartPolicy: Never
 status: {}

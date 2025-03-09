@@ -12,7 +12,7 @@ func TestUnmarshalJson(t *testing.T) {
 func TestGetMetric(t *testing.T) {
 	var monitor Monitor
 	// 初始化monitor
-	monitor.unmarshalJson(getJsonWithFile("example2.json"))
+	monitor.unmarshalJson(getJsonWithFile("example.json"))
 	monitor.GetMetric(1)
 }
 

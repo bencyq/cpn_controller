@@ -188,13 +188,13 @@ func (monitor *Monitor) PersistentPredictor() {
 		finishedJobIdx := []int{}
 		log.Println("INFO: Start monitor AssignedJob")
 		for idx, ele := range monitor.JobPool.AssignedJob {
-			joblist, _ := jobList(monitor.DataCenterInfo[ele.DataCenterIDX].ClusterInfo[ele.ClusterIDX].ClusterClientSet, NAMESPACE)
+			joblist, _ := JobList(monitor.DataCenterInfo[ele.DataCenterIDX].ClusterInfo[ele.ClusterIDX].ClusterClientSet, NAMESPACE)
 			for _, job := range joblist.Items {
 				if job.Name == ele.Batchv1Job.Name {
 					switch {
 					case job.Status.Succeeded == 1:
 						flag = true
-						log.Printf("INFO:AssignedJob finished, %v %v %v %v %v, runtime %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX, time.Since(job.Status.StartTime.Time).Seconds())
+						log.Printf("INFO: AssignedJob finished, %v %v %v %v %v, runtime %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX, time.Since(job.Status.StartTime.Time).Seconds())
 					case job.Status.Failed == 1:
 						flag = true
 						log.Printf("ERROR:AssignedJob failed, %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)

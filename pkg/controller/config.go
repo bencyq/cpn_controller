@@ -199,6 +199,6 @@ type BenchMark struct {
 	Model3AVGRunTime float64
 }
 
-const NAMESPACE = `cpn-controller`
+var NAMESPACE = `cpn-controller`
 
 var JsonUrl = "example.json"

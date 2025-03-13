@@ -205,7 +205,7 @@ func (monitor *Monitor) NewClientSetForEachCluseter() {
 }
 
 // TODO: 获取集群特定namespace的Job信息 还没测试
-func jobList(client *kubernetes.Clientset, namespace string) (joblist *batchv1.JobList, err error) {
+func JobList(client *kubernetes.Clientset, namespace string) (joblist *batchv1.JobList, err error) {
 	joblist, err = client.BatchV1().Jobs(namespace).List(context.TODO(), metav1.ListOptions{})
 	if err != nil {
 		log.Println("ERROR: cannot list jobs", err)

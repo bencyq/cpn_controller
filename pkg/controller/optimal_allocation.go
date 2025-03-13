@@ -14,7 +14,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	var optAlc = [5]int{math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt} // optimal Allocation, 存储job的分配位置
 	minTotalTime := int64(math.MaxInt64)
 
-	// 模拟计算作业在各个集群的各个节点的各张卡上的运行时间+传输时间，选取时间最少的
+	// 	
 	for dc, dataCenterInfo := range monitor.DataCenterInfo {
 		for cl, clusterInfo := range dataCenterInfo.ClusterInfo {
 			for n, nodeInfo := range clusterInfo.NodeInfo {

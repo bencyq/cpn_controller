@@ -1,0 +1,99 @@
+Starting: /root/go/bin/dlv dap --listen=127.0.0.1:34087 --log-dest=3 from /root/cpn_controller/cmd/fifo
+DAP server listening at: 127.0.0.1:34087
+Type 'dlv help' for list of commands.
+2025/03/12 08:33:48 INFO: Information initiated
+2025/03/12 08:33:48 INFO: GetMetric done!
+2025/03/12 08:33:48 INFO: getJob finished
+2025/03/12 08:33:48 INFO: GetMetric done!
+2025/03/12 08:33:48 INFO: Job 000 assigned to 0 0 1 0
+2025/03/12 08:33:48 INFO: Job 001 assigned to 0 0 1 1
+2025/03/12 08:33:48 INFO: Job 002 assigned to 0 1 1 0
+2025/03/12 08:33:59 INFO: GetMetric done!
+2025/03/12 08:33:59 INFO: Job 003 assigned to 0 0 1 0
+2025/03/12 08:33:59 INFO: Job 004 assigned to 0 0 1 1
+2025/03/12 08:33:59 INFO: Job 005 assigned to 0 1 1 0
+2025/03/12 08:34:09 INFO: GetMetric done!
+2025/03/12 08:34:09 INFO: Job 006 assigned to 0 0 1 0
+2025/03/12 08:34:09 INFO: Job 007 assigned to 0 0 1 1
+2025/03/12 08:34:09 INFO: Job 008 assigned to 0 1 1 0
+2025/03/12 08:34:19 INFO: GetMetric done!
+2025/03/12 08:34:19 INFO: Job 009 assigned to 0 0 1 0
+2025/03/12 08:34:19 INFO: Job 010 assigned to 0 0 1 1
+2025/03/12 08:34:19 INFO: Job 011 assigned to 0 1 1 0
+2025/03/12 08:34:19 INFO: Job 012 assigned to 0 2 0 0
+2025/03/12 08:34:19 INFO: Job 013 assigned to 0 2 0 1
+2025/03/12 08:34:19 INFO: Job 014 assigned to 0 2 0 2
+2025/03/12 08:34:19 INFO: Job 015 assigned to 0 2 0 3
+2025/03/12 08:34:19 INFO: Job 016 assigned to 0 2 0 4
+2025/03/12 08:34:19 INFO: Job 017 assigned to 0 2 0 5
+2025/03/12 08:34:29 INFO: GetMetric done!
+2025/03/12 08:34:29 INFO: Job 018 assigned to 0 0 1 0
+2025/03/12 08:34:29 INFO: Job 019 assigned to 0 0 1 1
+2025/03/12 08:34:29 INFO: Job 020 assigned to 0 1 1 0
+2025/03/12 08:34:39 INFO: GetMetric done!
+2025/03/12 08:34:39 INFO: Job 021 assigned to 0 0 1 0
+2025/03/12 08:34:39 INFO: Job 022 assigned to 0 0 1 1
+2025/03/12 08:34:39 INFO: Job 023 assigned to 0 1 1 0
+2025/03/12 08:34:40 INFO: Job 024 assigned to 0 2 0 0
+2025/03/12 08:34:40 INFO: Job 025 assigned to 0 2 0 1
+2025/03/12 08:34:40 INFO: Job 026 assigned to 0 2 0 2
+2025/03/12 08:34:40 INFO: Job 027 assigned to 0 2 0 3
+2025/03/12 08:34:50 INFO: GetMetric done!
+2025/03/12 08:34:50 INFO: Job 028 assigned to 0 0 1 0
+2025/03/12 08:34:50 INFO: Job 029 assigned to 0 0 1 1
+2025/03/12 08:34:50 INFO: Job 030 assigned to 0 1 1 0
+2025/03/12 08:34:50 INFO: Job 031 assigned to 0 2 0 0
+2025/03/12 08:35:00 INFO: GetMetric done!
+2025/03/12 08:35:00 INFO: Job 032 assigned to 0 0 1 0
+2025/03/12 08:35:00 INFO: Job 033 assigned to 0 0 1 1
+2025/03/12 08:35:00 INFO: Job 034 assigned to 0 1 1 0
+2025/03/12 08:35:00 INFO: Job 035 assigned to 0 2 0 0
+2025/03/12 08:35:00 INFO: Job 036 assigned to 0 2 0 1
+2025/03/12 08:35:00 INFO: Job 037 assigned to 0 2 0 2
+2025/03/12 08:35:10 INFO: GetMetric done!
+2025/03/12 08:35:10 INFO: Job 038 assigned to 0 0 1 0
+2025/03/12 08:35:10 INFO: Job 039 assigned to 0 0 1 1
+2025/03/12 08:36:30 ERROR:AssignedJob failed, 006 0 0 0 0
+2025/03/12 08:36:30 INFO: AssignedJob finished, 018 0 0 0 0, runtime 121.809098978
+2025/03/12 08:36:33 ERROR:AssignedJob failed, 021 0 0 0 0
+2025/03/12 08:36:39 INFO: AssignedJob finished, 015 0 2 0 0, runtime 240.480284561
+2025/03/12 08:36:45 ERROR:AssignedJob failed, 022 0 0 0 0
+2025/03/12 08:36:54 ERROR:AssignedJob failed, 028 0 0 0 0
+2025/03/12 08:37:07 ERROR:AssignedJob failed, 031 0 2 0 0
+2025/03/12 08:37:10 ERROR:AssignedJob failed, 032 0 0 0 0
+2025/03/12 08:37:13 ERROR:AssignedJob failed, 038 0 0 0 0
+2025/03/12 08:37:17 ERROR:AssignedJob failed, 033 0 0 0 0
+2025/03/12 08:37:19 INFO: AssignedJob finished, 029 0 0 0 0, runtime 149.537050151
+2025/03/12 08:37:19 ERROR:AssignedJob failed, 035 0 2 0 0
+2025/03/12 08:37:19 ERROR:AssignedJob failed, 036 0 2 0 0
+2025/03/12 08:37:26 INFO: AssignedJob finished, 001 0 0 0 0, runtime 218.060307994
+2025/03/12 08:37:27 ERROR:AssignedJob failed, 037 0 2 0 0
+2025/03/12 08:37:42 INFO: AssignedJob finished, 009 0 0 0 0, runtime 203.666043637
+2025/03/12 08:37:58 INFO: AssignedJob finished, 004 0 0 0 0, runtime 239.770341528
+2025/03/12 08:38:06 INFO: AssignedJob finished, 010 0 0 0 0, runtime 227.002658204
+2025/03/12 08:38:08 INFO: AssignedJob finished, 019 0 0 0 0, runtime 219.613726929
+2025/03/12 08:39:43 INFO: AssignedJob finished, 002 0 1 0 0, runtime 406.104588746
+2025/03/12 08:39:48 INFO: AssignedJob finished, 014 0 2 0 0, runtime 429.972737071
+2025/03/12 08:39:58 INFO: AssignedJob finished, 039 0 0 0 0, runtime 288.255122681
+2025/03/12 08:40:07 INFO: AssignedJob finished, 026 0 2 0 0, runtime 427.56800211
+2025/03/12 08:40:07 INFO: AssignedJob finished, 027 0 2 0 0, runtime 427.770941869
+2025/03/12 08:40:45 INFO: AssignedJob finished, 003 0 0 0 0, runtime 406.483023987
+2025/03/12 08:41:04 INFO: AssignedJob finished, 011 0 1 0 0, runtime 456.189505116
+2025/03/12 08:41:27 INFO: AssignedJob finished, 030 0 1 0 0, runtime 448.588931856
+2025/03/12 08:41:35 INFO: AssignedJob finished, 007 0 0 0 0, runtime 446.030567593
+2025/03/12 08:42:08 INFO: AssignedJob finished, 016 0 2 0 0, runtime 568.83124952
+2025/03/12 08:42:18 INFO: AssignedJob finished, 034 0 1 0 0, runtime 489.451968074
+2025/03/12 08:42:22 INFO: AssignedJob finished, 012 0 2 0 0, runtime 583.621785746
+2025/03/12 08:42:28 INFO: AssignedJob finished, 024 0 2 0 0, runtime 568.82188045
+2025/03/12 08:44:26 INFO: AssignedJob finished, 020 0 1 0 0, runtime 648.087937156
+2025/03/12 08:44:37 INFO: AssignedJob finished, 025 0 2 0 0, runtime 697.723145261
+2025/03/12 08:44:46 INFO: AssignedJob finished, 023 0 1 0 0, runtime 657.693430868
+2025/03/12 08:45:10 INFO: AssignedJob finished, 013 0 2 0 0, runtime 751.320775682
+2025/03/12 08:45:24 INFO: AssignedJob finished, 000 0 0 0 0, runtime 696.769155293
+2025/03/12 08:45:50 INFO: AssignedJob finished, 017 0 2 0 0, runtime 790.728492021
+2025/03/12 08:49:36 INFO: AssignedJob finished, 008 0 1 0 0, runtime 978.695183293
+2025/03/12 08:51:38 INFO: AssignedJob finished, 005 0 1 0 0, runtime 1110.899646695
+2025/03/12 08:52:38 INFO: Sleeping...
+2025/03/12 08:52:38 INFO: Consumed time 18.844773402466668
+PASS
+Process 8151 has exited with status 0

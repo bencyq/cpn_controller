@@ -107,6 +107,10 @@ func (monitor *Monitor) GetNodeInfoPointerFromJob(job *Job) *NodeInfo {
 	return monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX]
 }
 
+func (monitor *Monitor) GetClusterInfoPointerFromJob(job *Job) *ClusterInfo {
+	return monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX]
+}
+
 // ////////////////////////////
 // 以下为自定义数据结构，为算法所用
 // ////////////////////////////

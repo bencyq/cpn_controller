@@ -12,6 +12,7 @@ import (
 	// "k8s.io/apimachinery/pkg/util/yaml"
 	// "k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
+	"k8s.io/utils/ptr"
 )
 
 func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string, namespace string) bool {
@@ -256,4 +257,13 @@ func (monitor *Monitor) PersistentPredictor() {
 		log.Println("INFO: Sleeping...")
 		time.Sleep(time.Minute)
 	}
+}
+
+func (monitor *Monitor) DeleteJobFromNode(clientset *kubernetes.Clientset, job *Job, namespace string) bool {
+	err := clientset.BatchV1().Jobs(namespace).Delete(context.TODO(), job.Batchv1Job.Name, metav1.DeleteOptions{GracePeriodSeconds: new(int64), PropagationPolicy: ptr.To(metav1.DeletePropagationForeground)})
+	if err != nil {
+		log.Println("ERROR: DeleteJobFromNode failed!", err)
+		return false
+	}
+	return true
 }

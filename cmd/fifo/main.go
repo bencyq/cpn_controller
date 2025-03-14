@@ -9,7 +9,7 @@ import (
 
 func main() {
 	startTime := time.Now()
-	controller.NAMESPACE = "fifo"
+	controller.NAMESPACE = fifo.NAMESPACE
 	monitor := controller.NewMonitor()
 	fifo.FifoSchedule(monitor)
 	fifo.MonitorAssignedJob(monitor)

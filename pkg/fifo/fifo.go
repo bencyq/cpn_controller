@@ -13,6 +13,9 @@ import (
 // 给作业添加RestartPolicy，避免作业因OOM失败
 // 结束后手动检查作业是否因为OOM报错
 // TODO: 应当设置定时重启OOM作业
+
+var NAMESPACE = `fifo`
+
 func FifoSchedule(monitor *controller.Monitor) {
 	var ScheduleFailedJob = make(controller.JobQueue, 0)
 	for {
@@ -61,7 +64,7 @@ func FifoSchedule(monitor *controller.Monitor) {
 }
 
 func MonitorAssignedJob(monitor *controller.Monitor) {
-	for len(monitor.JobPool.AssignedJob) > 0 {
+	for len(monitor.JobPool.AssignedJob) > 0 && len(monitor.JobPool.OriginJob) > 0 {
 		// 对AssignedJob进行监控
 		finishedJobIdx := []int{}
 		// log.Println("INFO: Start monitor AssignedJob")
@@ -73,7 +76,9 @@ func MonitorAssignedJob(monitor *controller.Monitor) {
 					case job.Status.Succeeded == 1:
 						log.Printf("INFO: AssignedJob finished, %v %v %v %v %v, runtime %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX, time.Since(job.Status.StartTime.Time).Seconds())
 					case job.Status.Failed == 1:
-						log.Printf("ERROR:AssignedJob failed, %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
+						monitor.DeleteJobFromNode(monitor.GetClusterInfoPointerFromJob(ele).ClusterClientSet, ele, NAMESPACE)
+						monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, ele)
+						log.Printf("ERROR:AssignedJob failed, job deleted %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
 					case job.Status.Active == 1:
 						continue
 					}
@@ -86,5 +91,17 @@ func MonitorAssignedJob(monitor *controller.Monitor) {
 		for i := len(finishedJobIdx) - 1; i >= 0; i-- {
 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob[:finishedJobIdx[i]], monitor.JobPool.AssignedJob[finishedJobIdx[i]+1:]...)
 		}
+
+		// 重新提交失败的作业
+		var ScheduleFailedJob = controller.JobQueue{}
+		for _, job := range monitor.JobPool.OriginJob {
+			if !monitor.AssignJobToNode(monitor.GetClusterInfoPointerFromJob(job).ClusterClientSet, job, monitor.GetNodeInfoPointerFromJob(job).NodeID, NAMESPACE) {
+				ScheduleFailedJob = append(ScheduleFailedJob, job)
+				continue
+			}
+			log.Printf("INFO: Reassign job %v %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
+
+		}
+		monitor.JobPool.OriginJob = ScheduleFailedJob
 	}
 }

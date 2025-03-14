@@ -1,6 +1,8 @@
 package controller
 
-import "testing"
+import (
+	"testing"
+)
 
 func TestAssignJobWithinController(t *testing.T) {
 	monitor := NewMonitor()
@@ -14,4 +16,11 @@ func TestAssignJobToNode(t *testing.T) {
 	job := monitor.JobPool.OriginJob[0]
 	job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX = 0, 2, 0, 4
 	monitor.AssignJobToNode(monitor.DataCenterInfo[0].ClusterInfo[2].ClusterClientSet, job, "aigpuserver", NAMESPACE)
+}
+
+func TestDeleteJobFromNode(t *testing.T) {
+	NAMESPACE = `fifo`
+	monitor := NewMonitor()
+	job := monitor.JobPool.OriginJob[6]
+	monitor.DeleteJobFromNode(monitor.DataCenterInfo[0].ClusterInfo[0].ClusterClientSet, job, NAMESPACE)
 }

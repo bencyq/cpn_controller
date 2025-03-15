@@ -25,21 +25,27 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 
 	for i := range job.Batchv1Job.Spec.Template.Spec.Containers {
 		container := &job.Batchv1Job.Spec.Template.Spec.Containers[i]
-		flag := false
+		flag1 := false
+		flag2 := false
 		for j := range container.Env {
 			// 国网Hami环境下使用mps，必须能见所有卡，不能用NVIDIA_VISIBLE_DEVICES，改用CUDA_VISIBLE_DEVICES
 
 			// 不申请nvidia.com/gpu，不走hami scheduler，适应国网的当前环境，使用NVIDIA_VISIBLE_DEVICES=all来可见所有卡，用CUDA_VISIBLE_DEVICES来指定卡
 			if container.Env[j].Name == "NVIDIA_VISIBLE_DEVICES" {
-				flag = true
-				container.Env[j].Value = "true"
+				flag1 = true
+				container.Env[j].Value = "all"
 			}
 			if container.Env[j].Name == "CUDA_VISIBLE_DEVICES" {
-				flag = true
+				flag2 = true
 				container.Env[j].Value = fmt.Sprint(job.CardIDX)
 			}
 		}
-		if !flag {
+		if !flag1 {
+			// container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
+			container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: `all`})
+
+		}
+		if !flag2 {
 			// container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
 			container.Env = append(container.Env, corev1.EnvVar{Name: "CUDA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
 
@@ -56,13 +62,31 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 		// container.Resources.Limits[`nvidia.com/gpumem`] = *resource.NewQuantity(int64(nodeInfo.CardNums)*(nodeInfo.CardInfo[0].GPU_MEMORY_USED+nodeInfo.CardInfo[0].GPU_MEMORY_FREE), resource.DecimalSI)
 
 		// 将Job中的epoch写入yaml中
-		container.Args = append(container.Args, "--epoch", fmt.Sprint(job.Epoch))
+		flagEpoch := false
+		for _, ele := range container.Args {
+			if ele == "--epoch" {
+				flagEpoch = true
+			}
+		}
+		if !flagEpoch {
+			container.Args = append(container.Args, "--epoch", fmt.Sprint(job.Epoch))
+		}
 
 		// 添加挂载
+		flag3 := false
 		if container.VolumeMounts == nil {
 			container.VolumeMounts = []corev1.VolumeMount{}
+		} else {
+			for idx := range container.VolumeMounts {
+				if container.VolumeMounts[idx].Name == `nvidia-mps` {
+					container.VolumeMounts[idx].MountPath = `/tmp/nvidia-mps`
+					flag3 = true
+				}
+			}
 		}
-		container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{Name: `nvidia-mps`, MountPath: `/tmp/nvidia-mps`})
+		if !flag3 {
+			container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{Name: `nvidia-mps`, MountPath: `/tmp/nvidia-mps`})
+		}
 	}
 
 	// 设置节点选择器
@@ -83,10 +107,20 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 	}
 
 	// 设置挂载
+	flag4 := false
 	if job.Batchv1Job.Spec.Template.Spec.Volumes == nil {
 		job.Batchv1Job.Spec.Template.Spec.Volumes = []corev1.Volume{}
+	} else {
+		for idx := range job.Batchv1Job.Spec.Template.Spec.Volumes {
+			if job.Batchv1Job.Spec.Template.Spec.Volumes[idx].Name == `nvidia-mps` {
+				job.Batchv1Job.Spec.Template.Spec.Volumes[idx].VolumeSource = corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}
+				flag4 = true
+			}
+		}
 	}
-	job.Batchv1Job.Spec.Template.Spec.Volumes = append(job.Batchv1Job.Spec.Template.Spec.Volumes, corev1.Volume{Name: `nvidia-mps`, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}})
+	if !flag4 {
+		job.Batchv1Job.Spec.Template.Spec.Volumes = append(job.Batchv1Job.Spec.Template.Spec.Volumes, corev1.Volume{Name: `nvidia-mps`, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}})
+	}
 
 	// 创建Job
 	_, err := clientset.BatchV1().Jobs(namespace).Create(

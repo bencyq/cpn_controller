@@ -31,19 +31,21 @@ func FifoSchedule(monitor *controller.Monitor) {
 						continue
 					}
 					for c, cardInfo := range nodeInfo.CardInfo {
+						job := monitor.JobPool.OriginJob[jobIdx]
 						if cardInfo.GPU_MEMORY_FREE < 1024 {
 							continue
 						}
-						if (monitor.JobPool.OriginJob[jobIdx].Batchv1Job.Annotations[`model_name`] == `llama3` || monitor.JobPool.OriginJob[jobIdx].Batchv1Job.Annotations[`model_name`] == `glm4` || monitor.JobPool.OriginJob[jobIdx].Batchv1Job.Annotations[`model_name`] == `qwen2.5`) && cardInfo.CardModel == `Tesla P100-PCIE-16GB` { //设置一下LLM作业不上p100
+						if (job.Batchv1Job.Annotations[`model_name`] == `llama3` || job.Batchv1Job.Annotations[`model_name`] == `glm4` || job.Batchv1Job.Annotations[`model_name`] == `qwen2.5`) && cardInfo.CardModel == `Tesla P100-PCIE-16GB` { //设置一下LLM作业不上p100
 							continue
 						}
-						monitor.JobPool.OriginJob[jobIdx].Batchv1Job.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyOnFailure
-						if monitor.AssignJobToNode(clusterInfo.ClusterClientSet, monitor.JobPool.OriginJob[jobIdx], nodeInfo.NodeID, controller.NAMESPACE) {
-							log.Printf("INFO: Job %v assigned to %v %v %v %v", monitor.JobPool.OriginJob[jobIdx].ID, dc, cl, n, c)
-							monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, monitor.JobPool.OriginJob[jobIdx])
-							monitor.JobPool.OriginJob[jobIdx].DataCenterIDX, monitor.JobPool.OriginJob[jobIdx].ClusterIDX = dc, cl
+						job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX = dc, cl, n, c
+						job.Batchv1Job.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyOnFailure
+						if monitor.AssignJobToNode(clusterInfo.ClusterClientSet, job, nodeInfo.NodeID, controller.NAMESPACE) {
+							log.Printf("INFO: Job %v assigned to %v %v %v %v", job.ID, dc, cl, n, c)
+							monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
 							jobIdx++
 							if jobIdx >= len(monitor.JobPool.OriginJob) {
+								monitor.JobPool.OriginJob = controller.JobQueue{}
 								return
 							}
 							continue
@@ -64,7 +66,7 @@ func FifoSchedule(monitor *controller.Monitor) {
 }
 
 func MonitorAssignedJob(monitor *controller.Monitor) {
-	for len(monitor.JobPool.AssignedJob) > 0 && len(monitor.JobPool.OriginJob) > 0 {
+	for len(monitor.JobPool.AssignedJob) > 0 || len(monitor.JobPool.OriginJob) > 0 {
 		// 对AssignedJob进行监控
 		finishedJobIdx := []int{}
 		// log.Println("INFO: Start monitor AssignedJob")
@@ -78,7 +80,7 @@ func MonitorAssignedJob(monitor *controller.Monitor) {
 					case job.Status.Failed == 1:
 						monitor.DeleteJobFromNode(monitor.GetClusterInfoPointerFromJob(ele).ClusterClientSet, ele, NAMESPACE)
 						monitor.JobPool.OriginJob = append(monitor.JobPool.OriginJob, ele)
-						log.Printf("ERROR:AssignedJob failed, job deleted %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
+						log.Printf("ERROR: AssignedJob failed, job deleted %v %v %v %v %v", ele.ID, ele.DataCenterIDX, ele.ClusterIDX, ele.NodeIDX, ele.CardIDX)
 					case job.Status.Active == 1:
 						continue
 					}
@@ -97,9 +99,10 @@ func MonitorAssignedJob(monitor *controller.Monitor) {
 		for _, job := range monitor.JobPool.OriginJob {
 			if !monitor.AssignJobToNode(monitor.GetClusterInfoPointerFromJob(job).ClusterClientSet, job, monitor.GetNodeInfoPointerFromJob(job).NodeID, NAMESPACE) {
 				ScheduleFailedJob = append(ScheduleFailedJob, job)
-				continue
+			} else {
+				monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+				log.Printf("INFO: Reassign job %v %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
 			}
-			log.Printf("INFO: Reassign job %v %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
 
 		}
 		monitor.JobPool.OriginJob = ScheduleFailedJob

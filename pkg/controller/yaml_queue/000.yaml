@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "71"
-    model_name: qwen2.5
+    epoch: "57"
+    model_name: glm4
   creationTimestamp: null
   name: "000"
 spec:
@@ -16,14 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - qwen2.5
+        - glm4
         - --model-path
-        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
+        - /cyq/models/THUDM/glm-4-9b-chat
         command:
         - python
         - /cyq/test_demo/llm_cycle.py
-        image: bencyq/qwen2.5:202503071530
-        name: qwen
+        image: bencyq/glm4:202503071531
+        name: glm4
         resources: {}
       restartPolicy: Never
 status: {}

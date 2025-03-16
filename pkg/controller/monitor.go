@@ -120,7 +120,7 @@ func (monitor *Monitor) GetMetric(retries int) {
 				node.CPU_USAGE, _ = strconv.ParseFloat(nodeMetric["CPU_USAGE"].Result[0].Value[1].(string), 64)
 				node.TOTAL_MEMORY, _ = strconv.ParseInt(nodeMetric["TOTAL_MEMORY"].Result[0].Value[1].(string), 10, 64)
 				if node.TOTAL_MEMORY == 0 {
-					log.Printf("ERROR: invalid metric at DCID:%v ClID:%v NID:%v", monitor.DataCenterInfo[dc].DataCenterID, monitor.DataCenterInfo[dc].ClusterInfo[cl].ClusterID, monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].NodeID)
+					log.Printf("ERROR: invalid metric at %v %v %v", dc, cl, n)
 				}
 				node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
 				if node.NodeType == "GPU" {
@@ -129,6 +129,10 @@ func (monitor *Monitor) GetMetric(retries int) {
 					}
 					for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
 						node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_FREE, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+						if node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_FREE == 0 {
+							log.Printf("ERROR: invalid metric at %v %v %v", dc, cl, n)
+							continue
+						}
 					}
 					for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
 						node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_USED, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)

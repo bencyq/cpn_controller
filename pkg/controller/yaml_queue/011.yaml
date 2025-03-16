@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5059"
-    model_name: vgg19
+    epoch: "5647"
+    model_name: resnet152
   creationTimestamp: null
   name: "011"
 spec:
@@ -16,14 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - vgg19
+        - resnet152
         - --model-path
-        - /cyq/models/vgg/vgg19.pth
+        - /cyq/models/resnet/resnet152.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/vgg_epoch.py
+        - /cyq/test_demo/resnet_epoch.py
         image: bencyq/infer:202503071541
         name: pytorch-container
         resources: {}

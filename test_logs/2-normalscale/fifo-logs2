@@ -1,0 +1,221 @@
+Starting: /root/go/bin/dlv dap --listen=127.0.0.1:39579 --log-dest=3 from /root/cpn_controller/cmd/fifo
+DAP server listening at: 127.0.0.1:39579
+Type 'dlv help' for list of commands.
+2025/03/15 05:53:18 INFO: Information initiated
+2025/03/15 05:53:19 INFO: GetMetric done!
+2025/03/15 05:53:19 INFO: getJob finished
+2025/03/15 05:53:19 INFO: GetMetric done!
+2025/03/15 05:53:19 INFO: Job 000 assigned to 0 0 1 0
+2025/03/15 05:53:19 INFO: Job 001 assigned to 0 0 1 1
+2025/03/15 05:53:19 INFO: Job 002 assigned to 0 1 1 0
+2025/03/15 05:53:29 INFO: GetMetric done!
+2025/03/15 05:53:29 INFO: Job 003 assigned to 0 0 1 0
+2025/03/15 05:53:29 INFO: Job 004 assigned to 0 0 1 1
+2025/03/15 05:53:29 INFO: Job 005 assigned to 0 1 1 0
+2025/03/15 05:53:39 INFO: GetMetric done!
+2025/03/15 05:53:39 INFO: Job 006 assigned to 0 0 1 0
+2025/03/15 05:53:39 INFO: Job 007 assigned to 0 0 1 1
+2025/03/15 05:53:39 INFO: Job 008 assigned to 0 1 1 0
+2025/03/15 05:53:50 INFO: GetMetric done!
+2025/03/15 05:53:50 INFO: Job 009 assigned to 0 0 1 0
+2025/03/15 05:53:50 INFO: Job 010 assigned to 0 0 1 1
+2025/03/15 05:53:50 INFO: Job 011 assigned to 0 1 1 0
+2025/03/15 05:54:00 INFO: GetMetric done!
+2025/03/15 05:54:00 INFO: Job 012 assigned to 0 0 1 0
+2025/03/15 05:54:00 INFO: Job 013 assigned to 0 0 1 1
+2025/03/15 05:54:00 INFO: Job 014 assigned to 0 1 1 0
+2025/03/15 05:54:00 INFO: Job 015 assigned to 0 2 0 0
+2025/03/15 05:54:00 INFO: Job 016 assigned to 0 2 0 1
+2025/03/15 05:54:00 INFO: Job 017 assigned to 0 2 0 2
+2025/03/15 05:54:00 INFO: Job 018 assigned to 0 2 0 3
+2025/03/15 05:54:00 INFO: Job 019 assigned to 0 2 0 4
+2025/03/15 05:54:00 INFO: Job 020 assigned to 0 2 0 5
+2025/03/15 05:54:10 INFO: GetMetric done!
+2025/03/15 05:54:10 INFO: Job 021 assigned to 0 0 1 0
+2025/03/15 05:54:10 INFO: Job 022 assigned to 0 0 1 1
+2025/03/15 05:54:10 INFO: Job 023 assigned to 0 1 1 0
+2025/03/15 05:54:10 INFO: Job 024 assigned to 0 2 0 0
+2025/03/15 05:54:10 INFO: Job 025 assigned to 0 2 0 1
+2025/03/15 05:54:10 INFO: Job 026 assigned to 0 2 0 2
+2025/03/15 05:54:10 INFO: Job 027 assigned to 0 2 0 3
+2025/03/15 05:54:20 INFO: GetMetric done!
+2025/03/15 05:54:20 INFO: Job 028 assigned to 0 0 1 0
+2025/03/15 05:54:20 INFO: Job 029 assigned to 0 0 1 1
+2025/03/15 05:54:20 INFO: Job 030 assigned to 0 1 1 0
+2025/03/15 05:54:20 INFO: Job 031 assigned to 0 2 0 0
+2025/03/15 05:54:31 INFO: GetMetric done!
+2025/03/15 05:54:31 INFO: Job 032 assigned to 0 0 1 0
+2025/03/15 05:54:31 INFO: Job 033 assigned to 0 0 1 1
+2025/03/15 05:54:31 INFO: Job 034 assigned to 0 1 1 0
+2025/03/15 05:54:31 INFO: Job 035 assigned to 0 2 0 0
+2025/03/15 05:54:31 INFO: Job 036 assigned to 0 2 0 1
+2025/03/15 05:54:31 INFO: Job 037 assigned to 0 2 0 2
+2025/03/15 05:54:41 INFO: GetMetric done!
+2025/03/15 05:54:41 INFO: Job 038 assigned to 0 0 1 0
+2025/03/15 05:54:41 INFO: Job 039 assigned to 0 0 1 1
+2025/03/15 05:55:19 INFO: AssignedJob finished, 002 0 1 1 0, runtime 172.871801613
+2025/03/15 05:55:20 INFO: AssignedJob finished, 011 0 1 1 0, runtime 142.150084747
+2025/03/15 05:55:48 INFO: AssignedJob finished, 014 0 1 1 0, runtime 160.665724301
+2025/03/15 05:55:55 ERROR: AssignedJob failed, job deleted 006 0 0 1 0
+2025/03/15 05:55:56 INFO: AssignedJob finished, 030 0 1 1 0, runtime 147.864292275
+2025/03/15 05:56:35 INFO: Reassign job 006 0 0 1 0
+2025/03/15 05:56:40 INFO: AssignedJob finished, 015 0 2 0 0, runtime 298.87841697
+2025/03/15 05:56:40 INFO: AssignedJob finished, 018 0 2 0 3, runtime 298.958148891
+2025/03/15 05:56:41 ERROR: AssignedJob failed, job deleted 021 0 0 1 0
+2025/03/15 05:56:41 INFO: AssignedJob finished, 023 0 1 1 0, runtime 203.122931846
+2025/03/15 05:56:41 ERROR: AssignedJob failed, job deleted 028 0 0 1 0
+2025/03/15 05:56:41 ERROR: AssignedJob failed, job deleted 032 0 0 1 0
+2025/03/15 05:56:42 INFO: AssignedJob finished, 034 0 1 1 0, runtime 183.118248289
+2025/03/15 05:56:42 INFO: AssignedJob finished, 036 0 2 0 1, runtime 270.176712982
+2025/03/15 05:56:42 ERROR: AssignedJob failed, job deleted 038 0 0 1 0
+2025/03/15 05:56:42 ERROR: AssignedJob failed, job deleted 039 0 0 1 1
+2025/03/15 05:56:51 INFO: Reassign job 021 0 0 1 0
+2025/03/15 05:56:51 INFO: Reassign job 028 0 0 1 0
+2025/03/15 05:56:51 INFO: Reassign job 032 0 0 1 0
+2025/03/15 05:56:51 INFO: Reassign job 038 0 0 1 0
+2025/03/15 05:56:51 INFO: Reassign job 039 0 0 1 1
+2025/03/15 05:56:53 INFO: AssignedJob finished, 031 0 2 0 0, runtime 291.097643155
+2025/03/15 05:57:16 INFO: AssignedJob finished, 001 0 0 1 1, runtime 237.482976763
+2025/03/15 05:57:16 INFO: AssignedJob finished, 005 0 1 1 0, runtime 279.894033476
+2025/03/15 05:57:20 INFO: AssignedJob finished, 009 0 0 1 0, runtime 210.671065752
+2025/03/15 05:58:05 INFO: AssignedJob finished, 010 0 0 1 1, runtime 255.67094115
+2025/03/15 05:58:31 ERROR: AssignedJob failed, job deleted 006 0 0 1 0
+2025/03/15 05:58:32 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 05:58:35 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 05:58:38 INFO: Reassign job 006 0 0 1 0
+2025/03/15 05:58:52 ERROR: AssignedJob failed, job deleted 021 0 0 1 0
+2025/03/15 05:58:53 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 05:58:56 ERROR: AssignedJob failed, job deleted 038 0 0 1 0
+2025/03/15 05:58:56 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 05:58:57 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 05:58:59 INFO: Reassign job 021 0 0 1 0
+2025/03/15 05:59:00 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 05:59:02 ERROR: AssignedJob failed, job deleted 032 0 0 1 0
+2025/03/15 05:59:03 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 05:59:03 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 05:59:04 INFO: AssignedJob finished, 027 0 2 0 3, runtime 432.941562968
+2025/03/15 05:59:06 INFO: Reassign job 038 0 0 1 0
+2025/03/15 05:59:06 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 05:59:07 INFO: AssignedJob finished, 026 0 2 0 2, runtime 435.962800862
+2025/03/15 05:59:08 ERROR: AssignedJob failed, job deleted 028 0 0 1 0
+2025/03/15 05:59:09 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 05:59:09 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 05:59:12 INFO: Reassign job 032 0 0 1 0
+2025/03/15 05:59:12 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 05:59:15 INFO: Reassign job 028 0 0 1 0
+2025/03/15 05:59:25 INFO: AssignedJob finished, 008 0 1 1 0, runtime 398.692103886
+2025/03/15 05:59:26 INFO: AssignedJob finished, 020 0 2 0 5, runtime 464.184646374
+2025/03/15 05:59:37 INFO: AssignedJob finished, 012 0 0 1 0, runtime 337.886179948
+2025/03/15 05:59:52 INFO: AssignedJob finished, 019 0 2 0 4, runtime 490.152626659
+2025/03/15 06:00:00 INFO: AssignedJob finished, 004 0 0 1 1, runtime 391.072175372
+2025/03/15 06:00:32 INFO: AssignedJob finished, 029 0 0 1 1, runtime 372.071354873
+2025/03/15 06:00:42 ERROR: AssignedJob failed, job deleted 006 0 0 1 0
+2025/03/15 06:00:43 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:00:45 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:00:48 INFO: Reassign job 006 0 0 1 0
+2025/03/15 06:01:09 ERROR: AssignedJob failed, job deleted 021 0 0 1 0
+2025/03/15 06:01:09 ERROR: AssignedJob failed, job deleted 038 0 0 1 0
+2025/03/15 06:01:10 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:01:10 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:01:12 ERROR: AssignedJob failed, job deleted 028 0 0 1 0
+2025/03/15 06:01:13 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:01:13 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:01:13 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:01:14 INFO: AssignedJob finished, 016 0 2 0 1, runtime 572.296675125
+2025/03/15 06:01:15 INFO: Reassign job 021 0 0 1 0
+2025/03/15 06:01:15 INFO: Reassign job 038 0 0 1 0
+2025/03/15 06:01:15 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:01:18 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:01:19 INFO: AssignedJob finished, 024 0 2 0 0, runtime 567.302326122
+2025/03/15 06:01:20 INFO: Reassign job 028 0 0 1 0
+2025/03/15 06:01:22 ERROR: AssignedJob failed, job deleted 032 0 0 1 0
+2025/03/15 06:01:23 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:01:25 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:01:28 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:01:28 INFO: AssignedJob finished, 003 0 0 1 0, runtime 479.67044693
+2025/03/15 06:01:30 INFO: Reassign job 032 0 0 1 0
+2025/03/15 06:01:34 INFO: AssignedJob finished, 039 0 0 1 1, runtime 283.070263666
+2025/03/15 06:02:09 INFO: AssignedJob finished, 007 0 0 1 1, runtime 510.471683116
+2025/03/15 06:02:13 INFO: AssignedJob finished, 013 0 0 1 1, runtime 493.271089185
+2025/03/15 06:02:21 INFO: AssignedJob finished, 033 0 0 1 1, runtime 470.679124284
+2025/03/15 06:02:41 ERROR: AssignedJob failed, job deleted 006 0 0 1 0
+2025/03/15 06:02:42 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:02:44 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:02:44 INFO: AssignedJob finished, 025 0 2 0 1, runtime 652.500159357
+2025/03/15 06:02:45 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:02:46 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:02:48 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:02:49 INFO: Reassign job 006 0 0 1 0
+2025/03/15 06:02:57 INFO: AssignedJob finished, 035 0 2 0 0, runtime 645.111167458
+2025/03/15 06:02:57 INFO: AssignedJob finished, 037 0 2 0 2, runtime 645.139519665
+2025/03/15 06:03:11 ERROR: AssignedJob failed, job deleted 038 0 0 1 0
+2025/03/15 06:03:12 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:03:13 ERROR: AssignedJob failed, job deleted 021 0 0 1 0
+2025/03/15 06:03:14 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:03:14 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:03:15 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:03:15 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:03:16 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:03:17 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:03:18 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:03:18 INFO: Reassign job 021 0 0 1 0
+2025/03/15 06:03:19 INFO: Reassign job 038 0 0 1 0
+2025/03/15 06:03:22 ERROR: AssignedJob failed, job deleted 028 0 0 1 0
+2025/03/15 06:03:23 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:03:24 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:03:25 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:03:27 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:03:28 ERROR: AssignedJob failed, job deleted 032 0 0 1 0
+2025/03/15 06:03:28 INFO: Reassign job 028 0 0 1 0
+2025/03/15 06:03:29 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:03:30 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:03:31 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:03:33 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:03:34 INFO: Reassign job 032 0 0 1 0
+2025/03/15 06:03:51 INFO: AssignedJob finished, 017 0 2 0 2, runtime 729.702384213
+2025/03/15 06:04:53 ERROR: AssignedJob failed, job deleted 006 0 0 1 0
+2025/03/15 06:04:54 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:04:56 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:04:57 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:04:59 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:05:00 INFO: Reassign job 006 0 0 1 0
+2025/03/15 06:05:15 ERROR: AssignedJob failed, job deleted 021 0 0 1 0
+2025/03/15 06:05:16 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:05:17 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:05:19 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:05:19 ERROR: AssignedJob failed, job deleted 038 0 0 1 0
+2025/03/15 06:05:20 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:05:20 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:05:22 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:05:22 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "038" already exists
+2025/03/15 06:05:23 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "021" already exists
+2025/03/15 06:05:23 INFO: Reassign job 038 0 0 1 0
+2025/03/15 06:05:25 INFO: Reassign job 021 0 0 1 0
+2025/03/15 06:05:32 ERROR: AssignedJob failed, job deleted 028 0 0 1 0
+2025/03/15 06:05:33 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:34 ERROR: AssignedJob failed, job deleted 032 0 0 1 0
+2025/03/15 06:05:35 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:35 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:05:36 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:37 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "032" already exists
+2025/03/15 06:05:38 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:38 INFO: Reassign job 032 0 0 1 0
+2025/03/15 06:05:39 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:41 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:42 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "028" already exists
+2025/03/15 06:05:44 INFO: Reassign job 028 0 0 1 0
+2025/03/15 06:05:56 INFO: AssignedJob finished, 000 0 0 1 0, runtime 757.879346354
+2025/03/15 06:06:56 ERROR: AssignedJob failed, job deleted 006 0 0 1 0
+2025/03/15 06:06:57 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:06:58 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:06:59 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:07:00 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:07:02 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:07:03 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:07:04 ERROR: AssignJobToNode failed! object is being deleted: jobs.batch "006" already exists
+2025/03/15 06:07:05 INFO: Reassign job 006 0 0 1 0
+Detaching and terminating target process
+dlv dap (8197) exited with code: 0
+
+
+改进后的FIFO，能重新提交失败的作业；但是会导致作业死锁（一个24g的卡，分配了两个15g显存要求的作业）

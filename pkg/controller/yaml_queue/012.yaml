@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5812"
-    model_name: densenet201
+    epoch: "5859"
+    model_name: resnet152
   creationTimestamp: null
   name: "012"
 spec:
@@ -16,14 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet201
+        - resnet152
         - --model-path
-        - /cyq/models/densenet/densenet201.pth
+        - /cyq/models/resnet/resnet152.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/densenet_epoch.py
+        - /cyq/test_demo/resnet_epoch.py
         image: bencyq/infer:202503071541
         name: pytorch-container
         resources: {}

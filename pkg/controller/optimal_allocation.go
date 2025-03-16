@@ -14,7 +14,7 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	var optAlc = [5]int{math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt} // optimal Allocation, 存储job的分配位置
 	minTotalTime := int64(math.MaxInt64)
 
-	// 	
+	//
 	for dc, dataCenterInfo := range monitor.DataCenterInfo {
 		for cl, clusterInfo := range dataCenterInfo.ClusterInfo {
 			for n, nodeInfo := range clusterInfo.NodeInfo {
@@ -28,6 +28,9 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 				for c, cardInfo := range nodeInfo.CardInfo {
 					transferTime := (newJob.DataSize * 1024) / nodeInfo.Bandwidth
 					if cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq || len(cardInfo.JobQueue) >= 3 {
+						continue
+					}
+					if newJob.JobType == `GPU` && cardInfo.CardModel == `Tesla P100-PCIE-16GB` {
 						continue
 					}
 					for _, job := range cardInfo.JobQueue {
@@ -95,13 +98,11 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 					if cardInfo.GPU_MEMORY_USED+cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq {
 						continue
 					}
-					if monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime != 0 {
+					if monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedJob != nil {
 						continue
 					}
-					for _, job := range cardInfo.JobQueue {
-						if job.JobType == `GPU` && newJob.JobType == `GPU` {
-							continue
-						}
+					if newJob.JobType == `GPU` && cardInfo.CardModel == `Tesla P100-PCIE-16GB` {
+						continue
 					}
 					totaltime := int64(monitor.RandomForestPredict([]string{newJob.JobModelName}, dc, cl, n, c)[0]) * newJob.Epoch // 计算卡上状态为空时的运行时间
 					log.Println("DEBUG: TotaltimeWithoutLoads: ", totaltime, newJob.ID, dc, cl, n, c)
@@ -126,7 +127,7 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 		return false
 	}
 
-	// 计算该卡上当前作业的最长剩余运行时间
+	// 计算该卡上当前作业的最长剩余运行时间 TODO:FIXME:有可能为0，导致出问题
 	minRemainedTime := int64(0)
 	// minIdx := math.MaxInt64
 	for _, job := range monitor.DataCenterInfo[optAlc[0]].ClusterInfo[optAlc[1]].NodeInfo[optAlc[2]].CardInfo[optAlc[3]].JobQueue {

@@ -144,7 +144,7 @@ func (monitor *Monitor) AssignJob(job *Job) bool {
 		return false
 	}
 	if monitor.AssignJobWithinController(job) {
-		log.Printf("DEBUG: Job %v assigned, %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
+		log.Printf("INFO: Job %v assigned, %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
 		return true
 	}
 	return false
@@ -199,9 +199,8 @@ func (monitor *Monitor) ScheduleAndAssign() {
 func (monitor *Monitor) PersistentPredictor() {
 	log.Println("INFO: Start PersistentPredictor")
 
-	monitor.GetMetric(1)
-
 	for {
+		monitor.GetMetric(1)
 		// 对AssignedFailedJob(即ScheduledJob）进行重试，若还是失败，重新放回originJob
 		log.Println("INFO: Start ReAssignjob")
 		for _, job := range monitor.JobPool.ScheduledJob {
@@ -250,6 +249,8 @@ func (monitor *Monitor) PersistentPredictor() {
 
 		// 当有任务结束时
 		if flag {
+			monitor.GetMetric(1)
+
 			// 对ReservedJob进行再分配
 			var AssignFailedJobQueue = JobQueue{}
 			log.Println("INFO: Start assign ReservedJob")
@@ -258,6 +259,7 @@ func (monitor *Monitor) PersistentPredictor() {
 			for _, job := range monitor.JobPool.ReservedJob {
 				for _, j := range monitor.GetCardInfoPointerFromJob(job).JobQueue {
 					if j.JobType == "GPU" { // 避免一个卡上存在两个GPU Job
+						AssignFailedJobQueue = append(AssignFailedJobQueue, job)
 						continue overloop
 					}
 				}

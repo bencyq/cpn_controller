@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5422"
-    model_name: yolov8m
+    epoch: "5739"
+    model_name: resnet50
   creationTimestamp: null
   name: "037"
 spec:
@@ -16,16 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - yolov8m
+        - resnet50
         - --model-path
-        - /cyq/models/yolov8/yolov8m.pt
+        - /cyq/models/resnet/resnet50.pth
         - --images-path
-        - /cyq/datasets/Mapillary_Vistas/sorted_images/
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/yolo_epoch.py
-        image: bencyq/yolo:202503071542
-        name: yolov8m
+        - /cyq/test_demo/resnet_epoch.py
+        image: bencyq/infer:202503071541
+        name: pytorch-container
         resources: {}
       restartPolicy: Never
 status: {}

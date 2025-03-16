@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "85"
-    model_name: llama3
+    epoch: "5110"
+    model_name: densenet201
   creationTimestamp: null
   name: "032"
 spec:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - llama3
+        - densenet201
         - --model-path
-        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
+        - /cyq/models/densenet/densenet201.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llama3:202503071526
-        name: llama3
+        - /cyq/test_demo/densenet_epoch.py
+        image: bencyq/infer:202503071541
+        name: pytorch-container
         resources: {}
       restartPolicy: Never
 status: {}

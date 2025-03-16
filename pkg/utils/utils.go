@@ -75,7 +75,7 @@ func MakeRandomJobQueue(directoryIn, directoryOut string) {
 	randSrc := rand.New(rand.NewSource(time.Now().UnixNano()))
 	NewJobQueue := []batchv1.Job{}
 	for _, job := range JobQueue {
-		times := randSrc.Intn(4) + 1
+		times := randSrc.Intn(24) + 1
 		for i := 0; i < times; i += 1 {
 			NewJobQueue = append(NewJobQueue, job)
 		}

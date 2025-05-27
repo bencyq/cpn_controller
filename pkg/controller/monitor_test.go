@@ -24,3 +24,9 @@ func TestGetJob(t *testing.T) {
 func TestNewMonitor(t *testing.T) {
 	NewMonitor()
 }
+
+func TestGetImagefs(t *testing.T) {
+	JsonUrl = "example2.json"
+	m := NewMonitor()
+	GetImagefs(m.DataCenterInfo[0].ClusterInfo[0].ClusterClientSet, "node16")
+}

@@ -40,25 +40,25 @@
                                     "CardID": "0",
                                     "CardModel": "NVIDIA RTX A6000",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.014736412,
+                                        "Model2AVGRunTime": 0.051585681,
+                                        "Model3AVGRunTime": 36.71008748
                                     }
                                 },
                                 {
                                     "CardID": "1",
                                     "CardModel": "NVIDIA RTX A6000",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.014736412,
+                                        "Model2AVGRunTime": 0.051585681,
+                                        "Model3AVGRunTime": 36.71008748
                                     }
                                 }
                             ]
                         },
                         {
-                            "NodeID": "node235",
-                            "NodeIP": "10.90.1.235",
+                            "NodeID": "node245",
+                            "NodeIP": "10.90.1.245",
                             "CPUInfo": {
                                 "CPUNums": 2,
                                 "Architecture": "x86_64",
@@ -67,78 +67,123 @@
                             },
                             "NodeType": "GPU",
                             "Bandwidth": 100,
-                            "CardNums": 8,
+                            "CardNums": 4,
                             "CardInfo": [
                                 {
                                     "CardID": "0",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA GeForce RTX 4090",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.01656568,
+                                        "Model2AVGRunTime": 0.065646874,
+                                        "Model3AVGRunTime": 21.20620537
                                     }
                                 },
                                 {
                                     "CardID": "1",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
-                                        "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                    "CardModel": "NVIDIA GeForce RTX 4090",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime": 0.01656568,
+                                        "Model2AVGRunTime": 0.065646874,
+                                        "Model3AVGRunTime": 21.20620537
                                     }
                                 },
                                 {
                                     "CardID": "2",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA GeForce RTX 4090",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.01656568,
+                                        "Model2AVGRunTime": 0.065646874,
+                                        "Model3AVGRunTime": 21.20620537
                                     }
                                 },
                                 {
                                     "CardID": "3",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA GeForce RTX 4090",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.01656568,
+                                        "Model2AVGRunTime": 0.065646874,
+                                        "Model3AVGRunTime": 21.20620537
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "NodeID": "node245",
+                            "NodeIP": "10.90.1.191",
+                            "NodeType": "GPU",
+                            "Bandwidth": 100,
+                            "CardNums": 8,
+                            "CardInfo": [
+                                {
+                                    "CardID": "0",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
+                                    }
+                                },
+                                {
+                                    "CardID": "1",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
+                                    }
+                                },
+                                {
+                                    "CardID": "2",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
+                                    }
+                                },
+                                {
+                                    "CardID": "3",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "BenchMark": {
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
                                     }
                                 },
                                 {
                                     "CardID": "4",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
                                     }
                                 },
                                 {
                                     "CardID": "5",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
                                     }
                                 },
                                 {
                                     "CardID": "6",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
                                     }
                                 },
                                 {
                                     "CardID": "7",
-                                    "CardModel": "NVIDIA RTX 6000 Ada Generation",
+                                    "CardModel": "NVIDIA A100-PCIE-40GB",
                                     "BenchMark": {
-                                        "Model1AVGRunTime" : 0.014736412,
-                                        "Model2AVGRunTime" : 0.051585681,
-                                        "Model3AVGRunTime" : 36.71008748
+                                        "Model1AVGRunTime": 0.017401139,
+                                        "Model2AVGRunTime": 0.054753114,
+                                        "Model3AVGRunTime": 18.97077145
                                     }
                                 }
                             ]

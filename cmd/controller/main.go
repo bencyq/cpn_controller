@@ -13,7 +13,7 @@ func main() {
 	// 初始化流程
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	controller.JsonUrl = "example3.json"
+	controller.JsonUrl = "example2.json"
 	monitor := controller.NewMonitor()
 	monitor.InitPredictor(ctx)
 

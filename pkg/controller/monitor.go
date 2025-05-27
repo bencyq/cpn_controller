@@ -218,6 +218,17 @@ func JobList(client *kubernetes.Clientset, namespace string) (joblist *batchv1.J
 	return joblist, nil
 }
 
+func GetImagefs(client *kubernetes.Clientset, nodeName string) {
+	node, err := client.CoreV1().Nodes().Get(context.TODO(), "node-name", metav1.GetOptions{})
+	if err != nil {
+		log.Println("ERROR: GetImagefs failed", err)
+	}
+	// 获取临时存储的总容量（可能包含 imagefs）
+	capacity := node.Status.Capacity[corev1.ResourceEphemeralStorage]
+	allocatable := node.Status.Allocatable[corev1.ResourceEphemeralStorage]
+	fmt.Println(capacity, allocatable)
+}
+
 func parseYamlFile(filePath string) (batchv1.Job, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {

@@ -3,7 +3,7 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5682"
+    epoch: "5915"
     model_name: resnet18
   creationTimestamp: null
   name: "017"

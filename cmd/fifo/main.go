@@ -9,9 +9,10 @@ import (
 
 func main() {
 	startTime := time.Now()
+	controller.JsonUrl = "example2.json"
 	controller.NAMESPACE = fifo.NAMESPACE
 	monitor := controller.NewMonitor()
-	fifo.FifoSchedule(monitor)
+	monitor.ReadModelBaseline()
 	fifo.MonitorAssignedJob(monitor)
 	log.Println("INFO: Consumed time", time.Since(startTime).Minutes())
 }

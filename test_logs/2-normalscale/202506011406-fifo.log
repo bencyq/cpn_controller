@@ -1,0 +1,205 @@
+nohup: ignoring input
+2025/06/01 07:16:16 INFO: Information initiated
+2025/06/01 07:16:16 INFO: GetMetric done!
+2025/06/01 07:16:16 INFO: getJob finished
+2025/06/01 07:16:16 INFO: GetMetric done!
+2025/06/01 07:16:16 INFO: Job 000 assigned to 0 0 1 0
+2025/06/01 07:16:16 INFO: Job 001 assigned to 0 0 1 1
+2025/06/01 07:16:16 INFO: Job 002 assigned to 0 0 2 0
+2025/06/01 07:16:16 INFO: Job 003 assigned to 0 0 2 1
+2025/06/01 07:16:16 INFO: Job 004 assigned to 0 0 2 2
+2025/06/01 07:16:16 INFO: Job 005 assigned to 0 0 2 3
+2025/06/01 07:16:16 INFO: Job 006 assigned to 0 0 3 0
+2025/06/01 07:16:16 INFO: Job 007 assigned to 0 0 3 1
+2025/06/01 07:16:16 INFO: Job 008 assigned to 0 0 3 2
+2025/06/01 07:16:16 INFO: Job 009 assigned to 0 0 3 3
+2025/06/01 07:16:16 INFO: Job 010 assigned to 0 0 3 4
+2025/06/01 07:16:16 INFO: Job 011 assigned to 0 0 3 5
+2025/06/01 07:16:16 INFO: Job 012 assigned to 0 0 3 6
+2025/06/01 07:16:17 INFO: Job 013 assigned to 0 0 3 7
+2025/06/01 07:16:37 INFO: GetMetric done!
+2025/06/01 07:16:37 INFO: Job 014 assigned to 0 0 1 0
+2025/06/01 07:16:37 INFO: Job 015 assigned to 0 0 1 1
+2025/06/01 07:16:37 INFO: Job 016 assigned to 0 0 2 0
+2025/06/01 07:16:37 INFO: Job 017 assigned to 0 0 2 1
+2025/06/01 07:16:37 INFO: Job 018 assigned to 0 0 2 2
+2025/06/01 07:16:37 INFO: Job 019 assigned to 0 0 2 3
+2025/06/01 07:16:37 INFO: Job 020 assigned to 0 0 3 0
+2025/06/01 07:16:37 INFO: Job 021 assigned to 0 0 3 1
+2025/06/01 07:16:37 INFO: Job 022 assigned to 0 0 3 2
+2025/06/01 07:16:37 INFO: Job 023 assigned to 0 0 3 3
+2025/06/01 07:16:37 INFO: Job 024 assigned to 0 0 3 4
+2025/06/01 07:16:37 INFO: Job 025 assigned to 0 0 3 5
+2025/06/01 07:16:37 INFO: Job 026 assigned to 0 0 3 6
+2025/06/01 07:16:37 INFO: Job 027 assigned to 0 0 3 7
+2025/06/01 07:16:58 INFO: GetMetric done!
+2025/06/01 07:16:58 INFO: Job 028 assigned to 0 0 1 0
+2025/06/01 07:16:58 INFO: Job 029 assigned to 0 0 1 1
+2025/06/01 07:16:58 INFO: Job 030 assigned to 0 0 2 0
+2025/06/01 07:16:58 INFO: Job 031 assigned to 0 0 2 1
+2025/06/01 07:16:58 INFO: Job 032 assigned to 0 0 2 2
+2025/06/01 07:16:58 INFO: Job 033 assigned to 0 0 2 3
+2025/06/01 07:16:58 INFO: Job 034 assigned to 0 0 3 0
+2025/06/01 07:16:58 INFO: Job 035 assigned to 0 0 3 1
+2025/06/01 07:16:58 INFO: Job 036 assigned to 0 0 3 2
+2025/06/01 07:16:58 INFO: Job 037 assigned to 0 0 3 3
+2025/06/01 07:16:58 INFO: Job 038 assigned to 0 0 3 4
+2025/06/01 07:16:58 INFO: Job 039 assigned to 0 0 3 5
+2025/06/01 07:17:06 INFO: Sleep
+2025/06/01 07:17:46 INFO: GetMetric done!
+2025/06/01 07:17:46 INFO: AssignedJob finished, 002 0 0 2 0, runtime 90.548775343
+2025/06/01 07:17:46 INFO: AssignedJob finished, 011 0 0 3 5, runtime 90.910053739
+2025/06/01 07:17:48 INFO: AssignedJob finished, 018 0 0 2 2, runtime 71.309774731
+2025/06/01 07:17:52 INFO: Sleep
+2025/06/01 07:18:32 INFO: GetMetric done!
+2025/06/01 07:18:33 INFO: AssignedJob finished, 015 0 0 1 1, runtime 116.380503782
+2025/06/01 07:18:36 INFO: AssignedJob finished, 030 0 0 2 0, runtime 98.179152523
+2025/06/01 07:18:36 INFO: AssignedJob finished, 031 0 0 2 1, runtime 98.381451699
+2025/06/01 07:18:36 INFO: AssignedJob finished, 034 0 0 3 0, runtime 98.981504319
+2025/06/01 07:18:37 INFO: AssignedJob finished, 036 0 0 3 2, runtime 99.379831261
+2025/06/01 07:18:37 INFO: Sleep
+2025/06/01 07:19:18 INFO: GetMetric done!
+2025/06/01 07:19:18 INFO: AssignedJob finished, 001 0 0 1 1, runtime 182.066160808
+2025/06/01 07:19:18 INFO: AssignedJob finished, 009 0 0 3 3, runtime 182.193256388
+2025/06/01 07:19:18 INFO: AssignedJob finished, 010 0 0 3 4, runtime 182.210857642
+2025/06/01 07:19:19 INFO: AssignedJob finished, 019 0 0 2 3, runtime 162.250820563
+2025/06/01 07:19:22 INFO: Sleep
+2025/06/01 07:20:02 INFO: GetMetric done!
+2025/06/01 07:20:02 INFO: AssignedJob finished, 012 0 0 3 6, runtime 226.644241338
+2025/06/01 07:20:02 INFO: AssignedJob finished, 016 0 0 2 0, runtime 205.707119521
+2025/06/01 07:20:03 INFO: AssignedJob finished, 024 0 0 3 4, runtime 206.907907789
+2025/06/01 07:20:06 INFO: AssignedJob finished, 039 0 0 3 5, runtime 188.109150653
+2025/06/01 07:20:06 INFO: Sleep
+2025/06/01 07:20:46 INFO: GetMetric done!
+2025/06/01 07:20:46 INFO: AssignedJob finished, 003 0 0 2 1, runtime 270.192571541
+2025/06/01 07:20:48 INFO: Sleep
+2025/06/01 07:21:29 INFO: GetMetric done!
+2025/06/01 07:21:29 INFO: AssignedJob finished, 007 0 0 3 1, runtime 313.119572852
+2025/06/01 07:21:29 INFO: AssignedJob finished, 008 0 0 3 2, runtime 313.133859822
+2025/06/01 07:21:31 INFO: Sleep
+2025/06/01 07:22:11 INFO: GetMetric done!
+2025/06/01 07:22:12 INFO: AssignedJob finished, 025 0 0 3 5, runtime 335.108491505
+2025/06/01 07:22:13 INFO: AssignedJob finished, 035 0 0 3 1, runtime 315.506975476
+2025/06/01 07:22:13 INFO: Sleep
+2025/06/01 07:22:53 INFO: GetMetric done!
+2025/06/01 07:22:55 INFO: AssignedJob finished, 037 0 0 3 3, runtime 357.570660384
+2025/06/01 07:22:55 INFO: Sleep
+2025/06/01 07:23:35 INFO: GetMetric done!
+2025/06/01 07:23:37 INFO: Sleep
+2025/06/01 07:24:17 INFO: GetMetric done!
+2025/06/01 07:24:17 INFO: AssignedJob finished, 013 0 0 3 7, runtime 480.585098778
+2025/06/01 07:24:17 INFO: AssignedJob finished, 017 0 0 2 1, runtime 460.62540944
+2025/06/01 07:24:19 INFO: Sleep
+2025/06/01 07:24:59 INFO: GetMetric done!
+2025/06/01 07:25:00 INFO: Sleep
+2025/06/01 07:25:40 INFO: GetMetric done!
+2025/06/01 07:25:41 INFO: Sleep
+2025/06/01 07:26:21 INFO: GetMetric done!
+2025/06/01 07:26:22 INFO: Sleep
+2025/06/01 07:27:02 INFO: GetMetric done!
+2025/06/01 07:27:04 INFO: Sleep
+2025/06/01 07:27:44 INFO: GetMetric done!
+2025/06/01 07:27:45 INFO: Sleep
+2025/06/01 07:28:25 INFO: GetMetric done!
+2025/06/01 07:28:26 INFO: Sleep
+2025/06/01 07:29:06 INFO: GetMetric done!
+2025/06/01 07:29:08 INFO: Sleep
+2025/06/01 07:29:48 INFO: GetMetric done!
+2025/06/01 07:29:49 INFO: Sleep
+2025/06/01 07:30:29 INFO: GetMetric done!
+2025/06/01 07:30:30 INFO: Sleep
+2025/06/01 07:31:10 INFO: GetMetric done!
+2025/06/01 07:31:11 INFO: Sleep
+2025/06/01 07:31:51 INFO: GetMetric done!
+2025/06/01 07:31:53 INFO: Sleep
+2025/06/01 07:32:33 INFO: GetMetric done!
+2025/06/01 07:32:34 INFO: Sleep
+2025/06/01 07:33:14 INFO: GetMetric done!
+2025/06/01 07:33:15 INFO: Sleep
+2025/06/01 07:33:55 INFO: GetMetric done!
+2025/06/01 07:33:56 INFO: Sleep
+2025/06/01 07:34:36 INFO: GetMetric done!
+2025/06/01 07:34:38 INFO: Sleep
+2025/06/01 07:35:18 INFO: GetMetric done!
+2025/06/01 07:35:19 INFO: Sleep
+2025/06/01 07:35:59 INFO: GetMetric done!
+2025/06/01 07:36:00 INFO: Sleep
+2025/06/01 07:36:40 INFO: GetMetric done!
+2025/06/01 07:36:41 INFO: Sleep
+2025/06/01 07:37:22 INFO: GetMetric done!
+2025/06/01 07:37:23 INFO: Sleep
+2025/06/01 07:38:03 INFO: GetMetric done!
+2025/06/01 07:38:04 INFO: Sleep
+2025/06/01 07:38:44 INFO: GetMetric done!
+2025/06/01 07:38:45 INFO: Sleep
+2025/06/01 07:39:25 INFO: GetMetric done!
+2025/06/01 07:39:25 INFO: AssignedJob finished, 021 0 0 3 1, runtime 1368.985673696
+2025/06/01 07:39:27 INFO: Sleep
+2025/06/01 07:40:07 INFO: GetMetric done!
+2025/06/01 07:40:08 INFO: Sleep
+2025/06/01 07:40:48 INFO: GetMetric done!
+2025/06/01 07:40:48 INFO: AssignedJob finished, 006 0 0 3 0, runtime 1472.279376085
+2025/06/01 07:40:49 INFO: AssignedJob finished, 038 0 0 3 4, runtime 1431.226782564
+2025/06/01 07:40:49 INFO: Sleep
+2025/06/01 07:41:29 INFO: GetMetric done!
+2025/06/01 07:41:29 INFO: Sleep
+2025/06/01 07:42:09 INFO: GetMetric done!
+2025/06/01 07:42:10 INFO: AssignedJob finished, 014 0 0 1 0, runtime 1533.052717246
+2025/06/01 07:42:10 INFO: AssignedJob finished, 029 0 0 1 1, runtime 1512.190887851
+2025/06/01 07:42:10 INFO: AssignedJob finished, 032 0 0 2 2, runtime 1512.38863238
+2025/06/01 07:42:10 INFO: Sleep
+2025/06/01 07:42:50 INFO: GetMetric done!
+2025/06/01 07:42:50 INFO: Sleep
+2025/06/01 07:43:30 INFO: GetMetric done!
+2025/06/01 07:43:30 INFO: AssignedJob finished, 000 0 0 1 0, runtime 1634.893068241
+2025/06/01 07:43:31 INFO: Sleep
+2025/06/01 07:44:11 INFO: GetMetric done!
+2025/06/01 07:44:11 INFO: Sleep
+2025/06/01 07:44:51 INFO: GetMetric done!
+2025/06/01 07:44:51 INFO: Sleep
+2025/06/01 07:45:31 INFO: GetMetric done!
+2025/06/01 07:45:31 INFO: Sleep
+2025/06/01 07:46:11 INFO: GetMetric done!
+2025/06/01 07:46:11 INFO: AssignedJob finished, 028 0 0 1 0, runtime 1753.900770037
+2025/06/01 07:46:11 INFO: Sleep
+2025/06/01 07:46:51 INFO: GetMetric done!
+2025/06/01 07:46:52 INFO: Sleep
+2025/06/01 07:47:32 INFO: GetMetric done!
+2025/06/01 07:47:32 INFO: Sleep
+2025/06/01 07:48:12 INFO: GetMetric done!
+2025/06/01 07:48:12 INFO: Sleep
+2025/06/01 07:48:52 INFO: GetMetric done!
+2025/06/01 07:48:52 INFO: Sleep
+2025/06/01 07:49:32 INFO: GetMetric done!
+2025/06/01 07:49:32 INFO: AssignedJob finished, 004 0 0 2 2, runtime 1996.768502334
+2025/06/01 07:49:32 INFO: AssignedJob finished, 022 0 0 3 2, runtime 1975.817737998
+2025/06/01 07:49:32 INFO: Sleep
+2025/06/01 07:50:12 INFO: GetMetric done!
+2025/06/01 07:50:12 INFO: AssignedJob finished, 005 0 0 2 3, runtime 2036.985084845
+2025/06/01 07:50:13 INFO: AssignedJob finished, 033 0 0 2 3, runtime 1995.079669866
+2025/06/01 07:50:13 INFO: Sleep
+2025/06/01 07:50:53 INFO: GetMetric done!
+2025/06/01 07:50:53 INFO: Sleep
+2025/06/01 07:51:33 INFO: GetMetric done!
+2025/06/01 07:51:33 INFO: Sleep
+2025/06/01 07:52:13 INFO: GetMetric done!
+2025/06/01 07:52:13 INFO: Sleep
+2025/06/01 07:52:53 INFO: GetMetric done!
+2025/06/01 07:52:53 INFO: Sleep
+2025/06/01 07:53:33 INFO: GetMetric done!
+2025/06/01 07:53:33 INFO: Sleep
+2025/06/01 07:54:14 INFO: GetMetric done!
+2025/06/01 07:54:14 INFO: Sleep
+2025/06/01 07:54:54 INFO: GetMetric done!
+2025/06/01 07:54:54 INFO: Sleep
+2025/06/01 07:55:34 INFO: GetMetric done!
+2025/06/01 07:55:34 INFO: AssignedJob finished, 020 0 0 3 0, runtime 2337.440999229
+2025/06/01 07:55:34 INFO: Sleep
+2025/06/01 07:56:14 INFO: GetMetric done!
+2025/06/01 07:56:14 INFO: AssignedJob finished, 023 0 0 3 3, runtime 2377.609477406
+2025/06/01 07:56:14 INFO: Sleep
+2025/06/01 07:56:54 INFO: GetMetric done!
+2025/06/01 07:56:54 INFO: AssignedJob finished, 026 0 0 3 6, runtime 2417.780341238
+2025/06/01 07:56:54 INFO: AssignedJob finished, 027 0 0 3 7, runtime 2417.799447101
+2025/06/01 07:56:54 INFO: Sleep
+2025/06/01 07:57:34 INFO: Consumed time 41.312219940316666

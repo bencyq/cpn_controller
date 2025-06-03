@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "0"
+    epoch: "5901"
+    model_name: yolov8x
+  creationTimestamp: null
+  name: "023"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - yolov8x
+        - --model-path
+        - /cyq/models/yolov8/yolov8x.pt
+        - --images-path
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
+        command:
+        - python
+        - /cyq/test_demo/yolo_epoch.py
+        image: bencyq/yolo:202503071542
+        name: yolov8x
+        resources: {}
+      restartPolicy: Never
+status: {}

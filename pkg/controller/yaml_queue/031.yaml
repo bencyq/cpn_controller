@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5589"
-    model_name: yolov8m
+    epoch: "5020"
+    model_name: vgg16
   creationTimestamp: null
   name: "031"
 spec:
@@ -16,16 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - yolov8m
+        - vgg16
         - --model-path
-        - /cyq/models/yolov8/yolov8m.pt
+        - /cyq/models/vgg/vgg16.pth
         - --images-path
-        - /cyq/datasets/Mapillary_Vistas/sorted_images/
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/yolo_epoch.py
-        image: bencyq/yolo:202503071542
-        name: yolov8m
+        - /cyq/test_demo/vgg_epoch.py
+        image: bencyq/infer:202503071541
+        name: pytorch-container
         resources: {}
       restartPolicy: Never
 status: {}

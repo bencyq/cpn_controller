@@ -3,7 +3,7 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5901"
+    epoch: "5207"
     model_name: yolov8x
   creationTimestamp: null
   name: "023"

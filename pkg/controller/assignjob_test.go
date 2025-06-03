@@ -12,10 +12,11 @@ func TestAssignJobWithinController(t *testing.T) {
 }
 
 func TestAssignJobToNode(t *testing.T) {
+	JsonUrl = "example2.json"
 	monitor := NewMonitor()
-	job := monitor.JobPool.OriginJob[0]
-	job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX = 0, 2, 0, 4
-	monitor.AssignJobToNode(monitor.DataCenterInfo[0].ClusterInfo[2].ClusterClientSet, job, "aigpuserver", NAMESPACE)
+	job := monitor.JobPool.OriginJob[2]
+	job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX = 0, 0, 3, 4
+	monitor.AssignJobToNode(monitor.DataCenterInfo[0].ClusterInfo[0].ClusterClientSet, job, "node191", NAMESPACE)
 }
 
 func TestDeleteJobFromNode(t *testing.T) {

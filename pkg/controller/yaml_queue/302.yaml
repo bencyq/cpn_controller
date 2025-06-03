@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "0"
+    epoch: "5176"
+    model_name: densenet121
+  creationTimestamp: null
+  name: "302"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - densenet121
+        - --model-path
+        - /cyq/models/densenet/densenet121.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
+        command:
+        - python
+        - /cyq/test_demo/densenet_epoch.py
+        image: bencyq/infer:202503071541
+        name: pytorch-container
+        resources: {}
+      restartPolicy: Never
+status: {}

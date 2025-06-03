@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "56"
-    model_name: qwen2.5
+    epoch: "87"
+    model_name: llama3
   creationTimestamp: null
   name: "068"
 spec:
@@ -16,14 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - qwen2.5
+        - llama3
         - --model-path
-        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
+        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
         command:
         - python
         - /cyq/test_demo/llm_cycle.py
-        image: bencyq/qwen2.5:202503071530
-        name: qwen
+        image: bencyq/llama3:202503071526
+        name: llama3
         resources: {}
       restartPolicy: Never
 status: {}

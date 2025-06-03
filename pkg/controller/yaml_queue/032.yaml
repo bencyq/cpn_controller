@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5110"
-    model_name: densenet201
+    epoch: "5204"
+    model_name: vgg11
   creationTimestamp: null
   name: "032"
 spec:
@@ -16,14 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet201
+        - vgg11
         - --model-path
-        - /cyq/models/densenet/densenet201.pth
+        - /cyq/models/vgg/vgg11.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/densenet_epoch.py
+        - /cyq/test_demo/vgg_epoch.py
         image: bencyq/infer:202503071541
         name: pytorch-container
         resources: {}

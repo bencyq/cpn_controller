@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "0"
+    epoch: "5529"
+    model_name: vgg11
+  creationTimestamp: null
+  name: "292"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - vgg11
+        - --model-path
+        - /cyq/models/vgg/vgg11.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
+        command:
+        - python
+        - /cyq/test_demo/vgg_epoch.py
+        image: bencyq/infer:202503071541
+        name: pytorch-container
+        resources: {}
+      restartPolicy: Never
+status: {}

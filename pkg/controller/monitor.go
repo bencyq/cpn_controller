@@ -17,6 +17,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	batchv1 "k8s.io/api/batch/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -89,6 +90,7 @@ func (monitor *Monitor) GetMetric(retries int) {
 					if r := recover(); r != nil {
 						log.Printf("ERROR: GetMetric error! DatacenterID:%v ClusterID:%v NodeID:%v", datacenter.DataCenterID, cluster.ClusterID, node.NodeID)
 						if retries > 0 {
+							time.Sleep(time.Second)
 							monitor.GetMetric(retries - 1) // 递归调用，再GetMetric一遍
 						}
 					}
@@ -219,7 +221,7 @@ func JobList(client *kubernetes.Clientset, namespace string) (joblist *batchv1.J
 }
 
 func GetImagefs(client *kubernetes.Clientset, nodeName string) {
-	node, err := client.CoreV1().Nodes().Get(context.TODO(), "node-name", metav1.GetOptions{})
+	node, err := client.CoreV1().Nodes().Get(context.TODO(), nodeName, metav1.GetOptions{})
 	if err != nil {
 		log.Println("ERROR: GetImagefs failed", err)
 	}

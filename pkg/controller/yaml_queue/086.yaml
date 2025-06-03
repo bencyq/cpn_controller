@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5824"
-    model_name: vgg16
+    epoch: "56"
+    model_name: qwen2.5
   creationTimestamp: null
   name: "086"
 spec:
@@ -16,16 +16,14 @@ spec:
       containers:
       - args:
         - --model-name
-        - vgg16
+        - qwen2.5
         - --model-path
-        - /cyq/models/vgg/vgg16.pth
-        - --images-path
-        - /cyq/datasets/animals/main/
+        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
         command:
         - python
-        - /cyq/test_demo/vgg_epoch.py
-        image: bencyq/infer:202503071541
-        name: pytorch-container
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/qwen2.5:202503071530
+        name: qwen
         resources: {}
       restartPolicy: Never
 status: {}

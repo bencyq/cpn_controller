@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "0"
+    epoch: "77"
+    model_name: qwen2.5
+  creationTimestamp: null
+  name: "479"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - qwen2.5
+        - --model-path
+        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
+        command:
+        - python
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/qwen2.5:202503071530
+        name: qwen
+        resources: {}
+      restartPolicy: Never
+status: {}

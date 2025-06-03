@@ -17,6 +17,7 @@ import (
 var NAMESPACE = `fifo`
 
 func FifoSchedule(monitor *controller.Monitor) {
+	// TODO: 每个作业依次遍历所有位置，放置后减去显存
 	var ScheduleFailedJob = make(controller.JobQueue, 0)
 	for {
 		jobIdx := 0
@@ -31,8 +32,12 @@ func FifoSchedule(monitor *controller.Monitor) {
 						continue
 					}
 					for c, cardInfo := range nodeInfo.CardInfo {
+						if jobIdx >= len(monitor.JobPool.OriginJob) {
+							return
+						}
 						job := monitor.JobPool.OriginJob[jobIdx]
-						if cardInfo.GPU_MEMORY_FREE < 1024 {
+						monitor.JobAnalyze(job)
+						if cardInfo.GPU_MEMORY_USED+cardInfo.GPU_MEMORY_FREE-1024 < job.GPUMemoryReq {
 							continue
 						}
 						if (job.Batchv1Job.Annotations[`model_name`] == `llama3` || job.Batchv1Job.Annotations[`model_name`] == `glm4` || job.Batchv1Job.Annotations[`model_name`] == `qwen2.5`) && cardInfo.CardModel == `Tesla P100-PCIE-16GB` { //设置一下LLM作业不上p100
@@ -42,6 +47,8 @@ func FifoSchedule(monitor *controller.Monitor) {
 						job.Batchv1Job.Spec.Template.Spec.RestartPolicy = corev1.RestartPolicyOnFailure
 						if monitor.AssignJobToNode(clusterInfo.ClusterClientSet, job, nodeInfo.NodeID, controller.NAMESPACE) {
 							log.Printf("INFO: Job %v assigned to %v %v %v %v", job.ID, dc, cl, n, c)
+							cardInfo.GPU_MEMORY_USED += job.GPUMemoryReq
+							cardInfo.GPU_MEMORY_FREE -= job.GPUMemoryReq
 							monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
 							jobIdx++
 							if jobIdx >= len(monitor.JobPool.OriginJob) {
@@ -61,12 +68,13 @@ func FifoSchedule(monitor *controller.Monitor) {
 		} else {
 			return
 		}
-		time.Sleep(time.Second * 10)
+		time.Sleep(time.Second * 20)
 	}
 }
 
 func MonitorAssignedJob(monitor *controller.Monitor) {
 	for len(monitor.JobPool.AssignedJob) > 0 || len(monitor.JobPool.OriginJob) > 0 {
+		FifoSchedule(monitor)
 		// 对AssignedJob进行监控
 		finishedJobIdx := []int{}
 		// log.Println("INFO: Start monitor AssignedJob")
@@ -94,17 +102,19 @@ func MonitorAssignedJob(monitor *controller.Monitor) {
 			monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob[:finishedJobIdx[i]], monitor.JobPool.AssignedJob[finishedJobIdx[i]+1:]...)
 		}
 
-		// 重新提交失败的作业
-		var ScheduleFailedJob = controller.JobQueue{}
-		for _, job := range monitor.JobPool.OriginJob {
-			if !monitor.AssignJobToNode(monitor.GetClusterInfoPointerFromJob(job).ClusterClientSet, job, monitor.GetNodeInfoPointerFromJob(job).NodeID, NAMESPACE) {
-				ScheduleFailedJob = append(ScheduleFailedJob, job)
-			} else {
-				monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
-				log.Printf("INFO: Reassign job %v %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
-			}
+		// // 重新提交失败的作业
+		// var ScheduleFailedJob = controller.JobQueue{}
+		// for _, job := range monitor.JobPool.OriginJob {
+		// 	if !monitor.AssignJobToNode(monitor.GetClusterInfoPointerFromJob(job).ClusterClientSet, job, monitor.GetNodeInfoPointerFromJob(job).NodeID, NAMESPACE) {
+		// 		ScheduleFailedJob = append(ScheduleFailedJob, job)
+		// 	} else {
+		// 		monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)
+		// 		log.Printf("INFO: Reassign job %v %v %v %v %v", job.ID, job.DataCenterIDX, job.ClusterIDX, job.NodeIDX, job.CardIDX)
+		// 	}
 
-		}
-		monitor.JobPool.OriginJob = ScheduleFailedJob
+		// }
+		// monitor.JobPool.OriginJob = ScheduleFailedJob
+		log.Println("INFO: Sleep")
+		time.Sleep(time.Second * 40)
 	}
 }

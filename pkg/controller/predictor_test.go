@@ -16,7 +16,7 @@ func TestInitPredictor(t *testing.T) {
 
 func TestRealDataPredict(t *testing.T) {
 	monitor := NewMonitor()
-	monitor.readModelBaseline()
+	monitor.ReadModelBaseline()
 	monitor.RealDataPredict([]string{`densenet169`})
 	monitor.RealDataPredict([]string{`densenet169`, `resnet18`})
 	monitor.RealDataPredict([]string{`resnet152`, `yolov8x`, `densenet121`})

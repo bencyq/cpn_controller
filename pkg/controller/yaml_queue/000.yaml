@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "57"
-    model_name: glm4
+    epoch: "5309"
+    model_name: resnet152
   creationTimestamp: null
   name: "000"
 spec:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - glm4
+        - resnet152
         - --model-path
-        - /cyq/models/THUDM/glm-4-9b-chat
+        - /cyq/models/resnet/resnet152.pth
+        - --images-path
+        - /cyq/datasets/animals/main/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/glm4:202503071531
-        name: glm4
+        - /cyq/test_demo/resnet_epoch.py
+        image: bencyq/infer:202503071541
+        name: pytorch-container
         resources: {}
       restartPolicy: Never
 status: {}

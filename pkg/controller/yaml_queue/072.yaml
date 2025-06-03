@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "85"
-    model_name: qwen2.5
+    epoch: "5132"
+    model_name: yolov8m
   creationTimestamp: null
   name: "072"
 spec:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - qwen2.5
+        - yolov8m
         - --model-path
-        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
+        - /cyq/models/yolov8/yolov8m.pt
+        - --images-path
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/qwen2.5:202503071530
-        name: qwen
+        - /cyq/test_demo/yolo_epoch.py
+        image: bencyq/yolo:202503071542
+        name: yolov8m
         resources: {}
       restartPolicy: Never
 status: {}

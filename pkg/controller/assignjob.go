@@ -10,7 +10,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	// "k8s.io/apimachinery/pkg/util/yaml"
-	// "k8s.io/apimachinery/pkg/api/resource"
+	"k8s.io/apimachinery/pkg/api/resource"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/utils/ptr"
 )
@@ -60,6 +60,12 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 		// nodeInfo := monitor.GetNodeInfoPointerFromJob(job)
 		// container.Resources.Limits[`nvidia.com/gpu`] = *resource.NewQuantity(int64(nodeInfo.CardNums), resource.DecimalSI)
 		// container.Resources.Limits[`nvidia.com/gpumem`] = *resource.NewQuantity(int64(nodeInfo.CardNums)*(nodeInfo.CardInfo[0].GPU_MEMORY_USED+nodeInfo.CardInfo[0].GPU_MEMORY_FREE), resource.DecimalSI)
+
+		// 加入limits: k8s.amazonaws.com/vgpu: 1
+		if container.Resources.Limits == nil {
+			container.Resources.Limits = make(corev1.ResourceList)
+		}
+		container.Resources.Limits[`k8s.amazonaws.com/vgpu`] = *resource.NewQuantity(int64(1), resource.DecimalExponent)
 
 		// 将Job中的epoch写入yaml中
 		flagEpoch := false

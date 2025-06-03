@@ -45,7 +45,7 @@ func (monitor *Monitor) runBenchMark(DataCenterID string, ClusterID string, Node
 }
 
 // 读取并解析model_baseline.csv文件
-func (monitor *Monitor) readModelBaseline() {
+func (monitor *Monitor) ReadModelBaseline() {
 	// 获取项目工作目录，并读取model_baseline.csv文件
 	root, err := utils.GetProjectRoot()
 	if err != nil {
@@ -265,7 +265,7 @@ func (monitor *Monitor) RealDataPredict(jobModelNames []string) []float64 {
 
 // 负责开启python预测器进程，提交一次JobQueue
 func (monitor *Monitor) InitPredictor(ctx context.Context) {
-	monitor.readModelBaseline()
+	monitor.ReadModelBaseline()
 	if !NewRandomForestPredictor(ctx) {
 		log.Println("ERROR: NewRandomForestPredictor failed")
 		os.Exit(1)

@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "5761"
-    model_name: densenet201
+    epoch: "5182"
+    model_name: densenet121
   creationTimestamp: null
   name: "054"
 spec:
@@ -16,9 +16,9 @@ spec:
       containers:
       - args:
         - --model-name
-        - densenet201
+        - densenet121
         - --model-path
-        - /cyq/models/densenet/densenet201.pth
+        - /cyq/models/densenet/densenet121.pth
         - --images-path
         - /cyq/datasets/animals/main/
         command:

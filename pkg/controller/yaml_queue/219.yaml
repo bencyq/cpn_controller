@@ -1,0 +1,29 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  annotations:
+    data_size: "0"
+    epoch: "94"
+    model_name: llama3
+  creationTimestamp: null
+  name: "219"
+spec:
+  backoffLimit: 4
+  template:
+    metadata:
+      creationTimestamp: null
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - llama3
+        - --model-path
+        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
+        command:
+        - python
+        - /cyq/test_demo/llm_cycle.py
+        image: bencyq/llama3:202503071526
+        name: llama3
+        resources: {}
+      restartPolicy: Never
+status: {}

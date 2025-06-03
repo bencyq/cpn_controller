@@ -3,8 +3,8 @@ kind: Job
 metadata:
   annotations:
     data_size: "0"
-    epoch: "92"
-    model_name: glm4
+    epoch: "5764"
+    model_name: yolov8n
   creationTimestamp: null
   name: "036"
 spec:
@@ -16,14 +16,16 @@ spec:
       containers:
       - args:
         - --model-name
-        - glm4
+        - yolov8n
         - --model-path
-        - /cyq/models/THUDM/glm-4-9b-chat
+        - /cyq/models/yolov8/yolov8n.pt
+        - --images-path
+        - /cyq/datasets/Mapillary_Vistas/sorted_images/
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/glm4:202503071531
-        name: glm4
+        - /cyq/test_demo/yolo_epoch.py
+        image: bencyq/yolo:202503071542
+        name: yolov8n
         resources: {}
       restartPolicy: Never
 status: {}

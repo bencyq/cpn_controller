@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_absolute_error  # 添加MAE导入
 import time
 import pickle
 import itertools
@@ -32,7 +32,6 @@ train_data=train_data.values
 test_data=test_data.values
 
 def my_shuffle(data:list):
-    
     original_list = [0, 1, 2]
     permutations = list(itertools.permutations(original_list))
     new_data=np.empty((0,9))
@@ -69,6 +68,19 @@ def compare(data):
     print(comparison)
     r2_overall = r2_score(data[:,6:], y_pred)
     print(f"Overall R²: {r2_overall}")
-    print((time.time()-start_time)/10)
+    
+    # 新增MAE计算逻辑
+    mae_time1 = mean_absolute_error(data[:,6], y_pred[:,0])
+    mae_time2 = mean_absolute_error(data[:,7], y_pred[:,1])
+    mae_time3 = mean_absolute_error(data[:,8], y_pred[:,2])
+    mae_overall = mean_absolute_error(data[:,6:].flatten(), y_pred.flatten())
+    
+    print(f"MAE Time1: {mae_time1:.4f}")
+    print(f"MAE Time2: {mae_time2:.4f}")
+    print(f"MAE Time3: {mae_time3:.4f}")
+    print(f"Overall MAE: {mae_overall:.4f}")
+    
+    print(f"Execution time: {(time.time()-start_time)/10:.4f}s")
+
 compare(train_data)
 compare(test_data)

@@ -292,7 +292,7 @@ func NewMonitor() *Monitor {
 
 	monitor.GetMetric(3)
 
-	monitor.checkBenchMark()
+	// monitor.checkBenchMark()
 
 	// 获取Job
 	monitor.getJob()

@@ -24,8 +24,8 @@
                             "Bandwidth": 100
                         },
                         {
-                            "NodeID": "node16",
-                            "NodeIP": "10.90.1.16",
+                            "NodeID": "node200",
+                            "NodeIP": "10.90.1.200",
                             "CPUInfo": {
                                 "CPUNums": 2,
                                 "Architecture": "x86_64",
@@ -57,57 +57,6 @@
                             ]
                         },
                         {
-                            "NodeID": "node245",
-                            "NodeIP": "10.90.1.245",
-                            "CPUInfo": {
-                                "CPUNums": 2,
-                                "Architecture": "x86_64",
-                                "CPUModel": "Intel(R) Xeon(R) Platinum 8358 CPU @ 2.60GHz",
-                                "CPUCore": 128
-                            },
-                            "NodeType": "GPU",
-                            "Bandwidth": 100,
-                            "CardNums": 4,
-                            "CardInfo": [
-                                {
-                                    "CardID": "0",
-                                    "CardModel": "NVIDIA GeForce RTX 4090",
-                                    "BenchMark": {
-                                        "Model1AVGRunTime": 0.01656568,
-                                        "Model2AVGRunTime": 0.065646874,
-                                        "Model3AVGRunTime": 21.20620537
-                                    }
-                                },
-                                {
-                                    "CardID": "1",
-                                    "CardModel": "NVIDIA GeForce RTX 4090",
-                                    "BenchMark": {
-                                        "Model1AVGRunTime": 0.01656568,
-                                        "Model2AVGRunTime": 0.065646874,
-                                        "Model3AVGRunTime": 21.20620537
-                                    }
-                                },
-                                {
-                                    "CardID": "2",
-                                    "CardModel": "NVIDIA GeForce RTX 4090",
-                                    "BenchMark": {
-                                        "Model1AVGRunTime": 0.01656568,
-                                        "Model2AVGRunTime": 0.065646874,
-                                        "Model3AVGRunTime": 21.20620537
-                                    }
-                                },
-                                {
-                                    "CardID": "3",
-                                    "CardModel": "NVIDIA GeForce RTX 4090",
-                                    "BenchMark": {
-                                        "Model1AVGRunTime": 0.01656568,
-                                        "Model2AVGRunTime": 0.065646874,
-                                        "Model3AVGRunTime": 21.20620537
-                                    }
-                                }
-                            ]
-                        },
-                        {
                             "NodeID": "node191",
                             "NodeIP": "10.90.1.191",
                             "NodeType": "GPU",
@@ -116,7 +65,7 @@
                             "CardInfo": [
                                 {
                                     "CardID": "0",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -125,7 +74,7 @@
                                 },
                                 {
                                     "CardID": "1",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -134,7 +83,7 @@
                                 },
                                 {
                                     "CardID": "2",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -143,7 +92,7 @@
                                 },
                                 {
                                     "CardID": "3",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -152,7 +101,7 @@
                                 },
                                 {
                                     "CardID": "4",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -161,7 +110,7 @@
                                 },
                                 {
                                     "CardID": "5",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -170,7 +119,7 @@
                                 },
                                 {
                                     "CardID": "6",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -179,7 +128,7 @@
                                 },
                                 {
                                     "CardID": "7",
-                                    "CardModel": "NVIDIA A100-PCIE-40GB",
+                                    "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
                                         "Model2AVGRunTime": 0.054753114,
@@ -190,7 +139,7 @@
                         }
                     ],
                     "ClusterPromIpPort": "10.90.1.49:30778",
-                    "ClusterKubeconfigFilePath": "/root/cpn_controller/kubeconfig/admin.conf"
+                    "ClusterKubeconfigFilePath": "/home/cyq/.kube/config"
                 }
             ]
         }

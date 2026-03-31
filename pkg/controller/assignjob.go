@@ -67,32 +67,32 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 		}
 		container.Resources.Limits[`k8s.amazonaws.com/vgpu`] = *resource.NewQuantity(int64(1), resource.DecimalExponent)
 
-		// 将Job中的epoch写入yaml中
-		flagEpoch := false
-		for _, ele := range container.Args {
-			if ele == "--epoch" {
-				flagEpoch = true
-			}
-		}
-		if !flagEpoch {
-			container.Args = append(container.Args, "--epoch", fmt.Sprint(job.Epoch))
-		}
+		// // 将Job中的epoch写入yaml中
+		// flagEpoch := false
+		// for _, ele := range container.Args {
+		// 	if ele == "--epoch" {
+		// 		flagEpoch = true
+		// 	}
+		// }
+		// if !flagEpoch {
+		// 	container.Args = append(container.Args, "--epoch", fmt.Sprint(job.Epoch))
+		// }
 
-		// 添加挂载
-		flag3 := false
-		if container.VolumeMounts == nil {
-			container.VolumeMounts = []corev1.VolumeMount{}
-		} else {
-			for idx := range container.VolumeMounts {
-				if container.VolumeMounts[idx].Name == `nvidia-mps` {
-					container.VolumeMounts[idx].MountPath = `/tmp/nvidia-mps`
-					flag3 = true
-				}
-			}
-		}
-		if !flag3 {
-			container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{Name: `nvidia-mps`, MountPath: `/tmp/nvidia-mps`})
-		}
+		// // 添加挂载
+		// flag3 := false
+		// if container.VolumeMounts == nil {
+		// 	container.VolumeMounts = []corev1.VolumeMount{}
+		// } else {
+		// 	for idx := range container.VolumeMounts {
+		// 		if container.VolumeMounts[idx].Name == `nvidia-mps` {
+		// 			container.VolumeMounts[idx].MountPath = `/tmp/nvidia-mps`
+		// 			flag3 = true
+		// 		}
+		// 	}
+		// }
+		// if !flag3 {
+		// 	container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{Name: `nvidia-mps`, MountPath: `/tmp/nvidia-mps`})
+		// }
 	}
 
 	// 设置节点选择器
@@ -107,26 +107,26 @@ func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Jo
 	// }
 	// job.Batchv1Job.Spec.Template.Annotations["hami.io/resource-pool"] = "poc"
 
-	// 设置IPChost为true
-	if !job.Batchv1Job.Spec.Template.Spec.HostIPC {
-		job.Batchv1Job.Spec.Template.Spec.HostIPC = true
-	}
+	// // 设置IPChost为true
+	// if !job.Batchv1Job.Spec.Template.Spec.HostIPC {
+	// 	job.Batchv1Job.Spec.Template.Spec.HostIPC = true
+	// }
 
-	// 设置挂载
-	flag4 := false
-	if job.Batchv1Job.Spec.Template.Spec.Volumes == nil {
-		job.Batchv1Job.Spec.Template.Spec.Volumes = []corev1.Volume{}
-	} else {
-		for idx := range job.Batchv1Job.Spec.Template.Spec.Volumes {
-			if job.Batchv1Job.Spec.Template.Spec.Volumes[idx].Name == `nvidia-mps` {
-				job.Batchv1Job.Spec.Template.Spec.Volumes[idx].VolumeSource = corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}
-				flag4 = true
-			}
-		}
-	}
-	if !flag4 {
-		job.Batchv1Job.Spec.Template.Spec.Volumes = append(job.Batchv1Job.Spec.Template.Spec.Volumes, corev1.Volume{Name: `nvidia-mps`, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}})
-	}
+	// // 设置挂载
+	// flag4 := false
+	// if job.Batchv1Job.Spec.Template.Spec.Volumes == nil {
+	// 	job.Batchv1Job.Spec.Template.Spec.Volumes = []corev1.Volume{}
+	// } else {
+	// 	for idx := range job.Batchv1Job.Spec.Template.Spec.Volumes {
+	// 		if job.Batchv1Job.Spec.Template.Spec.Volumes[idx].Name == `nvidia-mps` {
+	// 			job.Batchv1Job.Spec.Template.Spec.Volumes[idx].VolumeSource = corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}
+	// 			flag4 = true
+	// 		}
+	// 	}
+	// }
+	// if !flag4 {
+	// 	job.Batchv1Job.Spec.Template.Spec.Volumes = append(job.Batchv1Job.Spec.Template.Spec.Volumes, corev1.Volume{Name: `nvidia-mps`, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}})
+	// }
 
 	// 创建Job
 	_, err := clientset.BatchV1().Jobs(namespace).Create(

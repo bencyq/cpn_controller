@@ -1,29 +1,36 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    data_size: "0"
-    epoch: "53"
-    model_name: qwen2.5
-  creationTimestamp: null
   name: "080"
+  annotations:
+    model_name: "resnet50_bs32_448x448"
+    data_size: "20"
+    epoch: "597"
 spec:
   backoffLimit: 4
   template:
-    metadata:
-      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - qwen2.5
+        - resnet50_bs32_448x448
         - --model-path
-        - /cyq/models/Qwen/Qwen2.5-7B-Instruct
+        - /data/cyq/hase/model_zoo/models
+        - --epoch
+        - "597"
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/qwen2.5:202503071530
-        name: qwen
-        resources: {}
+        - run_onnx_model.py
+        image: bencyq/nnmeter:202603311054
+        name: onnxruntime-container
+        workingDir: /data/cyq/hase/model_zoo
+        volumeMounts:
+        - mountPath: /data/cyq
+          name: data-cyq
+          readOnly: true
       restartPolicy: Never
-status: {}
+      volumes:
+      - name: data-cyq
+        hostPath:
+          path: /data/cyq
+          type: Directory

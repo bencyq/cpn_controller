@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mobilenet-v3-bs128-448x448-onnx
+  annotations:
+    model_name: "mobilenet_v3_bs128_448x448"
+    data_size: "20"
+    epoch: "20"
+spec:
+  backoffLimit: 4
+  template:
+    spec:
+      containers:
+      - args:
+        - --model-name
+        - mobilenet_v3_bs128_448x448
+        - --model-path
+        - /data/cyq/hase/model_zoo/models
+        - --epoch
+        - "20"
+        command:
+        - python
+        - run_onnx_model.py
+        image: bencyq/nnmeter:202603311054
+        name: onnxruntime-container
+        workingDir: /data/cyq/hase/model_zoo
+        volumeMounts:
+        - mountPath: /data/cyq
+          name: data-cyq
+          readOnly: true
+      restartPolicy: Never
+      volumes:
+      - name: data-cyq
+        hostPath:
+          path: /data/cyq
+          type: Directory

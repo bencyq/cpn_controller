@@ -1,31 +1,36 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    data_size: "0"
-    epoch: "5355"
-    model_name: yolov8n
-  creationTimestamp: null
   name: "022"
+  annotations:
+    model_name: "resnet152_bs64_224x224"
+    data_size: "20"
+    epoch: "1018"
 spec:
   backoffLimit: 4
   template:
-    metadata:
-      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - yolov8n
+        - resnet152_bs64_224x224
         - --model-path
-        - /cyq/models/yolov8/yolov8n.pt
-        - --images-path
-        - /cyq/datasets/Mapillary_Vistas/sorted_images/
+        - /data/cyq/hase/model_zoo/models
+        - --epoch
+        - "1018"
         command:
         - python
-        - /cyq/test_demo/yolo_epoch.py
-        image: bencyq/yolo:202503071542
-        name: yolov8n
-        resources: {}
+        - run_onnx_model.py
+        image: bencyq/nnmeter:202603311054
+        name: onnxruntime-container
+        workingDir: /data/cyq/hase/model_zoo
+        volumeMounts:
+        - mountPath: /data/cyq
+          name: data-cyq
+          readOnly: true
       restartPolicy: Never
-status: {}
+      volumes:
+      - name: data-cyq
+        hostPath:
+          path: /data/cyq
+          type: Directory

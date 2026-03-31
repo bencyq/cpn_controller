@@ -1,29 +1,36 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    data_size: "0"
-    epoch: "61"
-    model_name: llama3
-  creationTimestamp: null
   name: "085"
+  annotations:
+    model_name: "vgg11_bs32_224x224"
+    data_size: "20"
+    epoch: "4874"
 spec:
   backoffLimit: 4
   template:
-    metadata:
-      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - llama3
+        - vgg11_bs32_224x224
         - --model-path
-        - /cyq/models/shenzhi-wang/Llama3.1-8B-Chinese-Chat
+        - /data/cyq/hase/model_zoo/models
+        - --epoch
+        - "4874"
         command:
         - python
-        - /cyq/test_demo/llm_cycle.py
-        image: bencyq/llama3:202503071526
-        name: llama3
-        resources: {}
+        - run_onnx_model.py
+        image: bencyq/nnmeter:202603311054
+        name: onnxruntime-container
+        workingDir: /data/cyq/hase/model_zoo
+        volumeMounts:
+        - mountPath: /data/cyq
+          name: data-cyq
+          readOnly: true
       restartPolicy: Never
-status: {}
+      volumes:
+      - name: data-cyq
+        hostPath:
+          path: /data/cyq
+          type: Directory

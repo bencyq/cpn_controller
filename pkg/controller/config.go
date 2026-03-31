@@ -205,4 +205,4 @@ type BenchMark struct {
 
 var NAMESPACE = `cpn-controller`
 
-var JsonUrl = "example.json"
+var JsonUrl = "example2.json"

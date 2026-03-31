@@ -1,31 +1,36 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    data_size: "0"
-    epoch: "5038"
-    model_name: densenet121
-  creationTimestamp: null
   name: "034"
+  annotations:
+    model_name: "alexnet_bs32_224x224"
+    data_size: "20"
+    epoch: "162"
 spec:
   backoffLimit: 4
   template:
-    metadata:
-      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - densenet121
+        - alexnet_bs32_224x224
         - --model-path
-        - /cyq/models/densenet/densenet121.pth
-        - --images-path
-        - /cyq/datasets/animals/main/
+        - /data/cyq/hase/model_zoo/models
+        - --epoch
+        - "162"
         command:
         - python
-        - /cyq/test_demo/densenet_epoch.py
-        image: bencyq/infer:202503071541
-        name: pytorch-container
-        resources: {}
+        - run_onnx_model.py
+        image: bencyq/nnmeter:202603311054
+        name: onnxruntime-container
+        workingDir: /data/cyq/hase/model_zoo
+        volumeMounts:
+        - mountPath: /data/cyq
+          name: data-cyq
+          readOnly: true
       restartPolicy: Never
-status: {}
+      volumes:
+      - name: data-cyq
+        hostPath:
+          path: /data/cyq
+          type: Directory

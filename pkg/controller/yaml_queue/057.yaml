@@ -1,31 +1,36 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  annotations:
-    data_size: "0"
-    epoch: "5791"
-    model_name: resnet50
-  creationTimestamp: null
   name: "057"
+  annotations:
+    model_name: "resnet18_bs64_512x512"
+    data_size: "20"
+    epoch: "4336"
 spec:
   backoffLimit: 4
   template:
-    metadata:
-      creationTimestamp: null
     spec:
       containers:
       - args:
         - --model-name
-        - resnet50
+        - resnet18_bs64_512x512
         - --model-path
-        - /cyq/models/resnet/resnet50.pth
-        - --images-path
-        - /cyq/datasets/animals/main/
+        - /data/cyq/hase/model_zoo/models
+        - --epoch
+        - "4336"
         command:
         - python
-        - /cyq/test_demo/resnet_epoch.py
-        image: bencyq/infer:202503071541
-        name: pytorch-container
-        resources: {}
+        - run_onnx_model.py
+        image: bencyq/nnmeter:202603311054
+        name: onnxruntime-container
+        workingDir: /data/cyq/hase/model_zoo
+        volumeMounts:
+        - mountPath: /data/cyq
+          name: data-cyq
+          readOnly: true
       restartPolicy: Never
-status: {}
+      volumes:
+      - name: data-cyq
+        hostPath:
+          path: /data/cyq
+          type: Directory

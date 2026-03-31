@@ -261,14 +261,7 @@ func (monitor *Monitor) PersistentPredictor() {
 			var AssignFailedJobQueue = JobQueue{}
 			log.Println("INFO: Start assign ReservedJob")
 
-		overloop:
 			for _, job := range monitor.JobPool.ReservedJob {
-				for _, j := range monitor.GetCardInfoPointerFromJob(job).JobQueue {
-					if j.JobType == "GPU" { // 避免一个卡上存在两个GPU Job
-						AssignFailedJobQueue = append(AssignFailedJobQueue, job)
-						continue overloop
-					}
-				}
 				if int64(time.Since(job.ReservationStartTime).Seconds()) > job.ReservedTime { // 这个方案下，预留任务上去了可能会遇到显存不够的状态，导致任务失败。解决方案：1. 分配任务前，先检验显存是否够；2. 给Job设定RestartPolicy，定时重启来抢占资源
 					if monitor.AssignJob(job) {
 						monitor.JobPool.AssignedJob = append(monitor.JobPool.AssignedJob, job)

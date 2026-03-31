@@ -1,10 +1,9 @@
 package controller
 
 import (
-	"bufio"
 	"context"
-	"cpn-controller/pkg/python"
 	"cpn-controller/pkg/utils"
+	"fmt"
 	"log"
 	"math"
 	"os"
@@ -175,51 +174,44 @@ func (monitor *Monitor) TotaltimePredict(newJob *Job, dc int, cl int, n int, c i
 }
 
 func NewRandomForestPredictor(ctx context.Context) bool {
+	_ = ctx
 	root, _ := utils.GetProjectRoot()
-	fp := filepath.Join(root, `pkg`, `python`, `socket_server.py`)
-	cmd := exec.CommandContext(ctx, "python", "-u", fp) //加入-u避免python进程输出在缓冲
-	stdout, _ := cmd.StdoutPipe()
-
-	err := cmd.Start()
-	if err != nil {
-		log.Println("ERROR: NewRandomForestPredictor faild", err)
+	fp := filepath.Join(root, "bin", "dcgm_latency_predictor")
+	if _, err := os.Stat(fp); err != nil {
+		log.Println("ERROR: dcgm latency predictor not found", err)
 		return false
 	}
-	scanner := bufio.NewScanner(stdout)
-	if scanner.Scan() {
-		log.Println(scanner.Text())
-	}
-	if scanner.Scan() {
-		log.Println(scanner.Text())
-	}
-	go func() {
-		for scanner.Scan() {
-			log.Println(scanner.Text())
-		}
-	}()
+	log.Printf("INFO: Using predictor binary %s", fp)
 	return true
 }
 
 func (monitor *Monitor) RandomForestPredict(jobModelNames []string, dc int, cl int, n int, c int) []float64 {
-	benchMark := monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].BenchMark
-	bm := []string{
-		strconv.FormatFloat(benchMark.Model1AVGRunTime, 'f', -1, 64),
-		strconv.FormatFloat(benchMark.Model2AVGRunTime, 'f', -1, 64),
-		strconv.FormatFloat(benchMark.Model3AVGRunTime, 'f', -1, 64),
-	}
-	str_response := python.SendStruct(`rfp.sock`, bm, jobModelNames)
 	response := []float64{}
-	strs := strings.Split(str_response, ",")
-	// for _, str := range strs {
-	// 	value, _ := strconv.ParseFloat(str, 64)
-	// 	if value < 0.01 {
-	// 		response = append(response, 0.0)
-	// 	} else {
-	// 		response = append(response, value)
-	// 	}
-	// }
-	for i := range jobModelNames {
-		value, _ := strconv.ParseFloat(strs[i], 64)
+	root, _ := utils.GetProjectRoot()
+	predictorPath := filepath.Join(root, "bin", "dcgm_latency_predictor")
+	card := monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c]
+
+	for _, modelName := range jobModelNames {
+		args := []string{
+			modelName,
+			"--sm-active", fmt.Sprintf("%f", card.SM_ACTIVE),
+			"--sm-occupancy", fmt.Sprintf("%f", card.SM_OCCUPANCY),
+			"--dram-active", fmt.Sprintf("%f", card.DRAM_ACTIVE),
+		}
+		cmd := exec.Command(predictorPath, args...)
+		output, err := cmd.Output()
+		if err != nil {
+			log.Printf("ERROR: predictor exec failed for model %s at %d/%d/%d/%d: %v", modelName, dc, cl, n, c, err)
+			response = append(response, 0)
+			continue
+		}
+
+		value, err := strconv.ParseFloat(strings.TrimSpace(string(output)), 64)
+		if err != nil {
+			log.Printf("ERROR: predictor parse failed for model %s at %d/%d/%d/%d: %v output=%q", modelName, dc, cl, n, c, err, string(output))
+			response = append(response, 0)
+			continue
+		}
 		response = append(response, value)
 	}
 	log.Printf("DEBUG: jobModelNames:%v response:%v", jobModelNames, response)

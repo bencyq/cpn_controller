@@ -76,6 +76,9 @@ func generatePromMetrics(nodeName string, nodeType string) map[string]string {
 		metrics["GPU_UTIL"] = `DCGM_FI_DEV_GPU_UTIL{Hostname="` + nodeName + `"}`
 		metrics["GPU_MEMORY_FREE"] = `DCGM_FI_DEV_FB_FREE{Hostname="` + nodeName + `"}`
 		metrics["GPU_MEMORY_USED"] = `DCGM_FI_DEV_FB_USED{Hostname="` + nodeName + `"}`
+		metrics["SM_ACTIVE"] = `DCGM_FI_PROF_SM_ACTIVE{Hostname="` + nodeName + `"}`
+		metrics["SM_OCCUPANCY"] = `DCGM_FI_PROF_SM_OCCUPANCY{Hostname="` + nodeName + `"}`
+		metrics["DRAM_ACTIVE"] = `DCGM_FI_PROF_DRAM_ACTIVE{Hostname="` + nodeName + `"}`
 	}
 	return metrics
 }
@@ -127,17 +130,50 @@ func (monitor *Monitor) GetMetric(retries int) {
 				node.FREE_MEMORY, _ = strconv.ParseInt(nodeMetric["FREE_MEMORY"].Result[0].Value[1].(string), 10, 64)
 				if node.NodeType == "GPU" {
 					for _, result := range nodeMetric["GPU_UTIL"].Result {
-						node.FindCard(result.Metric["gpu"].(string)).GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+						card := node.FindCard(result.Metric["gpu"].(string))
+						if card == nil {
+							continue
+						}
+						card.GPU_UTIL, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
 					}
 					for _, result := range nodeMetric["GPU_MEMORY_FREE"].Result {
-						node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_FREE, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
-						if node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_FREE == 0 {
+						card := node.FindCard(result.Metric["gpu"].(string))
+						if card == nil {
+							continue
+						}
+						card.GPU_MEMORY_FREE, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+						if card.GPU_MEMORY_FREE == 0 {
 							log.Printf("ERROR: invalid metric at %v %v %v", dc, cl, n)
 							continue
 						}
 					}
 					for _, result := range nodeMetric["GPU_MEMORY_USED"].Result {
-						node.FindCard(result.Metric["gpu"].(string)).GPU_MEMORY_USED, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+						card := node.FindCard(result.Metric["gpu"].(string))
+						if card == nil {
+							continue
+						}
+						card.GPU_MEMORY_USED, _ = strconv.ParseInt(result.Value[1].(string), 10, 64)
+					}
+					for _, result := range nodeMetric["SM_ACTIVE"].Result {
+						card := node.FindCard(result.Metric["gpu"].(string))
+						if card == nil {
+							continue
+						}
+						card.SM_ACTIVE, _ = strconv.ParseFloat(result.Value[1].(string), 64)
+					}
+					for _, result := range nodeMetric["SM_OCCUPANCY"].Result {
+						card := node.FindCard(result.Metric["gpu"].(string))
+						if card == nil {
+							continue
+						}
+						card.SM_OCCUPANCY, _ = strconv.ParseFloat(result.Value[1].(string), 64)
+					}
+					for _, result := range nodeMetric["DRAM_ACTIVE"].Result {
+						card := node.FindCard(result.Metric["gpu"].(string))
+						if card == nil {
+							continue
+						}
+						card.DRAM_ACTIVE, _ = strconv.ParseFloat(result.Value[1].(string), 64)
 					}
 				}
 			}

@@ -85,6 +85,9 @@ type CardInfo struct {
 	GPU_UTIL        int64
 	GPU_MEMORY_FREE int64
 	GPU_MEMORY_USED int64
+	SM_ACTIVE       float64
+	SM_OCCUPANCY    float64
+	DRAM_ACTIVE     float64
 
 	// 分配到该卡上的作业
 	JobQueue JobQueue

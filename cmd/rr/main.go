@@ -2,17 +2,19 @@ package main
 
 import (
 	"cpn-controller/pkg/controller"
-	"cpn-controller/pkg/fifo"
+	"cpn-controller/pkg/rr"
 	"log"
 	"time"
 )
 
 func main() {
 	startTime := time.Now()
-	controller.JsonUrl = "example2.json"
-	controller.NAMESPACE = fifo.NAMESPACE
+
+	controller.JsonUrl = "example3.json"
+	controller.NAMESPACE = rr.NAMESPACE
 	monitor := controller.NewMonitor()
 	monitor.ReadModelBaseline()
-	fifo.MonitorAssignedJob(monitor)
+	rr.MonitorAssignedJob(monitor)
+
 	log.Println("INFO: Consumed time", time.Since(startTime).Minutes())
 }

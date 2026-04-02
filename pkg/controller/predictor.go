@@ -85,10 +85,9 @@ func (monitor *Monitor) JobAnalyze(job *Job) {
 		job.ID = job.Batchv1Job.Name
 		job.GPUMemoryReq, _ = strconv.ParseInt(monitor.ModelBaseline[job.JobModelName][0], 10, 64)
 		job.BaselineSpeed, _ = strconv.ParseFloat(monitor.ModelBaseline[job.JobModelName][1], 64)
-	} else {
 	}
 
-	if job.JobModelName == "llama3" || job.JobModelName == "glm4" || job.JobModelName == "qwen2.5" {
+	if job.GPUMemoryReq > 0 || job.JobModelName == "llama3" || job.JobModelName == "glm4" || job.JobModelName == "qwen2.5" {
 		job.JobType = "GPU"
 	} else {
 		job.JobType = "CPU"

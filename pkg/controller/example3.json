@@ -42,8 +42,7 @@
                                     "CardModel": "NVIDIA RTX A6000",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.014736412,
-                                        "Model2AVGRunTime": 0.051585681,
-                                        "Model3AVGRunTime": 36.71008748
+                                        "Model2AVGRunTime": 0.051585681
                                     }
                                 },
                                 {
@@ -52,8 +51,7 @@
                                     "CardModel": "NVIDIA RTX A6000",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.014736412,
-                                        "Model2AVGRunTime": 0.051585681,
-                                        "Model3AVGRunTime": 36.71008748
+                                        "Model2AVGRunTime": 0.051585681
                                     }
                                 }
                             ]

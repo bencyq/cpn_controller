@@ -184,6 +184,17 @@ func NewRandomForestPredictor(ctx context.Context) bool {
 	return true
 }
 
+func buildPredictorArgs(modelName string, card *CardInfo) []string {
+	return []string{
+		modelName,
+		"--sm-active", fmt.Sprintf("%f", card.SM_ACTIVE),
+		"--sm-occupancy", fmt.Sprintf("%f", card.SM_OCCUPANCY),
+		"--dram-active", fmt.Sprintf("%f", card.DRAM_ACTIVE),
+		"--compute-benchmark-time", fmt.Sprintf("%f", card.BenchMark.Model1AVGRunTime),
+		"--memory-benchmark-time", fmt.Sprintf("%f", card.BenchMark.Model2AVGRunTime),
+	}
+}
+
 func (monitor *Monitor) RandomForestPredict(jobModelNames []string, dc int, cl int, n int, c int) []float64 {
 	response := []float64{}
 	root, _ := utils.GetProjectRoot()
@@ -191,12 +202,7 @@ func (monitor *Monitor) RandomForestPredict(jobModelNames []string, dc int, cl i
 	card := monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c]
 
 	for _, modelName := range jobModelNames {
-		args := []string{
-			modelName,
-			"--sm-active", fmt.Sprintf("%f", card.SM_ACTIVE),
-			"--sm-occupancy", fmt.Sprintf("%f", card.SM_OCCUPANCY),
-			"--dram-active", fmt.Sprintf("%f", card.DRAM_ACTIVE),
-		}
+		args := buildPredictorArgs(modelName, card)
 		cmd := exec.Command(predictorPath, args...)
 		output, err := cmd.Output()
 		if err != nil {

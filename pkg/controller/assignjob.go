@@ -16,118 +16,104 @@ import (
 	"k8s.io/utils/ptr"
 )
 
-func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string, namespace string) bool {
-	// // 解析YAML为Job对象
-	// decoder := yaml.NewYAMLOrJSONDecoder(bytes.NewReader(yamlContent), 4096)
-	// var job batchv1.Job
-	// if err := decoder.Decode(&job); err != nil {
-	// 	return false
-	// }
+func upsertEnvVar(envs []corev1.EnvVar, name string, value string) []corev1.EnvVar {
+	for idx := range envs {
+		if envs[idx].Name == name {
+			envs[idx].Value = value
+			return envs
+		}
+	}
+	return append(envs, corev1.EnvVar{Name: name, Value: value})
+}
+
+func removeEnvVar(envs []corev1.EnvVar, name string) []corev1.EnvVar {
+	filtered := envs[:0]
+	for _, env := range envs {
+		if env.Name == name {
+			continue
+		}
+		filtered = append(filtered, env)
+	}
+	return filtered
+}
+
+func ensureVolumeMount(container *corev1.Container, name string, mountPath string) {
+	for idx := range container.VolumeMounts {
+		if container.VolumeMounts[idx].Name == name {
+			container.VolumeMounts[idx].MountPath = mountPath
+			return
+		}
+	}
+	container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{Name: name, MountPath: mountPath})
+}
+
+func ensureHostPathVolume(volumes []corev1.Volume, name string, path string) []corev1.Volume {
+	for idx := range volumes {
+		if volumes[idx].Name == name {
+			volumes[idx].VolumeSource = corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: path}}
+			return volumes
+		}
+	}
+	return append(volumes, corev1.Volume{Name: name, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: path}}})
+}
+
+func (monitor *Monitor) prepareJobForNode(job *Job, nodeName string) error {
+	cardUUID := monitor.GetCardUUIDFromJob(job)
+	if cardUUID == "" {
+		return fmt.Errorf("job %s selected card has empty UUID", job.ID)
+	}
 
 	for i := range job.Batchv1Job.Spec.Template.Spec.Containers {
 		container := &job.Batchv1Job.Spec.Template.Spec.Containers[i]
-		flag1 := false
-		flag2 := false
-		for j := range container.Env {
-			// 国网Hami环境下使用mps，必须能见所有卡，不能用NVIDIA_VISIBLE_DEVICES，改用CUDA_VISIBLE_DEVICES
+		container.Env = removeEnvVar(container.Env, "NVIDIA_VISIBLE_DEVICES")
+		container.Env = upsertEnvVar(container.Env, "CUDA_VISIBLE_DEVICES", "0")
 
-			// 不申请nvidia.com/gpu，不走hami scheduler，适应国网的当前环境，使用NVIDIA_VISIBLE_DEVICES=all来可见所有卡，用CUDA_VISIBLE_DEVICES来指定卡
-			if container.Env[j].Name == "NVIDIA_VISIBLE_DEVICES" {
-				flag1 = true
-				container.Env[j].Value = "all"
-			}
-			if container.Env[j].Name == "CUDA_VISIBLE_DEVICES" {
-				flag2 = true
-				container.Env[j].Value = fmt.Sprint(job.CardIDX)
-			}
-		}
-		if !flag1 {
-			// container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
-			container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: `all`})
-
-		}
-		if !flag2 {
-			// container.Env = append(container.Env, corev1.EnvVar{Name: "NVIDIA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
-			container.Env = append(container.Env, corev1.EnvVar{Name: "CUDA_VISIBLE_DEVICES", Value: fmt.Sprint(job.CardIDX)})
-
-		}
-
-		// 不申请nvidia.com/gpu，不走hami scheduler，适应国网的当前环境
-
-		// // 设置resources:limits:nvidia.com/gpu: 为物理卡的数量（hami环境需要这样才能正常运行mps）
-		// if container.Resources.Limits == nil {
-		// 	container.Resources.Limits = make(corev1.ResourceList)
-		// }
-		// nodeInfo := monitor.GetNodeInfoPointerFromJob(job)
-		// container.Resources.Limits[`nvidia.com/gpu`] = *resource.NewQuantity(int64(nodeInfo.CardNums), resource.DecimalSI)
-		// container.Resources.Limits[`nvidia.com/gpumem`] = *resource.NewQuantity(int64(nodeInfo.CardNums)*(nodeInfo.CardInfo[0].GPU_MEMORY_USED+nodeInfo.CardInfo[0].GPU_MEMORY_FREE), resource.DecimalSI)
-
-		// 加入limits: k8s.amazonaws.com/vgpu: 1
 		if container.Resources.Limits == nil {
 			container.Resources.Limits = make(corev1.ResourceList)
 		}
-		container.Resources.Limits[`k8s.amazonaws.com/vgpu`] = *resource.NewQuantity(int64(1), resource.DecimalExponent)
+		delete(container.Resources.Limits, corev1.ResourceName("k8s.amazonaws.com/vgpu"))
+		container.Resources.Limits[corev1.ResourceName("nvidia.com/gpu")] = *resource.NewQuantity(int64(1), resource.DecimalSI)
+		if job.GPUMemoryReq > 0 {
+			container.Resources.Limits[corev1.ResourceName("nvidia.com/gpumem")] = *resource.NewQuantity(job.GPUMemoryReq, resource.DecimalSI)
+		}
 
-		// // 将Job中的epoch写入yaml中
-		// flagEpoch := false
-		// for _, ele := range container.Args {
-		// 	if ele == "--epoch" {
-		// 		flagEpoch = true
-		// 	}
-		// }
-		// if !flagEpoch {
-		// 	container.Args = append(container.Args, "--epoch", fmt.Sprint(job.Epoch))
-		// }
+		if container.Resources.Requests == nil {
+			container.Resources.Requests = make(corev1.ResourceList)
+		}
+		delete(container.Resources.Requests, corev1.ResourceName("k8s.amazonaws.com/vgpu"))
+		container.Resources.Requests[corev1.ResourceName("nvidia.com/gpu")] = *resource.NewQuantity(int64(1), resource.DecimalSI)
+		if job.GPUMemoryReq > 0 {
+			container.Resources.Requests[corev1.ResourceName("nvidia.com/gpumem")] = *resource.NewQuantity(job.GPUMemoryReq, resource.DecimalSI)
+		}
 
-		// // 添加挂载
-		// flag3 := false
-		// if container.VolumeMounts == nil {
-		// 	container.VolumeMounts = []corev1.VolumeMount{}
-		// } else {
-		// 	for idx := range container.VolumeMounts {
-		// 		if container.VolumeMounts[idx].Name == `nvidia-mps` {
-		// 			container.VolumeMounts[idx].MountPath = `/tmp/nvidia-mps`
-		// 			flag3 = true
-		// 		}
-		// 	}
-		// }
-		// if !flag3 {
-		// 	container.VolumeMounts = append(container.VolumeMounts, corev1.VolumeMount{Name: `nvidia-mps`, MountPath: `/tmp/nvidia-mps`})
-		// }
+		ensureVolumeMount(container, "nvidia-mps", "/tmp/nvidia-mps")
 	}
 
-	// 设置节点选择器
 	if job.Batchv1Job.Spec.Template.Spec.NodeSelector == nil {
 		job.Batchv1Job.Spec.Template.Spec.NodeSelector = make(map[string]string)
 	}
 	job.Batchv1Job.Spec.Template.Spec.NodeSelector["kubernetes.io/hostname"] = nodeName
 
-	// // 设置annatation 国网环境下hami schduler需要
-	// if job.Batchv1Job.Spec.Template.Annotations == nil {
-	// 	job.Batchv1Job.Spec.Template.Annotations = make(map[string]string)
-	// }
-	// job.Batchv1Job.Spec.Template.Annotations["hami.io/resource-pool"] = "poc"
+	if job.Batchv1Job.Spec.Template.Annotations == nil {
+		job.Batchv1Job.Spec.Template.Annotations = make(map[string]string)
+	}
+	job.Batchv1Job.Spec.Template.Annotations["hami.io/resource-pool"] = HamiResourcePool
+	job.Batchv1Job.Spec.Template.Annotations["nvidia.com/use-gpuuuid"] = cardUUID
+	delete(job.Batchv1Job.Spec.Template.Annotations, "nvidia.com/nouse-gpuuuid")
 
-	// // 设置IPChost为true
-	// if !job.Batchv1Job.Spec.Template.Spec.HostIPC {
-	// 	job.Batchv1Job.Spec.Template.Spec.HostIPC = true
-	// }
+	job.Batchv1Job.Spec.Template.Spec.SchedulerName = HamiSchedulerName
+	job.Batchv1Job.Spec.Template.Spec.RuntimeClassName = ptr.To(HamiRuntimeClassName)
+	job.Batchv1Job.Spec.Template.Spec.HostIPC = true
+	job.Batchv1Job.Spec.Template.Spec.Volumes = ensureHostPathVolume(job.Batchv1Job.Spec.Template.Spec.Volumes, "nvidia-mps", "/tmp/nvidia-mps")
 
-	// // 设置挂载
-	// flag4 := false
-	// if job.Batchv1Job.Spec.Template.Spec.Volumes == nil {
-	// 	job.Batchv1Job.Spec.Template.Spec.Volumes = []corev1.Volume{}
-	// } else {
-	// 	for idx := range job.Batchv1Job.Spec.Template.Spec.Volumes {
-	// 		if job.Batchv1Job.Spec.Template.Spec.Volumes[idx].Name == `nvidia-mps` {
-	// 			job.Batchv1Job.Spec.Template.Spec.Volumes[idx].VolumeSource = corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}
-	// 			flag4 = true
-	// 		}
-	// 	}
-	// }
-	// if !flag4 {
-	// 	job.Batchv1Job.Spec.Template.Spec.Volumes = append(job.Batchv1Job.Spec.Template.Spec.Volumes, corev1.Volume{Name: `nvidia-mps`, VolumeSource: corev1.VolumeSource{HostPath: &corev1.HostPathVolumeSource{Path: `/tmp/nvidia-mps`}}})
-	// }
+	return nil
+}
+
+func (monitor *Monitor) AssignJobToNode(clientset *kubernetes.Clientset, job *Job, nodeName string, namespace string) bool {
+	if err := monitor.prepareJobForNode(job, nodeName); err != nil {
+		log.Println("ERROR: prepareJobForNode failed!", err)
+		return false
+	}
 
 	// 创建Job
 	_, err := clientset.BatchV1().Jobs(namespace).Create(

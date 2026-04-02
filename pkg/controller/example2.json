@@ -38,6 +38,7 @@
                             "CardInfo": [
                                 {
                                     "CardID": "0",
+                                    "UUID": "GPU-fa5532d9-11d7-428d-6da3-0beb06a4c9f6",
                                     "CardModel": "NVIDIA RTX A6000",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.014736412,
@@ -47,6 +48,7 @@
                                 },
                                 {
                                     "CardID": "1",
+                                    "UUID": "GPU-5e749a00-5ffb-5731-a714-d031839734e8",
                                     "CardModel": "NVIDIA RTX A6000",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.014736412,
@@ -65,6 +67,7 @@
                             "CardInfo": [
                                 {
                                     "CardID": "0",
+                                    "UUID": "GPU-e78176c2-5bbf-59b1-8028-aa98d7204491",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -74,6 +77,7 @@
                                 },
                                 {
                                     "CardID": "1",
+                                    "UUID": "GPU-555b0712-2e99-e113-2e7c-91fb45d21be3",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -83,6 +87,7 @@
                                 },
                                 {
                                     "CardID": "2",
+                                    "UUID": "GPU-9d9dc868-5125-29e2-933e-224fc6ebdca8",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -92,6 +97,7 @@
                                 },
                                 {
                                     "CardID": "3",
+                                    "UUID": "GPU-4c0c8646-5e2b-ffa7-12e1-737c44624738",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -101,6 +107,7 @@
                                 },
                                 {
                                     "CardID": "4",
+                                    "UUID": "GPU-6e3be04c-e145-348e-1ca4-d8a03d0875f1",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -110,6 +117,7 @@
                                 },
                                 {
                                     "CardID": "5",
+                                    "UUID": "GPU-1b2ac972-5ab9-845c-1951-3589fe7380d0",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -119,6 +127,7 @@
                                 },
                                 {
                                     "CardID": "6",
+                                    "UUID": "GPU-8c79c48c-313b-8465-f43b-3092079ac43c",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,
@@ -128,6 +137,7 @@
                                 },
                                 {
                                     "CardID": "7",
+                                    "UUID": "GPU-cffc26c7-a214-3e21-b792-1624742c207a",
                                     "CardModel": "NVIDIA A100-SXM4-40GB",
                                     "BenchMark": {
                                         "Model1AVGRunTime": 0.017401139,

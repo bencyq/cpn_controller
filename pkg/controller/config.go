@@ -70,6 +70,37 @@ func (node *NodeInfo) FindCard(cardID string) (card *CardInfo) {
 	return nil
 }
 
+func (node *NodeInfo) FindCardByUUID(uuid string) (card *CardInfo) {
+	for idx := range node.CardInfo {
+		if node.CardInfo[idx].UUID == uuid {
+			return node.CardInfo[idx]
+		}
+	}
+	return nil
+}
+
+// Prometheus 的 DCGM 指标同时携带 gpu 索引和 UUID，这里统一做一次映射与回填。
+func (node *NodeInfo) FindCardByMetric(metric map[string]interface{}) (card *CardInfo) {
+	if gpu, ok := metric["gpu"].(string); ok {
+		card = node.FindCard(gpu)
+	}
+	if card == nil {
+		if uuid, ok := metric["UUID"].(string); ok {
+			card = node.FindCardByUUID(uuid)
+		}
+	}
+	if card == nil {
+		return nil
+	}
+	if uuid, ok := metric["UUID"].(string); ok && uuid != "" {
+		card.UUID = uuid
+	}
+	if modelName, ok := metric["modelName"].(string); ok && modelName != "" && card.CardModel == "" {
+		card.CardModel = modelName
+	}
+	return card
+}
+
 // CPUInfo CPU 信息结构体
 type CPUInfo struct {
 	CPUNums      int    `json:"CPUNums"`
@@ -81,6 +112,7 @@ type CPUInfo struct {
 // CardInfo 显卡信息结构体
 type CardInfo struct {
 	CardID          string `json:"CardID"`
+	UUID            string `json:"UUID"`
 	CardModel       string `json:"CardModel"`
 	GPU_UTIL        int64
 	GPU_MEMORY_FREE int64
@@ -103,6 +135,10 @@ type CardInfo struct {
 // 通过Job里的IDX信息，查找对应的CardInfo指针
 func (monitor *Monitor) GetCardInfoPointerFromJob(job *Job) *CardInfo {
 	return monitor.DataCenterInfo[job.DataCenterIDX].ClusterInfo[job.ClusterIDX].NodeInfo[job.NodeIDX].CardInfo[job.CardIDX]
+}
+
+func (monitor *Monitor) GetCardUUIDFromJob(job *Job) string {
+	return monitor.GetCardInfoPointerFromJob(job).UUID
 }
 
 // 通过Job里的IDX信息，查找对应的NodeInfo指针
@@ -209,3 +245,12 @@ type BenchMark struct {
 var NAMESPACE = `cpn-controller`
 
 var JsonUrl = "example2.json"
+
+var HamiSchedulerName = "hami-scheduler"
+
+// HAMi device plugin 在当前 node200 环境下通过 NVIDIA_VISIBLE_DEVICES 注入 GPU UUID，
+// 需要使用 legacy runtime，避免 nvidia runtime 的 CDI 模式把 UUID 误解析成
+// management.nvidia.com/gpu=<UUID>。
+var HamiRuntimeClassName = "nvidia-legacy"
+
+var HamiResourcePool = "poc"

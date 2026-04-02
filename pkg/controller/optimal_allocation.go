@@ -53,9 +53,9 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	}
 
 	// 如果没有合适的位置分配任务
-	if optAlc[0] == math.MaxInt && newJob.JobType != "GPU" {
+	if optAlc[0] == math.MaxInt && newJob.GPUMemoryReq < 10240 {
 		return false
-	} else if optAlc[0] == math.MaxInt && newJob.JobType == "GPU" { // 给资源需求量大的作业进行资源预留，避免大作业长时间等待
+	} else if optAlc[0] == math.MaxInt && newJob.GPUMemoryReq >= 10240 { // 给资源需求量大的作业进行资源预留，避免大作业长时间等待
 		return monitor.ReserveAllocate(newJob)
 	}
 
@@ -92,7 +92,7 @@ func (monitor *Monitor) ReserveAllocate(newJob *Job) bool {
 					if monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedJob != nil {
 						continue
 					}
-					totaltime := int64(monitor.RandomForestPredict([]string{newJob.JobModelName}, dc, cl, n, c)[0]) * newJob.Epoch // 计算卡上状态为空时的运行时间
+					totaltime := int64(monitor.RandomForestPredict([]string{newJob.JobModelName}, dc, cl, n, c)[0] * float64(newJob.Epoch)) // 计算卡上状态为空时的运行时间
 					log.Println("DEBUG: TotaltimeWithoutLoads: ", totaltime, newJob.ID, dc, cl, n, c)
 					if totaltime <= 0 { // 返回了异常值，跳过
 						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.Batchv1Job.Name)

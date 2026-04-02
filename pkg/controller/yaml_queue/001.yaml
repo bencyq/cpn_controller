@@ -3,9 +3,9 @@ kind: Job
 metadata:
   name: "001"
   annotations:
-    model_name: "vgg16_bs128_448x448"
+    model_name: "vgg19_bs128_448x448"
     data_size: "20"
-    epoch: "100"
+    epoch: "3000"
 spec:
   backoffLimit: 4
   template:
@@ -13,11 +13,11 @@ spec:
       containers:
       - args:
         - --model-name
-        - vgg16_bs128_448x448
+        - vgg19_bs128_448x448
         - --model-path
         - /data/cyq/hase/model_zoo/models
         - --epoch
-        - "4141"
+        - "3000"
         command:
         - python
         - run_onnx_model.py

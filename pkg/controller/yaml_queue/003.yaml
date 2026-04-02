@@ -3,9 +3,9 @@ kind: Job
 metadata:
   name: "003"
   annotations:
-    model_name: "vgg19_bs128_224x224"
+    model_name: "densenet201_bs128_448x448"
     data_size: "20"
-    epoch: "3585"
+    epoch: "2000"
 spec:
   backoffLimit: 4
   template:
@@ -13,11 +13,11 @@ spec:
       containers:
       - args:
         - --model-name
-        - vgg19_bs128_224x224
+        - densenet201_bs128_448x448
         - --model-path
         - /data/cyq/hase/model_zoo/models
         - --epoch
-        - "3585"
+        - "2000"
         command:
         - python
         - run_onnx_model.py

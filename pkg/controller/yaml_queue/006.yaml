@@ -3,9 +3,9 @@ kind: Job
 metadata:
   name: "006"
   annotations:
-    model_name: "resnet50_bs16_512x512"
+    model_name: "alexnet_bs32_224x224"
     data_size: "20"
-    epoch: "2360"
+    epoch: "6000"
 spec:
   backoffLimit: 4
   template:
@@ -13,11 +13,11 @@ spec:
       containers:
       - args:
         - --model-name
-        - resnet50_bs16_512x512
+        - alexnet_bs32_224x224
         - --model-path
         - /data/cyq/hase/model_zoo/models
         - --epoch
-        - "2360"
+        - "6000"
         command:
         - python
         - run_onnx_model.py

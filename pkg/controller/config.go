@@ -246,6 +246,8 @@ var NAMESPACE = `cpn-controller`
 
 var JsonUrl = "example2.json"
 
+var LoadBalanceBeta = 0.8
+
 var HamiSchedulerName = "hami-scheduler"
 
 // HAMi device plugin 在当前 node200 环境下通过 NVIDIA_VISIBLE_DEVICES 注入 GPU UUID，

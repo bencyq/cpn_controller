@@ -10,6 +10,112 @@ import (
 // 对于一个作业，模拟其在各个集群运行的完成时间，并进行分配
 
 // 对于一个作业，模拟其在各个集群运行的完成时间
+func clampLoad(value float64) float64 {
+	switch {
+	case value < 0:
+		return 0
+	case value > 1:
+		return 1
+	default:
+		return value
+	}
+}
+
+func gpuMemoryUsage(used int64, free int64) (float64, bool) {
+	total := used + free
+	if total <= 0 {
+		return 0, false
+	}
+	return clampLoad(float64(used) / float64(total)), true
+}
+
+func (monitor *Monitor) nodeLoad(dc int, cl int, n int) float64 {
+	node := monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n]
+	if node == nil {
+		return 0
+	}
+
+	loadParts := []float64{clampLoad(node.CPU_USAGE)}
+	if node.TOTAL_MEMORY > 0 {
+		memUsage := 1 - float64(node.FREE_MEMORY)/float64(node.TOTAL_MEMORY)
+		loadParts = append(loadParts, clampLoad(memUsage))
+	}
+
+	if len(node.CardInfo) > 0 {
+		gpuUtilSum := 0.0
+		gpuUtilCount := 0
+		gpuMemorySum := 0.0
+		gpuMemoryCount := 0
+		for _, card := range node.CardInfo {
+			if card == nil {
+				continue
+			}
+			gpuUtilSum += clampLoad(float64(card.GPU_UTIL) / 100.0)
+			gpuUtilCount++
+			if usage, ok := gpuMemoryUsage(card.GPU_MEMORY_USED, card.GPU_MEMORY_FREE); ok {
+				gpuMemorySum += usage
+				gpuMemoryCount++
+			}
+		}
+		if gpuUtilCount > 0 {
+			loadParts = append(loadParts, gpuUtilSum/float64(gpuUtilCount))
+		}
+		if gpuMemoryCount > 0 {
+			loadParts = append(loadParts, gpuMemorySum/float64(gpuMemoryCount))
+		}
+	}
+
+	if len(loadParts) == 0 {
+		return 0
+	}
+
+	sum := 0.0
+	for _, part := range loadParts {
+		sum += part
+	}
+	return sum / float64(len(loadParts))
+}
+
+func (monitor *Monitor) clusterAverageNodeLoad(dc int, cl int) float64 {
+	cluster := monitor.DataCenterInfo[dc].ClusterInfo[cl]
+	if cluster == nil {
+		return 0
+	}
+
+	sum := 0.0
+	count := 0
+	for n, node := range cluster.NodeInfo {
+		if node == nil || len(node.CardInfo) == 0 {
+			continue
+		}
+		sum += monitor.nodeLoad(dc, cl, n)
+		count++
+	}
+	if count == 0 {
+		return 0
+	}
+	return sum / float64(count)
+}
+
+func (monitor *Monitor) applyLoadBalanceFactor(totaltime int64, dc int, cl int, n int) int64 {
+	if totaltime <= 0 {
+		return totaltime
+	}
+
+	avgLoad := monitor.clusterAverageNodeLoad(dc, cl)
+	if avgLoad <= 0 {
+		return totaltime
+	}
+
+	nodeLoad := monitor.nodeLoad(dc, cl, n)
+	loadPenalty := LoadBalanceBeta * math.Max(nodeLoad/avgLoad-1, 0)
+	adjusted := int64(math.Ceil(float64(totaltime) * (1 + loadPenalty)))
+	if adjusted < 1 {
+		return 1
+	}
+	return adjusted
+}
+
 func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 	var optAlc = [5]int{math.MaxInt, math.MaxInt, math.MaxInt, math.MaxInt} // optimal Allocation, 存储job的分配位置
 	minTotalTime := int64(math.MaxInt64)
@@ -29,15 +135,16 @@ func (monitor *Monitor) OptimalAllocate(newJob *Job) bool {
 					if cardInfo.GPU_MEMORY_FREE-1024 < newJob.GPUMemoryReq {
 						continue
 					}
-					totaltime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
-					log.Println("DEBUG: Totaltime: ", totaltime, newJob.ID, dc, cl, n, c)
-					if totaltime <= 0 { // 返回了异常值，跳过
+					rawTotaltime := monitor.TotaltimePredict(newJob, dc, cl, n, c)
+					if rawTotaltime <= 0 { // 返回了异常值，跳过
 						log.Printf("ERROR: RuntimePredict failed at %v %v %v %v, for job %v", dc, cl, n, c, newJob.Batchv1Job.Name)
 						continue
 					}
+					totaltime := monitor.applyLoadBalanceFactor(rawTotaltime, dc, cl, n)
+					log.Printf("DEBUG: Totaltime raw=%d adjusted=%d job=%s dc=%d cl=%d n=%d c=%d", rawTotaltime, totaltime, newJob.ID, dc, cl, n, c)
 					switch {
 					// 如果该节点上存在reservation，且newJob的预计时间超过了reservation time
-					case totaltime > monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime && monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime != 0:
+					case rawTotaltime > monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime && monitor.DataCenterInfo[dc].ClusterInfo[cl].NodeInfo[n].CardInfo[c].ReservedTime != 0:
 						continue
 					case totaltime < minTotalTime:
 						minTotalTime = totaltime

@@ -156,6 +156,7 @@ func (monitor *Monitor) ScheduleAndAssign() {
 	var AssignedFailedJob = JobQueue{}
 	for _, job := range monitor.JobPool.OriginJob {
 		monitor.JobAnalyze(job)
+		monitor.GetMetric(2)
 		if monitor.OptimalAllocate(job) {
 			if job.IsReserved {
 				monitor.JobPool.ReservedJob = append(monitor.JobPool.ReservedJob, job)
@@ -174,6 +175,9 @@ func (monitor *Monitor) ScheduleAndAssign() {
 				} else {
 					AssignedFailedJob = append(AssignedFailedJob, job)
 				}
+
+				log.Printf("INFO: job %v submission finished", job.ID)
+				time.Sleep(time.Minute)
 			}
 		} else {
 			SchduleFailedJob = append(SchduleFailedJob, job)
